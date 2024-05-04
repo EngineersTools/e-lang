@@ -1,0 +1,128 @@
+grammar Elang
+
+import './elang-terminals'
+import './elang-types'
+import './elang-expressions'
+
+entry ElangProgram:
+    Domain
+    (imports+=Import (imports+=Import)*)?
+    (statements+=Statement (statements+=Statement)*)?
+;
+
+/* 
+    Defines the engineering domain to which
+    this document applies. The domain acts effectively
+    as a namespace for all the code defined in this document.
+    One document can only have one domain definition.
+    If multiple files define the same domain and the documents
+    are imported, all their statements will be merged onto
+    the same domain.
+*/
+Domain:
+    'domain' name=ID
+;
+ 
+Import:
+    'import' importSource=STRING
+;
+
+Statement:
+    Expression |
+    ForStatement |
+    FormulaDeclaration |
+    IfStatement |
+    LambdaDeclaration |
+    MatchStatement |
+    ModelDeclaration |
+    PrintStatement | 
+    ProcedureDeclaration |
+    ReturnStatement |
+    StatementBlock |
+    UnitFamilyDeclaration |
+    VariableDeclaration 
+;
+
+VariableDeclaration returns NamedElement:
+    {infer ConstantDeclaration} (export?='export')? 'const' name=ID (':' type=TypeReference)? (assignment?='=' value=(Expression))? |
+    {infer MutableDeclaration} (export?='export')? 'var' name=ID (':' type=TypeReference)? (assignment?='=' value=(Expression))?
+;
+
+LambdaDeclaration:
+    ParameterList 
+    (':' returnType=TypeReference)? 
+    '=>' 
+    body=(Expression | StatementBlock) 
+    (explicitOperationCall?=
+        '(' 
+            (arguments+=Expression (',' arguments+=Expression)*)?
+        ')'
+    )?
+;
+
+FormulaDeclaration:
+    (export?='export')? 'formula' name=ID ParameterList 'returns' returnType=TypeReference body=StatementBlock
+;
+
+ProcedureDeclaration:
+    (export?='export')? 'procedure' name=ID ParameterList ('returns' returnType=TypeReference)?
+    body=StatementBlock
+;
+
+ParameterDeclaration:
+    name=ID (isOptional?='?')? (':' type=TypeReference)?
+;
+
+fragment ParameterList:
+    '(' 
+        (parameters+=ParameterDeclaration (',' parameters+=ParameterDeclaration)*)? 
+    ')'
+;
+
+StatementBlock:
+    '{' 
+        (statements+=Statement)* 
+    '}'
+;
+
+ReturnStatement:
+    'return' value=Expression
+;
+
+IfStatement:
+    'if' '(' condition=Expression ')' block=StatementBlock
+    ('else' elseBlock=StatementBlock)?
+;
+
+ForStatement:
+    'for' '(' counter=VariableDeclaration 'from' from=Expression 'to' to=Expression 'step' step=Expression ')' block=StatementBlock
+;
+
+MatchStatement:
+    'match' condition=Expression '{'
+        options+=LambdaDeclaration 
+        (',' options+=LambdaDeclaration)*
+    '}'
+;
+
+PrintStatement:
+    'print' value=Expression
+;
+
+type NamedElement = ConstantDeclaration | 
+                    MutableDeclaration |
+                    ModelDeclaration | 
+                    PropertyDeclaration | 
+                    FormulaDeclaration |
+                    ProcedureDeclaration | 
+                    ParameterDeclaration |
+                    UnitFamilyDeclaration |
+                    UnitDeclaration
+;
+
+type Exportable = ConstantDeclaration | 
+                    MutableDeclaration |
+                    ModelDeclaration | 
+                    FormulaDeclaration |
+                    ProcedureDeclaration | 
+                    UnitFamilyDeclaration;
