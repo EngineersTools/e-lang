@@ -2,6 +2,7 @@ import {
   Expression,
   MeasurementLiteral,
   isExpression,
+  isFormulaDeclaration,
   isLambdaDeclaration,
   isMeasurementLiteral,
 } from "../language/generated/ast.js";
@@ -50,18 +51,35 @@ export async function convertMeasurements(
 
       context.variables.leave();
     }
-    // else if (isFormulaDeclaration(conversion)) {
-    //   const inputArgument = await runExpression(left, context);
+    else if (isFormulaDeclaration(conversion.ref)) {
+      const inputArgument = await runExpression(left, context);
 
-    //   context.variables.enter();
-    //   const names = conversion.parameters.map((e) => e.name);
-    //   context.variables.push(names[0], inputArgument);
-    //   const returnFn: ReturnFunction = (returnValue) => {
-    //     convertedMeasurement = returnValue;
-    //   };
-    //   await runElangStatement(conversion.body, context, returnFn);
-    //   context.variables.leave();
-    // }
+      context.variables.enter();
+      const names = conversion.ref.parameters.map((e) => e.name);
+      context.variables.push(names[0], inputArgument);
+
+      if (args && args.length > 0) {
+        for (let i = 0; i < args.length; i++) {
+          const argValue = await runExpression(args[i], context);
+          context.variables.push(names[i + 1], argValue);
+        }
+      }
+
+      if (isExpression(conversion.ref.body)) {
+        convertedMeasurement = await runExpression(conversion.ref.body, context);
+        if (isMeasurementLiteral(convertedMeasurement)) {
+          convertedMeasurement.unit = right.unit;
+        }
+      } else {
+        await runElangStatement(conversion.ref.body, context, (val) => {
+          convertedMeasurement = val;
+        });
+      }
+      
+      context.variables.leave();
+    }
+
+    (convertedMeasurement as MeasurementLiteral).unit = right.unit
 
     return {
       left: convertedMeasurement as MeasurementLiteral,
