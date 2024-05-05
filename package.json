@@ -1,5 +1,5 @@
 {
-  "name": "elang",
+  "name": "e-lang",
   "description": "The engineering programming language",
   "icon": "elang-icon.png",
   "repository": {
@@ -64,7 +64,7 @@
     "vite": "~4.4.11",
     "vitest": "~1.0.0"
   },
-  "displayName": "elang",
+  "displayName": "e-lang",
   "engines": {
     "vscode": "^1.67.0",
     "node": ">=18.0.0"
@@ -75,14 +75,14 @@
   "contributes": {
     "languages": [
       {
-        "id": "elang",
+        "id": "e-lang",
         "aliases": [
           "Elang",
           "elang"
         ],
         "extensions": [
-          ".elang",
-          ".elangnb"
+          ".el",
+          ".elnb"
         ],
         "icon": {
           "dark": "./elang-file-icon-dark.png",
@@ -93,7 +93,7 @@
     ],
     "grammars": [
       {
-        "language": "elang",
+        "language": "e-lang",
         "scopeName": "source.elang",
         "path": "syntaxes/elang.tmLanguage.json"
       }
@@ -104,7 +104,7 @@
         "displayName": "Elang Notebook",
         "selector": [
           {
-            "filenamePattern": "*.elangnb"
+            "filenamePattern": "*.elnb"
           }
         ]
       }
