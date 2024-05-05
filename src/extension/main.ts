@@ -60,7 +60,7 @@ function startLanguageClient(context: vscode.ExtensionContext): LanguageClient {
   };
 
   const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-    "**/*.{elang,elangnb}"
+    "**/*.{el,elnb}"
   );
   context.subscriptions.push(fileSystemWatcher);
 
