@@ -5,3 +5,7 @@
 elang is an experimental programming language that provides higher level abstractions specific to the needs of engineering disciplines.
 
 The best way to try elang is to install the VSCode extension.
+
+This is an alpha version and it should not be used in production.
+
+Documentation is being built on the GitHub repo whilst a documentation site is being prepared.

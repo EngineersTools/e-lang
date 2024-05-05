@@ -5,9 +5,12 @@
   "repository": {
     "url": "https://github.com/EngineersTools/elang"
   },
-  "publisher": "Engineers Tools",
+  "publisher": "EngineersTools",
   "license": "MIT",
-  "version": "0.0.1-alpha",
+  "version": "0.0.1",
+  "author": {
+    "name": "Carlos Gamez"
+  },
   "files": [
     "bin",
     "out",

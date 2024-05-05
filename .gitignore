@@ -2,6 +2,7 @@
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/tasks.json
+*.vsix
 node_modules/
 out/
 src/language/generated/
