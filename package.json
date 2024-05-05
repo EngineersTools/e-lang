@@ -2,8 +2,9 @@
   "name": "elang",
   "description": "The engineering programming language",
   "repository": {
-    "url": "https://github.com/EngineersTools/elang"
+    "url": "https://github.com/EngineersTools/elang",
   },
+  "license": "MIT",
   "version": "0.0.1-alpha",
   "files": [
     "bin",
