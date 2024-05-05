@@ -1,9 +1,11 @@
 {
   "name": "elang",
   "description": "The engineering programming language",
+  "icon": "elang-icon.png",
   "repository": {
-    "url": "https://github.com/EngineersTools/elang",
+    "url": "https://github.com/EngineersTools/elang"
   },
+  "publisher": "Engineers Tools",
   "license": "MIT",
   "version": "0.0.1-alpha",
   "files": [
@@ -18,7 +20,7 @@
     "lint": "eslint src --ext ts",
     "langium:generate": "langium generate",
     "langium:watch": "langium generate --watch",
-    "vscode:prepublish": "bun run build && bun run lint",
+    "vscode:prepublish": "bun run esbuild-base -- --minify && bun run lint",
     "esbuild-base": "esbuild ./src/extension/main.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
     "prepare:static": "node ./scripts/prepare.js",
     "build:web": "bun run build && bun run prepare:static && bun run build:monarch && bun run build:worker && bun run build:bundle",
@@ -79,6 +81,10 @@
           ".elang",
           ".elangnb"
         ],
+        "icon": {
+          "dark": "./elang-file-icon-dark.png",
+          "light": "./elang-file-icon-light.png"
+        },
         "configuration": "./language-configuration.json"
       }
     ],
