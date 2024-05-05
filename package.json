@@ -15,6 +15,7 @@
     "langium:generate": "langium generate",
     "langium:watch": "langium generate --watch",
     "vscode:prepublish": "npm run build && npm run lint",
+    "esbuild-base": "esbuild ./src/extension/main.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
     "prepare:static": "node ./scripts/prepare.js",
     "build:web": "npm run build && npm run prepare:static && npm run build:monarch && npm run build:worker && npm run build:bundle",
     "build:monarch": "tsc -b tsconfig.monarch.json",
