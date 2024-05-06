@@ -1,7 +1,7 @@
 {
   "name": "e-lang",
   "description": "The engineering programming language",
-  "icon": "elang-icon.png",
+  "icon": "elang-social-card.png",
   "repository": {
     "url": "https://github.com/EngineersTools/elang"
   },

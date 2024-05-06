@@ -1,6 +1,6 @@
 # elang
 
-![elang logo](./elang-logo.png)
+![elang logo](./elang-social-card.png)
 
 elang is an experimental programming language that provides higher level abstractions specific to the needs of engineering disciplines.
 
