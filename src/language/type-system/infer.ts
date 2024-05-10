@@ -25,7 +25,7 @@ import {
   isTypeReference,
   isUnaryExpression,
 } from "../generated/ast.js";
-import { Types } from "./Types.js";
+import { TypeEnvironment } from "./Types.js";
 import {
   TypeDescription,
   createBooleanType,
@@ -44,7 +44,7 @@ import {
 
 export function inferType(
   node: AstNode | undefined,
-  cache: Types
+  cache: TypeEnvironment
 ): TypeDescription {
   let type: TypeDescription | undefined;
 
@@ -156,7 +156,7 @@ export function inferTypeRef(node: TypeReference): TypeDescription {
 
 function inferBinaryExpression(
   expr: BinaryExpression,
-  cache: Types
+  cache: TypeEnvironment
 ): TypeDescription {
   // Operations that should return boolean
   if (["and", "or", "<", "<=", ">", ">=", "==", "!="].includes(expr.operator)) {

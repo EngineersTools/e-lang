@@ -7,7 +7,7 @@ import {
   isExportable,
   isMeasurementLiteral,
 } from "../language/generated/ast.js";
-import { Types } from "../language/type-system/Types.js";
+import { TypeEnvironment } from "../language/type-system/Types.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { Variables } from "./Variables.js";
 import { InterpreterContext, services } from "./interpreter.js";
@@ -44,7 +44,7 @@ export async function runProgram(
   // Create a context for the run of this program
   const context: RunnerContext = outerRunnerContext ?? {
     variables: new Variables(),
-    types: new Types(),
+    types: new TypeEnvironment(),
     cancellationToken,
     timeout,
     // Pass the context and onStart function

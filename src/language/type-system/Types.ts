@@ -1,7 +1,7 @@
 import { AstNode } from "langium";
 import { TypeDescription } from "./descriptions.js";
 
-export class Types {
+export class TypeEnvironment {
   private stack: Map<AstNode, TypeDescription>[] = [];
 
   length(): number {

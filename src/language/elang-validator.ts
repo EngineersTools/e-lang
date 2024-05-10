@@ -23,7 +23,7 @@ import {
   isReturnStatement,
   isTypeReference,
 } from "./generated/ast.js";
-import { Types } from "./type-system/Types.js";
+import { TypeEnvironment } from "./type-system/Types.js";
 import { isAssignable } from "./type-system/assignment.js";
 import { typeToString } from "./type-system/descriptions.js";
 import { inferType } from "./type-system/infer.js";
@@ -82,8 +82,8 @@ function getInheritedModelProperties(
  * Implementation of custom validations.
  */
 export class ElangValidator {
-  private getTypeCache(): Types {
-    return new Types();
+  private getTypeCache(): TypeEnvironment {
+    return new TypeEnvironment();
   }
 
   checkParentModelsForDuplicatedProperties(
