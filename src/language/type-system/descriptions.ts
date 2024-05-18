@@ -1,3 +1,8 @@
+/**
+ * This modulde contains all the type descriptions
+ * used in the type system of the elang language.
+ */
+
 import { AstNode } from "langium";
 import {
   BooleanLiteral,
@@ -16,7 +21,7 @@ import { inferTypeRef } from "./infer.js";
 import { getCircularReplacer } from "../helpers.js";
 
 export type TypeDescription =
-  | StringType
+  | TextType
   | NumberType
   | BooleanType
   | NullType
@@ -31,19 +36,19 @@ export type TypeDescription =
   | ErrorType;
 
 // STRING
-export interface StringType {
+export interface TextType {
   readonly $type: "text";
   readonly literal?: StringLiteral;
 }
 
-export function createStringType(literal?: StringLiteral): StringType {
+export function createTextType(literal?: StringLiteral): TextType {
   return {
     $type: "text",
     literal,
   };
 }
 
-export function isStringType(item: TypeDescription): item is StringType {
+export function isTextType(item: TypeDescription): item is TextType {
   return item.$type === "text";
 }
 

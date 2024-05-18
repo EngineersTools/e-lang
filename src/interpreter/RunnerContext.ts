@@ -1,5 +1,5 @@
 import { CancellationToken } from "vscode-languageserver";
-import { TypeEnvironment } from "../language/type-system/Types.js";
+import { TypeEnvironment } from "../language/type-system/TypeEnvironment.class.js";
 import { InterpreterContext } from "./interpreter.js";
 import { Variables } from "./Variables.js";
 

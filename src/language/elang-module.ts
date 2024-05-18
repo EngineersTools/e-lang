@@ -9,6 +9,7 @@ import {
 } from "langium/lsp";
 import { ElangLinker } from "./elang-linker.js";
 import { ElangScopeComputation, ElangScopeProvider } from "./elang-scope.js";
+import { ElangTypechecker, registerTypechecks } from "./elang-typechecker.js";
 import { ElangValidator, registerValidationChecks } from "./elang-validator.js";
 import {
   ElangGeneratedModule,
@@ -23,6 +24,7 @@ import { ElangHoverProvider } from "./lsp/hover-provider.js";
 export type ElangAddedServices = {
   validation: {
     ElangValidator: ElangValidator;
+    ElangTypechecker: ElangTypechecker;
   };
 };
 
@@ -43,6 +45,7 @@ export const ElangModule: Module<
 > = {
   validation: {
     ElangValidator: () => new ElangValidator(),
+    ElangTypechecker: () => new ElangTypechecker()
   },
   references: {
     ScopeComputation: (services) => new ElangScopeComputation(services),
@@ -86,5 +89,6 @@ export function createElangServices(context: DefaultSharedModuleContext): {
   );
   shared.ServiceRegistry.register(Elang);
   registerValidationChecks(Elang);
+  registerTypechecks(Elang);
   return { shared, Elang };
 }

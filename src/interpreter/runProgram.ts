@@ -7,7 +7,7 @@ import {
   isExportable,
   isMeasurementLiteral,
 } from "../language/generated/ast.js";
-import { TypeEnvironment } from "../language/type-system/Types.js";
+import { TypeEnvironment } from "../language/type-system/TypeEnvironment.class.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { Variables } from "./Variables.js";
 import { InterpreterContext, services } from "./interpreter.js";
@@ -55,7 +55,7 @@ export async function runProgram(
 
   // Initialise the Variables and Types objects of this program
   context.variables.enter();
-  context.types.enter();
+  context.types.enterScope();
 
   // If an onStart function was passed, run it now
   if (context.onStart) {
@@ -123,7 +123,7 @@ export async function runProgram(
 
   // Close and finalise the Variables and Types objects for this run
   context.variables.leave();
-  context.types.leave();
+  context.types.leaveScope();
 }
 
 export function isNumber(value: unknown): value is number {

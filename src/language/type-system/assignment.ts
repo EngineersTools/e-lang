@@ -4,7 +4,7 @@ import {
   isModelType,
   isNullType,
 } from "./descriptions.js";
-import { getModelDeclarationChain } from "./infer.js";
+import { getModelDeclarationChain } from "./getModelDeclarationChain.js";
 
 export function isAssignable(
   from: TypeDescription,

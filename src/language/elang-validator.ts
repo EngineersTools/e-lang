@@ -23,7 +23,7 @@ import {
   isReturnStatement,
   isTypeReference,
 } from "./generated/ast.js";
-import { TypeEnvironment } from "./type-system/Types.js";
+import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import { isAssignable } from "./type-system/assignment.js";
 import { typeToString } from "./type-system/descriptions.js";
 import { inferType } from "./type-system/infer.js";

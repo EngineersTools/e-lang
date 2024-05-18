@@ -1,7 +1,6 @@
 import { AstNode } from "langium";
 import {
   BinaryExpression,
-  ModelDeclaration,
   TypeReference,
   isBinaryExpression,
   isBooleanLiteral,
@@ -25,7 +24,7 @@ import {
   isTypeReference,
   isUnaryExpression,
 } from "../generated/ast.js";
-import { TypeEnvironment } from "./Types.js";
+import { TypeEnvironment } from "./TypeEnvironment.class.js";
 import {
   TypeDescription,
   createBooleanType,
@@ -38,8 +37,8 @@ import {
   createModelTypeFromValue,
   createNullType,
   createNumberType,
-  createStringType,
-  isStringType,
+  createTextType,
+  isTextType,
 } from "./descriptions.js";
 
 export function inferType(
@@ -51,15 +50,15 @@ export function inferType(
   if (!node) {
     return createErrorType("Could not infer type for undefined", node);
   }
-  const existing = cache.get(node);
+  const existing = cache.get(node.$type);
   if (existing) {
     return existing;
   }
   // Prevent recursive inference errors
-  cache.set(node, createErrorType("Recursive definition", node));
+  cache.set(node.$type, createErrorType("Recursive definition", node));
 
   if (isStringLiteral(node)) {
-    type = createStringType(node);
+    type = createTextType(node);
   } else if (isNumberLiteral(node)) {
     type = createNumberType(node);
   } else if (isBooleanLiteral(node)) {
@@ -115,7 +114,7 @@ export function inferType(
     type = createErrorType("Could not infer type for " + node.$type, node);
   }
 
-  cache.set(node, type);
+  cache.set(node.$type, type);
   return type;
 }
 
@@ -126,7 +125,7 @@ export function inferTypeRef(node: TypeReference): TypeDescription {
     if (node.primitive === "number") {
       primaryType = createNumberType();
     } else if (node.primitive === "text") {
-      primaryType = createStringType();
+      primaryType = createTextType();
     } else if (node.primitive === "boolean") {
       primaryType = createBooleanType();
     }
@@ -172,8 +171,8 @@ function inferBinaryExpression(
       return createMeasurementType();
     }
     if (expr.operator === "+") {
-      if (isStringType(left) || isStringType(right)) {
-        return createStringType();
+      if (isTextType(left) || isTextType(right)) {
+        return createTextType();
       } else {
         return createMeasurementType();
       }
@@ -185,8 +184,8 @@ function inferBinaryExpression(
       return createNumberType();
     }
     if (expr.operator === "+") {
-      if (isStringType(left) || isStringType(right)) {
-        return createStringType();
+      if (isTextType(left) || isTextType(right)) {
+        return createTextType();
       } else {
         return createNumberType();
       }
@@ -198,20 +197,4 @@ function inferBinaryExpression(
   return createErrorType("Could not infer type from binary expression", expr);
 }
 
-export function getModelDeclarationChain(
-  modelItem: ModelDeclaration
-): ModelDeclaration[] {
-  const set = new Set<ModelDeclaration>();
 
-  let value: ModelDeclaration = modelItem;
-
-  value.parentTypes.forEach((pt) => {
-    while (pt.ref && value && !set.has(value)) {
-      set.add(value);
-      value = pt.ref;
-    }
-  });
-
-  // Sets preserve insertion order
-  return Array.from(set);
-}

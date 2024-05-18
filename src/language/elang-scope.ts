@@ -27,9 +27,10 @@ import {
   isMutableDeclaration,
   isUnitDeclaration,
 } from "./generated/ast.js";
-import { TypeEnvironment } from "./type-system/Types.js";
+import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import { isModelType } from "./type-system/descriptions.js";
-import { getModelDeclarationChain, inferType } from "./type-system/infer.js";
+import { inferType } from "./type-system/infer.js";
+import { getModelDeclarationChain } from "./type-system/getModelDeclarationChain.js";
 
 export class ElangScopeProvider extends DefaultScopeProvider {
   constructor(services: LangiumServices) {

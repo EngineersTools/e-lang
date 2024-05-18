@@ -58,7 +58,7 @@ export async function runElangStatement(
   } else if (isForStatement(statement)) {
     const { counter, from, to, step, block } = statement;
     context.variables.enter();
-    context.types.enter();
+    context.types.enterScope();
 
     if (counter) {
       await runElangStatement(counter, context, returnFn);
@@ -74,10 +74,10 @@ export async function runElangStatement(
     }
 
     context.variables.leave();
-    context.types.leave();
+    context.types.leaveScope();
   } else if (isFormulaDeclaration(statement)) {
     context.types.set(
-      statement,
+      statement.name,
       createFormulaType(
         inferType(statement, context.types),
         statement.parameters
@@ -86,7 +86,7 @@ export async function runElangStatement(
     context.variables.push(statement.name, statement);
   } else if (isProcedureDeclaration(statement)) {
     context.types.set(
-      statement,
+      statement.name,
       createProcedureType(
         inferType(statement, context.types),
         statement.parameters
@@ -102,7 +102,7 @@ export async function runElangStatement(
     }
   } else if (isLambdaDeclaration(statement)) {
     context.types.set(
-      statement,
+      statement.$type,
       createLambdaType(
         inferType(statement, context.types),
         statement.parameters
@@ -116,7 +116,7 @@ export async function runElangStatement(
       );
 
       context.variables.enter();
-      context.types.enter();
+      context.types.enterScope();
 
       const names = statement.parameters.map((e) => e.name);
 
@@ -124,13 +124,13 @@ export async function runElangStatement(
         const argValue = args[i] ?? null;
         context.variables.push(names[i], argValue);
         const type = inferType(statement.parameters[i], context.types);
-        context.types.set(statement.parameters[i], type);
+        context.types.set(statement.parameters[i].name, type);
       }
 
       await runElangStatement(statement.body, context, returnFn);
 
       context.variables.leave();
-      context.types.leave();
+      context.types.leaveScope();
     }
   } else if (isMatchStatement(statement)) {
     const condition = await runExpression(statement.condition, context);
@@ -139,7 +139,7 @@ export async function runElangStatement(
       if (element.parameters == condition) context.log("Found it");
     }
   } else if (isModelDeclaration(statement)) {
-    context.types.set(statement, createModelType(statement));
+    context.types.set(statement.name, createModelType(statement));
   } else if (
     isConstantDeclaration(statement) ||
     isMutableDeclaration(statement)
@@ -147,10 +147,10 @@ export async function runElangStatement(
     await runVariableDeclaration(statement, context);
   } else if (isParameterDeclaration(statement)) {
     const type = inferType(statement, context.types);
-    context.types.set(statement, type);
+    context.types.set(statement.name, type);
   } else if (isPropertyDeclaration(statement)) {
     const type = inferType(statement, context.types);
-    context.types.set(statement, type);
+    context.types.set(statement.name, type);
   } else if (isPrintStatement(statement)) {
     if (isExpression(statement.value)) {
       context.log(await serialiseExpression(statement.value, context));
@@ -158,7 +158,7 @@ export async function runElangStatement(
       context.log("This statement or expression cannot be printed.");
     }
   } else if (isReturnStatement(statement)) {
-    context.types.set(statement, inferType(statement, context.types));
+    context.types.set(statement.$type, inferType(statement, context.types));
 
     const result = statement.value
       ? await runExpression(statement.value, context)
@@ -186,11 +186,11 @@ export async function runElangStatement(
   } else if (isModelMemberCall(statement)) {
     await runExpression(statement, context);
   } else if (isUnitFamilyDeclaration(statement)) {
-    context.types.set(statement, createUnitFamilyType(statement));
+    context.types.set(statement.name, createUnitFamilyType(statement));
 
     if (statement.units && statement.units.length > 0) {
       for (const unit of statement.units) {
-        context.types.set(unit, createUnitType(unit));
+        context.types.set(unit.name, createUnitType(unit));
       }
     }
 

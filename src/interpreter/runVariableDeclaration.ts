@@ -19,7 +19,7 @@ export async function runVariableDeclaration(
     const type = inferType(statement, context.types);
     const valueType = inferType(statement.value, context.types);
 
-    context.types.set(statement, type);
+    context.types.set(statement.name, type);
 
     if (!isAssignable(type, valueType)) {
       throw new AstNodeError(
