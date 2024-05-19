@@ -3,7 +3,7 @@
     "languages": [{
         "id": "elang",
         "grammar": "src/language/grammar/elang.langium",
-        "fileExtensions": [".elang", ".elangnb"],
+        "fileExtensions": [".elang", ".elnb"],
         "textMate": {
             "out": "syntaxes/elang.tmLanguage.json"
         },

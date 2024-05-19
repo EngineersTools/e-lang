@@ -9,12 +9,12 @@ describe("TypeEnvironment", () => {
     expect(env.numberOfScopes()).toBe(0);
 
     env.enterScope();
-    env.set("numberVar", { $type: "number" });
-    env.set("textVar", { $type: "text" });
+    env.setVariableType("numberVar", { $type: "number" });
+    env.setVariableType("textVar", { $type: "text" });
     expect(env.numberOfScopes()).toBe(1);
 
     env.enterScope();
-    env.set("booleanVar", { $type: "boolean" });
+    env.setVariableType("booleanVar", { $type: "boolean" });
     expect(env.numberOfScopes()).toBe(2);
     env.leaveScope();
 
@@ -28,22 +28,22 @@ describe("TypeEnvironment", () => {
     const env = new TypeEnvironment();
 
     env.enterScope();
-    env.set("numberVar", { $type: "number" });
-    env.set("textVar", { $type: "text" });
+    env.setVariableType("numberVar", { $type: "number" });
+    env.setVariableType("textVar", { $type: "text" });
 
     env.enterScope();
-    env.set("booleanVar", { $type: "boolean" });
+    env.setVariableType("booleanVar", { $type: "boolean" });
 
-    expect(env.get("numberVar")).toEqual({ $type: "number" });
-    expect(env.get("textVar")).toEqual({ $type: "text" });
-    expect(env.get("booleanVar")).toEqual({ $type: "boolean" });
-    expect(env.get("unknownVar")).toBeUndefined();
-
-    env.leaveScope();
-    expect(env.get("booleanVar")).toBeUndefined();
+    expect(env.getVariableType("numberVar")).toEqual({ $type: "number" });
+    expect(env.getVariableType("textVar")).toEqual({ $type: "text" });
+    expect(env.getVariableType("booleanVar")).toEqual({ $type: "boolean" });
+    expect(env.getVariableType("unknownVar")).toBeUndefined();
 
     env.leaveScope();
-    expect(env.get("numberVar")).toBeUndefined();
-    expect(env.get("textVar")).toBeUndefined();
+    expect(env.getVariableType("booleanVar")).toBeUndefined();
+
+    env.leaveScope();
+    expect(env.getVariableType("numberVar")).toBeUndefined();
+    expect(env.getVariableType("textVar")).toBeUndefined();
   });
 });

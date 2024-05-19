@@ -15,8 +15,12 @@ PropertyDeclaration:
     (override?='override')? name=ID (isOptional?='?')? ':' (type=TypeReference) (description=STRING)?
 ;
 
-Primitive returns string:
-    'number' | 'text' | 'boolean'
+PrimitiveType infers TypeReference:
+    type=('number' | 'text' | 'boolean')
+;
+
+ModelType infers TypeReference:
+    model=[ModelDeclaration:ID]
 ;
 
 LambdaType:
@@ -39,10 +43,10 @@ TypeIntersection infers TypeReference:
 
 PrimaryTypeReference infers TypeReference:
     (array?='listof')?
-    (model=[ModelDeclaration:ID] |
-    primitive=Primitive |
-    measurement=MeasurementType |
-    lambda=LambdaType)
+    ( ModelType |
+    PrimitiveType |
+    MeasurementType |
+    LambdaType)
 ;
 
 /**

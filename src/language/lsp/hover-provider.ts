@@ -9,7 +9,6 @@ import {
   isUnitDeclaration,
   isUnitFamilyDeclaration,
 } from "../generated/ast.js";
-import { inferTypeRef } from "../type-system/infer.js";
 
 export class ElangHoverProvider extends AstNodeHoverProvider {
   protected getAstNodeHoverContent(node: AstNode): Hover | undefined {
@@ -53,7 +52,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
           kind: "markdown",
           language: "e-lang",
           value: `(Model) ${node.name} { ${node.properties.map(
-            (p) => `\n\t${p.name}: ${inferTypeRef(p.type).$type}`
+            (p) => `\n\t${p.name}: ${p.type.$type}`
           )} \n}`,
         },
       };
@@ -62,9 +61,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
         contents: {
           kind: "markdown",
           language: "e-lang",
-          value: `(Model Property) ${node.name}: ${
-            inferTypeRef(node.type).$type
-          }`,
+          value: `(Model Property) ${node.name}: ${node.type.$type}`,
         },
       };
     }

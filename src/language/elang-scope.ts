@@ -19,8 +19,6 @@ import { LangiumServices } from "langium/lsp";
 import { CancellationToken } from "vscode-jsonrpc";
 import {
   ElangProgram,
-  ModelDeclaration,
-  ModelValue,
   isConstantDeclaration,
   isModelMemberAssignment,
   isModelMemberCall,
@@ -28,9 +26,8 @@ import {
   isUnitDeclaration,
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
-import { isModelType } from "./type-system/descriptions.js";
+import { ModelMemberType, isModelType } from "./type-system/descriptions.js";
 import { inferType } from "./type-system/infer.js";
-import { getModelDeclarationChain } from "./type-system/getModelDeclarationChain.js";
 
 export class ElangScopeProvider extends DefaultScopeProvider {
   constructor(services: LangiumServices) {
@@ -54,14 +51,9 @@ export class ElangScopeProvider extends DefaultScopeProvider {
 
       const previousType = inferType(previous, this.types);
 
-      if (
-        isModelType(previousType) &&
-        (previousType.declaration || previousType.value)
-      ) {
-        return previousType.declaration !== undefined
-          ? this.scopeModelDeclarationMembers(previousType.declaration)
-          : previousType.value !== undefined
-          ? this.scopeModelValueMembers(previousType.value)
+      if (isModelType(previousType)) {
+        return previousType !== undefined
+          ? this.scopeMemberTypes(previousType.memberTypes)
           : super.getScope(context);
       }
       return EMPTY_SCOPE;
@@ -70,16 +62,21 @@ export class ElangScopeProvider extends DefaultScopeProvider {
     return super.getScope(context);
   }
 
-  private scopeModelDeclarationMembers(modelItem: ModelDeclaration): Scope {
-    const allMembers = getModelDeclarationChain(modelItem).flatMap(
-      (e) => e.properties
-    );
+  private scopeMemberTypes(memberTypes: ModelMemberType[]): Scope {
+    const allMembers = memberTypes.flatMap((e) => e.typeDesc);
     return this.createScopeForNodes(allMembers);
   }
 
-  private scopeModelValueMembers(modelItem: ModelValue): Scope {
-    return this.createScopeForNodes(modelItem.members);
-  }
+  // private scopeModelDeclarationMembers(modelItem: ModelDeclaration): Scope {
+  //   const allMembers = getModelDeclarationChain(modelItem).flatMap(
+  //     (e) => e.properties
+  //   );
+  //   return this.createScopeForNodes(allMembers);
+  // }
+
+  // private scopeModelValueMembers(modelItem: ModelValue): Scope {
+  //   return this.createScopeForNodes(modelItem.members);
+  // }
 
   override createScopeForNodes(
     elements: Iterable<AstNode>,

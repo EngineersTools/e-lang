@@ -1,7 +1,20 @@
+import { TypeRegistry } from "./TypeRegistry.class.js";
 import { TypeDescription } from "./descriptions.js";
 
 export class TypeEnvironment {
-  private stack: Map<string, TypeDescription>[] = [];
+  constructor() {
+    this.typeRegistry = new TypeRegistry();
+    this.stack = [];
+    this._registerGlobalVariables();
+  }
+
+  private typeRegistry: TypeRegistry;
+
+  private stack: Map<string, TypeDescription>[];
+
+  private _registerGlobalVariables() {
+    this.enterScope(); // The global scope
+  }
 
   numberOfScopes(): number {
     return this.stack.length;
@@ -9,19 +22,37 @@ export class TypeEnvironment {
 
   enterScope(): void {
     this.stack.push(new Map());
+    this.typeRegistry.enterScope();
   }
 
   leaveScope(): void {
     this.stack.pop();
+    this.typeRegistry.leaveScope();
   }
 
-  set(name: string, type: TypeDescription): void {
+  registerType(name: string, type: TypeDescription): void {
+    this.typeRegistry.set(name, type);
+  }
+
+  getRegisteredType(name: string): TypeDescription | undefined {
+    return this.typeRegistry.get(name);
+  }
+
+  getTypeRegistryVarIndex() {
+    return this.typeRegistry.varIndex;
+  }
+
+  increaseTypeRegistryVarIndex() {
+    this.typeRegistry.varIndex++;
+  }
+
+  setVariableType(name: string, type: TypeDescription): void {
     if (this.stack.length > 0) {
       this.stack[this.stack.length - 1].set(name, type);
     }
   }
 
-  get(name: string): TypeDescription | undefined {
+  getVariableType(name: string): TypeDescription | undefined {
     for (let i = this.stack.length - 1; i >= 0; i--) {
       const scope = this.stack[i];
       const type = scope.get(name);

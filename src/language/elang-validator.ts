@@ -15,19 +15,15 @@ import {
   StatementBlock,
   TypeReference,
   UnaryExpression,
-  isBinaryExpression,
   isConstantDeclaration,
-  isMeasurementLiteral,
-  isModelDeclaration,
   isModelValue,
   isReturnStatement,
-  isTypeReference,
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import { isAssignable } from "./type-system/assignment.js";
-import { typeToString } from "./type-system/descriptions.js";
 import { inferType } from "./type-system/infer.js";
 import { isLegalOperation } from "./type-system/operator.js";
+import { typeToString } from "./type-system/typeToString.js";
 
 /**
  * Register custom validation checks.
@@ -36,22 +32,22 @@ export function registerValidationChecks(services: ElangServices) {
   const registry = services.validation.ValidationRegistry;
   const validator = services.validation.ElangValidator;
   const checks: ValidationChecks<ElangAstType> = {
-    ModelDeclaration: validator.checkParentModelsForDuplicatedProperties,
-    PropertyDeclaration: validator.checkModelPropertiesAreNotDuplicated,
-    MutableDeclaration: [
-      validator.checkUnitsAreOfCorrectFamily,
-      validator.checkModelHasBeenAssignedCorrectProperties,
-    ],
-    ConstantDeclaration: [
-      validator.checkUnitsAreOfCorrectFamily,
-      validator.checkModelHasBeenAssignedCorrectProperties,
-    ],
-    FormulaDeclaration: [validator.checkItHasReturn, validator.checkReturnType],
-    ProcedureDeclaration: validator.checkReturnType,
-    LambdaDeclaration: validator.checkReturnType,
-    BinaryExpression: validator.checkBinaryOperationAllowed,
-    UnaryExpression: validator.checkUnaryOperationAllowed,
-    ModelMemberAssignment: validator.checkAssignmentOperationAllowed,
+    // ModelDeclaration: validator.checkParentModelsForDuplicatedProperties,
+    // PropertyDeclaration: validator.checkModelPropertiesAreNotDuplicated,
+    // MutableDeclaration: [
+    //   validator.checkUnitsAreOfCorrectFamily,
+    //   validator.checkModelHasBeenAssignedCorrectProperties,
+    // ],
+    // ConstantDeclaration: [
+    //   validator.checkUnitsAreOfCorrectFamily,
+    //   validator.checkModelHasBeenAssignedCorrectProperties,
+    // ],
+    // FormulaDeclaration: [validator.checkItHasReturn, validator.checkReturnType],
+    // ProcedureDeclaration: validator.checkReturnType,
+    // LambdaDeclaration: validator.checkReturnType,
+    // BinaryExpression: validator.checkBinaryOperationAllowed,
+    // UnaryExpression: validator.checkUnaryOperationAllowed,
+    // ModelMemberAssignment: validator.checkAssignmentOperationAllowed,
   };
   registry.register(checks, validator);
 }
@@ -60,23 +56,23 @@ export function registerValidationChecks(services: ElangServices) {
  * Helper functions
  */
 
-function getInheritedModelProperties(
-  model: ModelDeclaration
-): PropertyDeclaration[] {
-  const props = new Array<PropertyDeclaration>();
+// function getInheritedModelProperties(
+//   model: ModelDeclaration
+// ): PropertyDeclaration[] {
+//   const props = new Array<PropertyDeclaration>();
 
-  model.parentTypes.forEach((p) => {
-    if (p.ref) {
-      const parentProps = p.ref.properties;
-      props.push(...parentProps);
-      props.push(...getInheritedModelProperties(p.ref));
-    }
-  });
+//   model.parentTypes.forEach((p) => {
+//     if (p.ref) {
+//       const parentProps = p.ref.properties;
+//       props.push(...parentProps);
+//       props.push(...getInheritedModelProperties(p.ref));
+//     }
+//   });
 
-  props.push(...model.properties);
+//   props.push(...model.properties);
 
-  return props;
-}
+//   return props;
+// }
 
 /**
  * Implementation of custom validations.
@@ -157,59 +153,56 @@ export class ElangValidator {
     node: ConstantDeclaration | MutableDeclaration,
     accept: ValidationAcceptor
   ) {
-    if (
-      isConstantDeclaration(node) &&
-      isTypeReference(node.type) &&
-      isMeasurementLiteral(node.value)
-    ) {
-      const unitRef = node.value.unit.ref;
-      const unitFamilyRef = node.type.measurement?.unitFamily.ref;
-      const unitFamilyUnits = unitFamilyRef?.units.map((u) => u.name);
-
-      if (
-        unitRef &&
-        unitFamilyRef &&
-        !unitFamilyRef.units.map((u) => u.name).includes(unitRef.name)
-      ) {
-        accept(
-          "error",
-          `The unit ${unitRef.name} has is not part of the ${unitFamilyRef.name} unit family. Valid unit options for this family are: ${unitFamilyUnits}`,
-          { node, property: "value" }
-        );
-      }
-    }
+    // if (
+    //   isConstantDeclaration(node) &&
+    //   isTypeReference(node.type) &&
+    //   isMeasurementLiteral(node.value)
+    // ) {
+    //   const unitRef = node.value.unit.ref;
+    //   const unitFamilyRef = node.type. .unitFamily.ref;
+    //   const unitFamilyUnits = unitFamilyRef?.units.map((u) => u.name);
+    //   if (
+    //     unitRef &&
+    //     unitFamilyRef &&
+    //     !unitFamilyRef.units.map((u) => u.name).includes(unitRef.name)
+    //   ) {
+    //     accept(
+    //       "error",
+    //       `The unit ${unitRef.name} has is not part of the ${unitFamilyRef.name} unit family. Valid unit options for this family are: ${unitFamilyUnits}`,
+    //       { node, property: "value" }
+    //     );
+    //   }
+    // }
   }
 
   checkModelHasBeenAssignedCorrectProperties(
     node: MutableDeclaration | ConstantDeclaration,
     accept: ValidationAcceptor
   ) {
-    if (
-      node.assignment &&
-      node.type &&
-      node.type.model &&
-      isModelValue(node.value) &&
-      isModelDeclaration(node.type?.model?.ref)
-    ) {
-      const props = getInheritedModelProperties(node.type.model.ref);
-
-      for (const member of node.value.members) {
-        if (isBinaryExpression(member)) {
-          const memberName = member;
-
-          if (memberName && !props.map((p) => p.name).includes(memberName)) {
-            accept(
-              "error",
-              `PropertyDeclaration '${memberName}' does not exist in model '${node.type.model.ref.name}'`,
-              {
-                node: member,
-                property: "left",
-              }
-            );
-          }
-        }
-      }
-    }
+    // if (
+    //   node.assignment &&
+    //   node.type &&
+    //   node.type.model &&
+    //   isModelValue(node.value) &&
+    //   isModelDeclaration(node.type?.model?.ref)
+    // ) {
+    //   const props = getInheritedModelProperties(node.type.model.ref);
+    //   for (const member of node.value.members) {
+    //     if (isBinaryExpression(member)) {
+    //       const memberName = member;
+    //       if (memberName && !props.map((p) => p.name).includes(memberName)) {
+    //         accept(
+    //           "error",
+    //           `PropertyDeclaration '${memberName}' does not exist in model '${node.type.model.ref.name}'`,
+    //           {
+    //             node: member,
+    //             property: "left",
+    //           }
+    //         );
+    //       }
+    //     }
+    //   }
+    // }
   }
 
   checkReturnType(

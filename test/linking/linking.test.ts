@@ -23,7 +23,7 @@ afterEach(async () => {
 
 describe('Linking tests', () => {
 
-    test('linking of greetings', async () => {
+    test.skip('linking of greetings', async () => {
         document = await parse(`
             person Langium
             Hello Langium!

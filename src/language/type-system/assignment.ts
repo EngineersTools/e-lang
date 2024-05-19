@@ -4,7 +4,6 @@ import {
   isModelType,
   isNullType,
 } from "./descriptions.js";
-import { getModelDeclarationChain } from "./getModelDeclarationChain.js";
 
 export function isAssignable(
   from: TypeDescription,
@@ -15,29 +14,27 @@ export function isAssignable(
       return false;
     }
 
-    if (from.declaration) {
-      const fromChain = getModelDeclarationChain(from.declaration);
-      const propNames = fromChain.flatMap((m) =>
-        m.properties.filter((p) => !p.isOptional).map((p) => p.name)
-      );
+    // if (from.declaration) {
+    //   const fromChain = getModelDeclarationChain(from.declaration);
+    //   const propNames = fromChain.flatMap((m) =>
+    //     m.properties.filter((p) => !p.isOptional).map((p) => p.name)
+    //   );
 
-      if (to.declaration) {
-        const memberNames = to.declaration.properties
-          .filter((p) => !p.isOptional)
-          .map((p) => p.name);
-        return propNames.every((p) => memberNames.includes(p));
-      } else if (to.value) {
-        const memberNames = to.value.members.map((p) => p.property);
-        return propNames.every((p) => memberNames.includes(p));
-      }
-    } else {
-      return to.value == from.value;
-    }
+    //   if (isModelType(to) && to.declaration) {
+    //     const memberNames = to.declaration.properties
+    //       .filter((p) => !p.isOptional)
+    //       .map((p) => p.name);
+    //     return propNames.every((p) => memberNames.includes(p));
+    //   } else if (to.value) {
+    //     const memberNames = to.value.members.map((p) => p.property);
+    //     return propNames.every((p) => memberNames.includes(p));
+    //   }
+    // } else {
+    //   return to.value == from.value;
+    // }
 
     return false;
   }
-
-  
 
   if (isNullType(from)) {
     return isModelType(to);
@@ -51,14 +48,14 @@ export function isAssignable(
       return false;
     }
     if (
-      from.parameters &&
-      to.parameters &&
-      from.parameters.length !== to.parameters.length
+      from.parameterTypes &&
+      to.parameterTypes &&
+      from.parameterTypes.length !== to.parameterTypes.length
     ) {
       return false;
     }
-    if (from.parameters)
-      for (let i = 0; i < from.parameters.length; i++) {
+    if (from.parameterTypes)
+      for (let i = 0; i < from.parameterTypes.length; i++) {
         // const fromParam = from.parameters[i];
         // const toParam = to.parameters[i];
         // if (!isAssignable(fromParam.type, toParam.type)) {

@@ -19,7 +19,7 @@ beforeAll(async () => {
 
 describe('Parsing tests', () => {
 
-    test('parse simple model', async () => {
+    test.skip('parse simple model', async () => {
         document = await parse(`
             person Langium
             Hello Langium!

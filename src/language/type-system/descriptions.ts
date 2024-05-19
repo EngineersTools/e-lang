@@ -4,47 +4,36 @@
  */
 
 import { AstNode } from "langium";
-import {
-  BooleanLiteral,
-  MeasurementLiteral,
-  ModelDeclaration,
-  ModelValue,
-  NullLiteral,
-  NumberLiteral,
-  ParameterDeclaration,
-  StringLiteral,
-  TypeReference,
-  UnitDeclaration,
-  UnitFamilyDeclaration,
-} from "../generated/ast.js";
-import { inferTypeRef } from "./infer.js";
-import { getCircularReplacer } from "../helpers.js";
 
 export type TypeDescription =
-  | TextType
-  | NumberType
   | BooleanType
-  | NullType
-  | MeasurementType
-  | ModelType
+  | EmptyListType
+  | ErrorType
   | FormulaType
-  | ProcedureType
+  | IntersectionType
   | LambdaType
-  | UnitFamilyType
-  | UnitType
   | ListType
-  | ErrorType;
+  | MeasurementType
+  | ModelMemberType
+  | ModelType
+  | NumberType
+  | NullType
+  | ParameterType
+  | ProcedureType
+  | TextType
+  | UnionType
+  | UnitConversionType
+  | UnitFamilyType
+  | UnitType;
 
 // STRING
 export interface TextType {
   readonly $type: "text";
-  readonly literal?: StringLiteral;
 }
 
-export function createTextType(literal?: StringLiteral): TextType {
+export function createTextType(): TextType {
   return {
     $type: "text",
-    literal,
   };
 }
 
@@ -55,13 +44,11 @@ export function isTextType(item: TypeDescription): item is TextType {
 // NUMBER
 export interface NumberType {
   readonly $type: "number";
-  readonly literal?: NumberLiteral;
 }
 
-export function createNumberType(literal?: NumberLiteral): NumberType {
+export function createNumberType(): NumberType {
   return {
     $type: "number",
-    literal,
   };
 }
 
@@ -72,13 +59,11 @@ export function isNumberType(item: TypeDescription): item is NumberType {
 // BOOLEAN
 export interface BooleanType {
   readonly $type: "boolean";
-  readonly literal?: BooleanLiteral;
 }
 
-export function createBooleanType(literal?: BooleanLiteral): BooleanType {
+export function createBooleanType(): BooleanType {
   return {
     $type: "boolean",
-    literal,
   };
 }
 
@@ -89,13 +74,11 @@ export function isBooleanType(item: TypeDescription): item is BooleanType {
 // NULL
 export interface NullType {
   readonly $type: "null";
-  readonly literal?: NullLiteral;
 }
 
-export function createNullType(literal?: NullLiteral): NullType {
+export function createNullType(): NullType {
   return {
     $type: "null",
-    literal,
   };
 }
 
@@ -106,15 +89,15 @@ export function isNullType(item: TypeDescription): item is NullType {
 // MEASUREMENT
 export interface MeasurementType {
   readonly $type: "measurement";
-  readonly literal?: MeasurementLiteral;
+  readonly unitFamilyType: UnitFamilyType;
 }
 
 export function createMeasurementType(
-  literal?: MeasurementLiteral
+  unitFamilyType: UnitFamilyType
 ): MeasurementType {
   return {
     $type: "measurement",
-    literal,
+    unitFamilyType,
   };
 }
 
@@ -124,18 +107,51 @@ export function isMeasurementType(
   return item.$type === "measurement";
 }
 
+// UNIT CONVERSION
+export interface UnitConversionType {
+  readonly $type: "unitConversion";
+  readonly from: UnitType;
+  readonly to: UnitType;
+  readonly conversionType: FormulaType | LambdaType;
+}
+
+export function createUnitConversionType(
+  from: UnitType,
+  to: UnitType,
+  conversionType: FormulaType | LambdaType
+): UnitConversionType {
+  return {
+    $type: "unitConversion",
+    from,
+    to,
+    conversionType,
+  };
+}
+
+export function isUnitConversionType(
+  item: TypeDescription
+): item is UnitConversionType {
+  return item.$type === "unitConversion";
+}
+
 // UNIT FAMILY
 export interface UnitFamilyType {
   readonly $type: "unitFamily";
-  readonly declaration: UnitFamilyDeclaration;
+  readonly name: string;
+  readonly unitTypes?: UnitType[];
+  readonly conversionTypes?: UnitConversionType[];
 }
 
 export function createUnitFamilyType(
-  declaration: UnitFamilyDeclaration
+  name: string,
+  unitTypes?: UnitType[],
+  conversionTypes?: UnitConversionType[]
 ): UnitFamilyType {
   return {
     $type: "unitFamily",
-    declaration,
+    name,
+    unitTypes,
+    conversionTypes,
   };
 }
 
@@ -148,13 +164,24 @@ export function isUnitFamilyType(
 // UNIT
 export interface UnitType {
   readonly $type: "unit";
-  readonly declaration: UnitDeclaration;
+  readonly unitName: string;
+  readonly unitFamilyType?: UnitFamilyType;
+  readonly unitDescription?: string;
+  readonly unitLongName?: string;
 }
 
-export function createUnitType(declaration: UnitDeclaration): UnitType {
+export function createUnitType(
+  unitName: string,
+  unitDescription?: string,
+  unitLongName?: string,
+  unitFamilyType?: UnitFamilyType
+): UnitType {
   return {
     $type: "unit",
-    declaration,
+    unitName,
+    unitFamilyType,
+    unitDescription,
+    unitLongName,
   };
 }
 
@@ -163,23 +190,43 @@ export function isUnitType(item: TypeDescription): item is UnitType {
 }
 
 // MODEL
-export interface ModelType {
-  readonly $type: "model";
-  readonly declaration?: ModelDeclaration;
-  readonly value?: ModelValue;
+
+export interface ModelMemberType {
+  readonly $type: "modelMember";
+  readonly typeDesc: TypeDescription;
 }
 
-export function createModelType(declaration: ModelDeclaration): ModelType {
+export function createModelMemberType(
+  typeDesc: TypeDescription
+): ModelMemberType {
   return {
-    $type: "model",
-    declaration,
+    $type: "modelMember",
+    typeDesc,
   };
 }
 
-export function createModelTypeFromValue(modelValue: ModelValue): ModelType {
+export function isModelMemberType(
+  item: TypeDescription
+): item is ModelMemberType {
+  return item.$type === "modelMember";
+}
+
+export type ModelTypeSource = "declaration" | "value";
+
+export interface ModelType {
+  readonly $type: "model";
+  readonly $source: ModelTypeSource;
+  readonly memberTypes: ModelMemberType[];
+}
+
+export function createModelType(
+  source: ModelTypeSource,
+  memberTypes: ModelMemberType[]
+): ModelType {
   return {
     $type: "model",
-    value: modelValue,
+    $source: source,
+    memberTypes,
   };
 }
 
@@ -187,21 +234,38 @@ export function isModelType(item: TypeDescription): item is ModelType {
   return item.$type === "model";
 }
 
+// PARAMETER
+export interface ParameterType {
+  readonly $type: "parameter";
+  readonly typeDescription: TypeDescription;
+}
+
+export function createParameterType(type: TypeDescription): ParameterType {
+  return {
+    $type: "parameter",
+    typeDescription: type,
+  };
+}
+
+export function isParameterType(item: TypeDescription): item is ParameterType {
+  return item.$type === "parameter";
+}
+
 // FORMULA
 export interface FormulaType {
   readonly $type: "formula";
   readonly returnType: TypeDescription;
-  readonly parameters?: ParameterDeclaration[];
+  readonly parameterTypes?: ParameterType[];
 }
 
 export function createFormulaType(
   returnType: TypeDescription,
-  parameters?: ParameterDeclaration[]
+  parameterTypes?: ParameterType[]
 ): FormulaType {
   return {
     $type: "formula",
-    parameters,
     returnType,
+    parameterTypes,
   };
 }
 
@@ -209,16 +273,22 @@ export function isFormulaType(item: TypeDescription): item is FormulaType {
   return item.$type === "formula";
 }
 
+export function isFormulaTypeWithParameters(
+  item: TypeDescription
+): item is FormulaType {
+  return isFormulaType(item) && item.parameterTypes !== undefined;
+}
+
 // PROCEDURE
 export interface ProcedureType {
   readonly $type: "procedure";
-  readonly parameters?: ParameterDeclaration[];
   readonly returnType?: TypeDescription;
+  readonly parameters?: ParameterType[];
 }
 
 export function createProcedureType(
   returnType?: TypeDescription,
-  parameters?: ParameterDeclaration[]
+  parameters?: ParameterType[]
 ): ProcedureType {
   return {
     $type: "procedure",
@@ -231,21 +301,57 @@ export function isProcedureType(item: TypeDescription): item is ProcedureType {
   return item.$type === "procedure";
 }
 
+export function isProcedureTypeWithReturnType(
+  item: TypeDescription
+): item is ProcedureType {
+  return isProcedureType(item) && item.returnType !== undefined;
+}
+
+export function isProcedureTypeWithParameters(
+  item: TypeDescription
+): item is ProcedureType {
+  return isProcedureType(item) && item.parameters !== undefined;
+}
+
+export function isProcedureTypeWithReturnTypeAndParameters(
+  item: TypeDescription
+): item is ProcedureType {
+  return (
+    isProcedureTypeWithReturnType(item) && isProcedureTypeWithParameters(item)
+  );
+}
+
+export function isProcedureTypeWithoutReturnTypeWithParameters(
+  item: TypeDescription
+): item is ProcedureType {
+  return (
+    !isProcedureTypeWithReturnType(item) && isProcedureTypeWithParameters(item)
+  );
+}
+
+export function isProcedureTypeWithReturnTypeWithoutParameters(
+  item: TypeDescription
+): item is ProcedureType {
+  return (
+    isProcedureTypeWithReturnType(item) && !isProcedureTypeWithParameters(item)
+  );
+}
+
 // LAMBDA
 export interface LambdaType {
   readonly $type: "lambda";
-  readonly parameters?: ParameterDeclaration[];
   readonly returnType?: TypeDescription;
+  readonly parameters?: ParameterType[];
 }
 
 export function createLambdaType(
   returnType?: TypeDescription,
-  parameters?: ParameterDeclaration[]
+  parameters?: ParameterType[]
 ): LambdaType {
   return {
     $type: "lambda",
-    parameters,
     returnType,
+    parameters,
   };
 }
 
@@ -253,7 +359,51 @@ export function isLambdaType(item: TypeDescription): item is LambdaType {
   return item.$type === "lambda";
 }
 
+export function isLambdaTypeWithReturnType(
+  item: TypeDescription
+): item is LambdaType {
+  return isLambdaType(item) && item.returnType !== undefined;
+}
+
+export function isLambdaTypeWithParameters(
+  item: TypeDescription
+): item is LambdaType {
+  return isLambdaType(item) && item.parameters !== undefined;
+}
+
+export function isLambdaTypeWithReturnTypeAndParameters(
+  item: TypeDescription
+): item is LambdaType {
+  return isLambdaTypeWithReturnType(item) && isLambdaTypeWithParameters(item);
+}
+
+export function isLambdaTypeWithoutReturnTypeWithParameters(
+  item: TypeDescription
+): item is LambdaType {
+  return !isLambdaTypeWithReturnType(item) && isLambdaTypeWithParameters(item);
+}
+
+export function isLambdaTypeWithReturnTypeWithoutParameters(
+  item: TypeDescription
+): item is LambdaType {
+  return isLambdaTypeWithReturnType(item) && !isLambdaTypeWithParameters(item);
+}
+
 // LIST
+export interface EmptyListType {
+  readonly $type: "emptyList";
+}
+
+export function createEmptyListType(): EmptyListType {
+  return {
+    $type: "emptyList",
+  };
+}
+
+export function isEmtpyListType(item: TypeDescription): item is EmptyListType {
+  return item.$type === "emptyList";
+}
+
 export interface ListType {
   readonly $type: "list";
   readonly itemType: TypeDescription;
@@ -289,41 +439,40 @@ export function isErrorType(item: TypeDescription): item is ErrorType {
   return item.$type === "error";
 }
 
-// TYPE REFERENCE TO TYPE DESCRIPTION
-export function typeReferenceToTypeDescription(
-  typeRef: TypeReference
-): TypeDescription {
-  return inferTypeRef(typeRef);
+// UNION TYPE
+export interface UnionType {
+  readonly $type: "unionType";
+  readonly types: TypeDescription[];
 }
 
-// TO STRING
-export function typeToString(item: TypeDescription): string {
-  if (isModelType(item)) {
-    return (
-      item.declaration?.name ??
-      JSON.stringify(item.value, getCircularReplacer())
-    );
-  } else if (
-    isFormulaType(item) ||
-    isProcedureType(item) ||
-    isLambdaType(item)
-  ) {
-    if (item.parameters) {
-      const params = item.parameters
-        .map((e) => {
-          if (e.type)
-            return `${e.name}: ${typeToString(
-              typeReferenceToTypeDescription(e.type)
-            )}`;
-          else return `${e.name}`;
-        })
-        .join(", ");
+export function createUnionType(...types: TypeDescription[]): UnionType {
+  return {
+    $type: "unionType",
+    types: Array.from(new Set(types.sort())),
+  };
+}
 
-      if (item.returnType)
-        return `(${params}) => ${typeToString(item.returnType)}`;
-      else return `(${params})`;
-    }
-  }
+export function isUnionType(item: TypeDescription): item is UnionType {
+  return item.$type === "unionType";
+}
 
-  return item.$type;
+// UNION INTERSECTION
+export interface IntersectionType {
+  readonly $type: "intersectionType";
+  readonly types: TypeDescription[];
+}
+
+export function createIntersectionType(
+  ...types: TypeDescription[]
+): IntersectionType {
+  return {
+    $type: "intersectionType",
+    types: Array.from(new Set(types.sort())),
+  };
+}
+
+export function isIntersectionType(
+  item: TypeDescription
+): item is IntersectionType {
+  return item.$type === "intersectionType";
 }

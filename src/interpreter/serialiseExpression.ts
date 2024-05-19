@@ -8,10 +8,8 @@ import {
   isModelValue,
   isProcedureDeclaration,
 } from "../language/generated/ast.js";
-import {
-  typeReferenceToTypeDescription,
-  typeToString,
-} from "../language/type-system/descriptions.js";
+import { inferType } from "../language/type-system/infer.js";
+import { typeToString } from "../language/type-system/typeToString.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { runExpression } from "./runExpression.js";
@@ -72,32 +70,28 @@ export async function serialiseExpression(
     const params = result.parameters
       .map((e) => {
         if (e.type)
-          return `${e.name}: ${typeToString(
-            typeReferenceToTypeDescription(e.type)
-          )}`;
+          return `${e.name}: ${typeToString(inferType(e.type, context.types))}`;
         else return `${e.name}`;
       })
       .join(", ");
 
     if (result.returnType)
       return `${result.name}(${params}) => ${typeToString(
-        typeReferenceToTypeDescription(result.returnType)
+        inferType(result.returnType, context.types)
       )}`;
     else return `${result.name}(${params})`;
   } else if (isLambdaDeclaration(result)) {
     const params = result.parameters
       .map((e) => {
         if (e.type)
-          return `${e.name}: ${typeToString(
-            typeReferenceToTypeDescription(e.type)
-          )}`;
+          return `${e.name}: ${typeToString(inferType(e.type, context.types))}`;
         else return `${e.name}`;
       })
       .join(", ");
 
     if (result.returnType)
       return `(${params}) => ${typeToString(
-        typeReferenceToTypeDescription(result.returnType)
+        inferType(result.returnType, context.types)
       )}`;
     else return `(${params})`;
   } else {

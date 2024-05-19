@@ -21,14 +21,6 @@ import {
   isStatementBlock,
   isUnitFamilyDeclaration,
 } from "../language/generated/ast.js";
-import {
-  createFormulaType,
-  createLambdaType,
-  createModelType,
-  createProcedureType,
-  createUnitFamilyType,
-  createUnitType,
-} from "../language/type-system/descriptions.js";
 import { inferType } from "../language/type-system/infer.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { runExpression } from "./runExpression.js";
@@ -76,21 +68,15 @@ export async function runElangStatement(
     context.variables.leave();
     context.types.leaveScope();
   } else if (isFormulaDeclaration(statement)) {
-    context.types.set(
+    context.types.setVariableType(
       statement.name,
-      createFormulaType(
-        inferType(statement, context.types),
-        statement.parameters
-      )
+      inferType(statement, context.types)
     );
     context.variables.push(statement.name, statement);
   } else if (isProcedureDeclaration(statement)) {
-    context.types.set(
+    context.types.setVariableType(
       statement.name,
-      createProcedureType(
-        inferType(statement, context.types),
-        statement.parameters
-      )
+      inferType(statement, context.types)
     );
     context.variables.push(statement.name, statement);
   } else if (isIfStatement(statement)) {
@@ -101,12 +87,9 @@ export async function runElangStatement(
       await runElangStatement(statement.elseBlock, context, returnFn);
     }
   } else if (isLambdaDeclaration(statement)) {
-    context.types.set(
+    context.types.setVariableType(
       statement.$type,
-      createLambdaType(
-        inferType(statement, context.types),
-        statement.parameters
-      )
+      inferType(statement, context.types)
     );
     // This caters for the case where the lambda is
     // immediately invoked
@@ -124,7 +107,7 @@ export async function runElangStatement(
         const argValue = args[i] ?? null;
         context.variables.push(names[i], argValue);
         const type = inferType(statement.parameters[i], context.types);
-        context.types.set(statement.parameters[i].name, type);
+        context.types.setVariableType(statement.parameters[i].name, type);
       }
 
       await runElangStatement(statement.body, context, returnFn);
@@ -139,7 +122,10 @@ export async function runElangStatement(
       if (element.parameters == condition) context.log("Found it");
     }
   } else if (isModelDeclaration(statement)) {
-    context.types.set(statement.name, createModelType(statement));
+    context.types.setVariableType(
+      statement.name,
+      inferType(statement, context.types)
+    );
   } else if (
     isConstantDeclaration(statement) ||
     isMutableDeclaration(statement)
@@ -147,10 +133,10 @@ export async function runElangStatement(
     await runVariableDeclaration(statement, context);
   } else if (isParameterDeclaration(statement)) {
     const type = inferType(statement, context.types);
-    context.types.set(statement.name, type);
+    context.types.setVariableType(statement.name, type);
   } else if (isPropertyDeclaration(statement)) {
     const type = inferType(statement, context.types);
-    context.types.set(statement.name, type);
+    context.types.setVariableType(statement.name, type);
   } else if (isPrintStatement(statement)) {
     if (isExpression(statement.value)) {
       context.log(await serialiseExpression(statement.value, context));
@@ -158,7 +144,10 @@ export async function runElangStatement(
       context.log("This statement or expression cannot be printed.");
     }
   } else if (isReturnStatement(statement)) {
-    context.types.set(statement.$type, inferType(statement, context.types));
+    context.types.setVariableType(
+      statement.$type,
+      inferType(statement, context.types)
+    );
 
     const result = statement.value
       ? await runExpression(statement.value, context)
@@ -186,11 +175,17 @@ export async function runElangStatement(
   } else if (isModelMemberCall(statement)) {
     await runExpression(statement, context);
   } else if (isUnitFamilyDeclaration(statement)) {
-    context.types.set(statement.name, createUnitFamilyType(statement));
+    context.types.setVariableType(
+      statement.name,
+      inferType(statement, context.types)
+    );
 
     if (statement.units && statement.units.length > 0) {
       for (const unit of statement.units) {
-        context.types.set(unit.name, createUnitType(unit));
+        context.types.setVariableType(
+          unit.name,
+          inferType(unit, context.types)
+        );
       }
     }
 
