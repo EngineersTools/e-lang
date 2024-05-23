@@ -22,7 +22,7 @@ entry ElangProgram:
 Domain:
     'domain' name=ID
 ;
- 
+
 Import:
     'import' importSource=STRING
 ;
@@ -40,12 +40,12 @@ Statement:
     ReturnStatement |
     StatementBlock |
     UnitFamilyDeclaration |
-    VariableDeclaration 
+    VariableDeclaration
 ;
 
 VariableDeclaration returns NamedElement:
-    {infer ConstantDeclaration} (export?='export')? 'const' name=ID (':' type=TypeReference)? (assignment?='=' value=(Expression))? |
-    {infer MutableDeclaration} (export?='export')? 'var' name=ID (':' type=TypeReference)? (assignment?='=' value=(Expression))?
+    {infer ConstantDeclaration} (export?='export')? 'const' name=ID (':' type=TypeReference)? (assignment?='=' value=(Expression | LambdaDeclaration))? |
+    {infer MutableDeclaration} (export?='export')? 'var' name=ID (':' type=TypeReference)? (assignment?='=' value=(Expression | LambdaDeclaration))?
 ;
 
 LambdaDeclaration:
@@ -53,8 +53,7 @@ LambdaDeclaration:
     (':' returnType=TypeReference)? 
     '=>' 
     body=(Expression | StatementBlock) 
-    (explicitOperationCall?=
-        '(' 
+    (explicitOperationCall?='(' 
             (arguments+=Expression (',' arguments+=Expression)*)?
         ')'
     )?
@@ -117,9 +116,7 @@ type NamedElement = ConstantDeclaration |
                     ProcedureDeclaration | 
                     ParameterDeclaration |
                     UnitFamilyDeclaration |
-                    UnitDeclaration
-;
-
+                    UnitDeclaration;
 type Exportable = ConstantDeclaration | 
                     MutableDeclaration |
                     ModelDeclaration | 

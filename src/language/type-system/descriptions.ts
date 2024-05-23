@@ -217,16 +217,19 @@ export interface ModelType {
   readonly $type: "model";
   readonly $source: ModelTypeSource;
   readonly memberTypes: ModelMemberType[];
+  readonly parentTypes?: ModelType[];
 }
 
 export function createModelType(
   source: ModelTypeSource,
-  memberTypes: ModelMemberType[]
+  memberTypes: ModelMemberType[],
+  parentTypes?: ModelType[]
 ): ModelType {
   return {
     $type: "model",
     $source: source,
     memberTypes,
+    parentTypes,
   };
 }
 

@@ -1,42 +1,44 @@
 import { AstNode } from "langium";
 import {
-    ConstantDeclaration,
-    Expression,
-    FormulaDeclaration,
-    IfStatement,
-    LambdaDeclaration,
-    ListValue,
-    MatchStatement,
-    ModelDeclaration,
-    ModelMemberAssignment,
-    ModelValue,
-    MutableDeclaration,
-    NamedElement,
-    PrintStatement,
-    ProcedureDeclaration,
-    ReturnStatement,
-    Statement,
-    StatementBlock,
-    UnitFamilyDeclaration,
-    isConstantDeclaration,
-    isElangProgram,
-    isExpression,
-    isForStatement,
-    isFormulaDeclaration,
-    isIfStatement,
-    isLambdaDeclaration,
-    isListValue,
-    isMatchStatement,
-    isModelDeclaration,
-    isModelMemberAssignment,
-    isModelValue,
-    isMutableDeclaration,
-    isPrintStatement,
-    isProcedureDeclaration,
-    isReturnStatement,
-    isStatementBlock,
-    isUnitDeclaration,
-    isUnitFamilyDeclaration
+  ConstantDeclaration,
+  Expression,
+  FormulaDeclaration,
+  IfStatement,
+  LambdaDeclaration,
+  LambdaType,
+  ListValue,
+  MatchStatement,
+  ModelDeclaration,
+  ModelMemberAssignment,
+  ModelValue,
+  MutableDeclaration,
+  NamedElement,
+  PrintStatement,
+  ProcedureDeclaration,
+  ReturnStatement,
+  Statement,
+  StatementBlock,
+  UnitFamilyDeclaration,
+  isConstantDeclaration,
+  isElangProgram,
+  isExpression,
+  isForStatement,
+  isFormulaDeclaration,
+  isIfStatement,
+  isLambdaDeclaration,
+  isLambdaType,
+  isListValue,
+  isMatchStatement,
+  isModelDeclaration,
+  isModelMemberAssignment,
+  isModelValue,
+  isMutableDeclaration,
+  isPrintStatement,
+  isProcedureDeclaration,
+  isReturnStatement,
+  isStatementBlock,
+  isUnitDeclaration,
+  isUnitFamilyDeclaration,
 } from "../generated/ast.js";
 import { TypeEnvironment } from "./TypeEnvironment.class.js";
 import { ListType } from "./descriptions.js";
@@ -76,6 +78,8 @@ export function addStatement(stmt: Statement, env: TypeEnvironment): void {
     addIfStatement(stmt, env);
   } else if (isLambdaDeclaration(stmt)) {
     addLambdaDeclaration(stmt, env);
+  } else if (isLambdaType(stmt)) {
+    addLambdaType(stmt, env);
   } else if (isMatchStatement(stmt)) {
     addMatchStatement(stmt, env);
   } else if (isModelDeclaration(stmt)) {
@@ -197,6 +201,7 @@ export function addProcedureDeclaration(
 
   addStatement(prc.body, env);
 }
+
 export function addLambdaDeclaration(
   lmb: LambdaDeclaration,
   env: TypeEnvironment
@@ -215,6 +220,21 @@ export function addLambdaDeclaration(
   }
 
   addStatement(lmb.body, env);
+}
+
+export function addLambdaType(lmb: LambdaType, env: TypeEnvironment): void {
+  if (lmb.returnType) {
+    const lambdaName = `Lambda_${env.getTypeRegistryVarIndex()}`;
+    env.increaseTypeRegistryVarIndex();
+    env.setVariableType(lambdaName, inferType(lmb, env));
+  }
+
+  if (lmb.parameters) {
+    env.enterScope();
+    lmb.parameters.forEach((p) => {
+      env.setVariableType(p.name, inferType(p.type, env));
+    });
+  }
 }
 
 export function addIfStatement(stmt: IfStatement, env: TypeEnvironment): void {

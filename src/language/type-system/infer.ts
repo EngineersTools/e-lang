@@ -9,8 +9,10 @@ import {
   ListValue,
   MeasurementLiteral,
   MeasurementType,
+  ModelDeclaration,
   ModelMemberAssignment,
   ModelValue,
+  MutableDeclaration,
   ParameterDeclaration,
   PropertyDeclaration,
   TypeReference,
@@ -31,6 +33,7 @@ import {
   isModelMemberAssignment,
   isModelMemberCall,
   isModelValue,
+  isMutableDeclaration,
   isNullLiteral,
   isNumberLiteral,
   isParameterDeclaration,
@@ -46,18 +49,23 @@ import {
 import { TypeEnvironment } from "./TypeEnvironment.class.js";
 import {
   FormulaType,
+  LambdaType as LambdaTypeDescription,
   ModelMemberType,
+  ModelType,
   ParameterType,
   TypeDescription,
   UnitConversionType,
+  UnitFamilyType,
   UnitType,
-  LambdaType as LambdaTypeDescription,
   createBooleanType,
+  createEmptyListType,
   createErrorType,
   createLambdaType,
   createListType,
+  createMeasurementType,
   createModelMemberType,
   createModelType,
+  createNullType,
   createNumberType,
   createParameterType,
   createTextType,
@@ -65,12 +73,8 @@ import {
   createUnitConversionType,
   createUnitFamilyType,
   createUnitType,
-  createMeasurementType,
-  UnitFamilyType,
-  createNullType,
-  createEmptyListType,
-  isTextType,
   isNumberType,
+  isTextType,
 } from "./descriptions.js";
 
 export function inferType(
@@ -85,6 +89,8 @@ export function inferType(
 
   if (isConstantDeclaration(node)) {
     type = inferConstantDeclaration(node, env);
+  } else if (isMutableDeclaration(node)) {
+    type = inferMutableDeclaration(node, env);
   } else if (isTypeReference(node)) {
     type = inferTypeReference(node, env);
   } else if (isExpression(node)) {
@@ -105,6 +111,8 @@ export function inferType(
     type = inferLambda(node, env);
   } else if (isLambdaDeclaration(node)) {
     type = inferLambda(node, env);
+  } else if (isModelDeclaration(node)) {
+    type = inferModelDeclaration(node, env);
   }
 
   if (!type) {
@@ -116,6 +124,22 @@ export function inferType(
 
 export function inferConstantDeclaration(
   node: ConstantDeclaration,
+  env: TypeEnvironment
+): TypeDescription {
+  if (node.type) {
+    return inferType(node.type, env);
+  } else if (node.value) {
+    return inferType(node.value, env);
+  } else {
+    return createErrorType(
+      "The type of this variable cannot be inferred. Assign a type or a value to it.",
+      node
+    );
+  }
+}
+
+export function inferMutableDeclaration(
+  node: MutableDeclaration,
   env: TypeEnvironment
 ): TypeDescription {
   if (node.type) {
@@ -335,6 +359,20 @@ export function inferExpression(
   } else {
     return createErrorType("Could not infer type for expression", expr);
   }
+}
+
+export function inferModelDeclaration(
+  expr: ModelDeclaration,
+  env: TypeEnvironment
+): TypeDescription {
+  const propertyTypes = expr.properties.map((prop) =>
+    inferType(prop, env)
+  ) as ModelMemberType[];
+  const parentTypes = expr.parentTypes
+    .filter((p) => p.ref && isModelDeclaration(p.ref))
+    .map((m) => inferType(m.ref, env) as ModelType);
+
+  return createModelType("declaration", propertyTypes, parentTypes);
 }
 
 export function inferModelValue(

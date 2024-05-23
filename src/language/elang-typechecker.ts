@@ -2,6 +2,10 @@ import { AstNode, ValidationAcceptor, ValidationChecks } from "langium";
 import { ElangServices } from "./elang-module.js";
 import { ElangAstType, ElangProgram, isElangProgram } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
+import {
+  buildTypeEnvironment,
+  closeTypeEnvironment,
+} from "./type-system/buildTypeEnvironment.function.js";
 
 export function registerTypechecks(services: ElangServices) {
   const registry = services.validation.ValidationRegistry;
@@ -33,8 +37,13 @@ export class ElangTypechecker {
       //   this.typecheckStatement(env, stmt, accept);
       // });
 
-      console.dir(env, { depth: 3 });
+      buildTypeEnvironment(node, env);
+
+      console.clear();
+      console.dir(env, { depth: 5 });
     }
+
+    closeTypeEnvironment(env);
   }
 
   // typecheckStatement(

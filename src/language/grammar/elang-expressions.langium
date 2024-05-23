@@ -47,7 +47,6 @@ ModelMemberCall infers Expression:
     )*
 ;
 
-
 PrimaryExpression infers Expression:
     '(' Expression ')' |
     StringLiteral |
@@ -76,7 +75,7 @@ FeatureCall infers Expression:
 ListAccess infers Expression:
     {infer ModelMemberCall}
 	element=[NamedElement:ID]
-    (accessElement?= '[' 
+    (accessElement?='[' 
         (
             index=(NUM | Expression)
         ) 
