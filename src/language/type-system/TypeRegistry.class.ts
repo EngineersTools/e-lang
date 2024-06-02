@@ -10,20 +10,23 @@ export class TypeRegistry {
   constructor() {
     this.varIndex = 0;
     this.stack = [];
-    this._registerGlobalTypes();
+    this.globalTypesRegistered = false;
   }
-
   varIndex: number;
 
   // Stores the name of the type and its type description
   private stack: Map<string, TypeDescription>[];
 
-  private _registerGlobalTypes() {
-    this.enterScope(); // The global scope
-    this.set("text", createTextType());
-    this.set("number", createNumberType());
-    this.set("boolean", createBooleanType());
-    this.set("null", createNullType());
+  private globalTypesRegistered;
+
+  registerGlobalTypes() {
+    if (!this.globalTypesRegistered) {
+      this.set("text", createTextType());
+      this.set("number", createNumberType());
+      this.set("boolean", createBooleanType());
+      this.set("null", createNullType());
+      this.globalTypesRegistered = true;
+    }
   }
 
   numberOfScopes(): number {

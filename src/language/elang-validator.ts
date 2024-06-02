@@ -11,13 +11,12 @@ import {
   ModelMemberAssignment,
   MutableDeclaration,
   ProcedureDeclaration,
-  PropertyDeclaration,
   StatementBlock,
   TypeReference,
   UnaryExpression,
   isConstantDeclaration,
   isModelValue,
-  isReturnStatement,
+  isReturnStatement
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import { isAssignable } from "./type-system/assignment.js";
@@ -110,42 +109,6 @@ export class ElangValidator {
           });
         }
       }
-    }
-  }
-
-  checkModelPropertiesAreNotDuplicated(
-    prop: PropertyDeclaration,
-    accept: ValidationAcceptor
-  ): void {
-    if (
-      prop.$container &&
-      prop.$container.$type == "ModelDeclaration" &&
-      prop.$container.parentTypes.length > 0
-    ) {
-      const model = prop.$container;
-      const parentModels = model.parentTypes;
-
-      parentModels.forEach((parentModel) => {
-        if (parentModel.ref) {
-          const parentModelPropertiesNames = parentModel.ref?.properties.map(
-            (p) => p.name
-          );
-
-          if (
-            parentModelPropertiesNames.includes(prop.name) &&
-            !prop.override
-          ) {
-            accept(
-              "error",
-              `This property already exists in parent model '${parentModel.ref.name}', use the 'override' keyword if this is intentional`,
-              {
-                node: prop,
-                property: "name",
-              }
-            );
-          }
-        }
-      });
     }
   }
 

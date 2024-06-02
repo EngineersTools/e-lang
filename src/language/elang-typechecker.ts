@@ -1,17 +1,31 @@
-import { AstNode, ValidationAcceptor, ValidationChecks } from "langium";
+import { ValidationAcceptor, ValidationChecks } from "langium";
 import { ElangServices } from "./elang-module.js";
-import { ElangAstType, ElangProgram, isElangProgram } from "./generated/ast.js";
+import {
+  ConstantDeclaration,
+  ElangAstType,
+  ElangProgram,
+  MutableDeclaration,
+  PropertyDeclaration,
+  Statement,
+  isConstantDeclaration,
+  isModelDeclaration,
+  isMutableDeclaration,
+} from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import {
-  buildTypeEnvironment,
-  closeTypeEnvironment,
-} from "./type-system/buildTypeEnvironment.function.js";
+  addStatement,
+  registerModelDeclaration,
+} from "./type-system/TypeEnvironment.functions.js";
+import { getModelDeclarationParentsChain } from "./type-system/getModelDeclarationChain.js";
+import { isAssignable } from "./type-system/assignment.js";
+import { inferType } from "./type-system/infer.js";
 
 export function registerTypechecks(services: ElangServices) {
   const registry = services.validation.ValidationRegistry;
   const typesValidator = services.validation.ElangTypechecker;
   const checks: ValidationChecks<ElangAstType> = {
     ElangProgram: typesValidator.typecheckProgram,
+    PropertyDeclaration: typesValidator.checkModelPropertiesAreNotDuplicated,
   };
   registry.register(checks, typesValidator);
 }
@@ -22,56 +36,45 @@ export class ElangTypechecker {
 
     env.enterScope();
 
-    this.typecheckNode(env, program, accept);
+    program.statements.forEach((stmt) => {
+      this.typecheckStatement(env, stmt, accept);
+    });
+
+    console.dir(env, { depth: 6 });
 
     env.leaveScope();
   }
 
-  typecheckNode(
+  typecheckStatement(
     env: TypeEnvironment,
-    node: AstNode,
+    stmt: Statement,
     accept: ValidationAcceptor
-  ) {
-    if (isElangProgram(node)) {
-      // node.statements.forEach((stmt) => {
-      //   this.typecheckStatement(env, stmt, accept);
-      // });
-
-      buildTypeEnvironment(node, env);
-
-      console.clear();
-      console.dir(env, { depth: 5 });
+  ): void {
+    if (isModelDeclaration(stmt)) {
+      registerModelDeclaration(stmt, env);
+    } else if (isConstantDeclaration(stmt) || isMutableDeclaration(stmt)) {
+      this.typecheckVariableDeclarationStatement(env, stmt, accept);
     }
 
-    closeTypeEnvironment(env);
+    // if (isExpression(stmt)) {
+    //   this.typecheckExpression(env, stmt, accept);
+    // } else
+    // if (isForStatement(stmt)) {
+    // } else
+    //if (isFormulaDeclaration(stmt)) {
+    // } else if (isIfStatement(stmt)) {
+    // } else if (isLambdaDeclaration(stmt)) {
+    // } else if (isMatchStatement(stmt)) {
+    // } else  else if (isPrintStatement(stmt)) {
+    // } else if (isProcedureDeclaration(stmt)) {
+    // } else if (isReturnStatement(stmt)) {
+    // } else if (isStatementBlock(stmt)) {
+    //   env.enterScope();
+    //   stmt.statements.forEach((s) => this.typecheckStatement(env, s, accept));
+    //   env.leaveScope();
+    // } else if (isUnitFamilyDeclaration(stmt)) {
+    // } else
   }
-
-  // typecheckStatement(
-  //   env: TypeEnvironment,
-  //   stmt: Statement,
-  //   accept: ValidationAcceptor
-  // ): void {
-  //   if (isExpression(stmt)) {
-  //     this.typecheckExpression(env, stmt, accept);
-  //   } else if (isForStatement(stmt)) {
-  //   } else if (isFormulaDeclaration(stmt)) {
-  //   } else if (isIfStatement(stmt)) {
-  //   } else if (isLambdaDeclaration(stmt)) {
-  //   } else if (isMatchStatement(stmt)) {
-  //   } else if (isModelDeclaration(stmt)) {
-  //     env.setVariableType(stmt.name, createModelTypeFromDeclaration(stmt));
-  //   } else if (isPrintStatement(stmt)) {
-  //   } else if (isProcedureDeclaration(stmt)) {
-  //   } else if (isReturnStatement(stmt)) {
-  //   } else if (isStatementBlock(stmt)) {
-  //     env.enterScope();
-  //     stmt.statements.forEach((s) => this.typecheckStatement(env, s, accept));
-  //     env.leaveScope();
-  //   } else if (isUnitFamilyDeclaration(stmt)) {
-  //   } else if (isConstantDeclaration(stmt) || isMutableDeclaration(stmt)) {
-  //     this.typecheckVariableDeclarationStatement(env, stmt, accept);
-  //   }
-  // }
 
   // typecheckExpression(
   //   env: TypeEnvironment,
@@ -82,54 +85,96 @@ export class ElangTypechecker {
   //   accept("info", exprType.$type, { node: exp });
   // }
 
-  // typecheckVariableDeclarationStatement(
-  //   env: TypeEnvironment,
-  //   stmt: ConstantDeclaration | MutableDeclaration,
-  //   accept: ValidationAcceptor
-  // ) {
-  //   if (stmt.assignment && stmt.type && stmt.value) {
-  //     const assignedType = inferType(stmt.type, env);
-  //     const exprType = inferType(stmt.value, env);
-  //     env.setVariableType(stmt.name, assignedType);
+  checkModelPropertiesAreNotDuplicated(
+    prop: PropertyDeclaration,
+    accept: ValidationAcceptor
+  ): void {
+    if (isModelDeclaration(prop.$container)) {
+      const model = prop.$container;
+      const parentModels = getModelDeclarationParentsChain(model);
 
-  //     if (isErrorType(assignedType)) {
-  //       accept("error", assignedType.message, {
-  //         node: stmt,
-  //         property: "type",
-  //       });
-  //     }
+      parentModels.forEach((parentModel) => {
+        if (parentModel) {
+          const parentModelPropertiesNames = parentModel.properties.map(
+            (p) => p.name
+          );
 
-  //     if (isErrorType(exprType)) {
-  //       accept("error", exprType.message, {
-  //         node: stmt,
-  //         property: "value",
-  //       });
-  //     }
+          if (
+            parentModelPropertiesNames.includes(prop.name) &&
+            !prop.override
+          ) {
+            accept(
+              "error",
+              `This property already exists in parent model '${parentModel.name}', use the 'override' keyword if this is intentional`,
+              {
+                node: prop,
+                property: "name",
+              }
+            );
+          }
+        }
+      });
+    }
+  }
 
-  //     if (isModelType(assignedType) || isModelType(exprType)) {
-  //       this.checkModelAssignment(assignedType, exprType, env, accept);
-  //     }
+  typecheckVariableDeclarationStatement(
+    env: TypeEnvironment,
+    stmt: ConstantDeclaration | MutableDeclaration,
+    accept: ValidationAcceptor
+  ) {
+    addStatement(stmt, env);
 
-  //     if (assignedType.$type !== exprType.$type) {
-  //       accept(
-  //         "error",
-  //         `Type mismatch. Value of type '${exprType.$type}' cannot be assigned to a variable of type '${assignedType.$type}'.`,
-  //         { node: stmt, property: "value" }
-  //       );
-  //     }
-  //   } else if (stmt.assignment && stmt.value) {
-  //     const exprType = inferType(stmt.value, env);
-  //     env.setVariableType(stmt.name, exprType);
-  //   } else if (stmt.type) {
-  //     const assignedType = inferType(stmt.type, env);
-  //     env.setVariableType(stmt.name, assignedType);
-  //   } else if (!stmt.assignment && !stmt.type && !stmt.value) {
-  //     accept("error", "No type assigned to this variable", {
-  //       node: stmt,
-  //       property: "name",
-  //     });
-  //   }
-  // }
+    if (stmt.assignment && stmt.type && stmt.value) {
+      const assignedType = env.getVariableType(stmt.name);
+      const exprType = inferType(stmt.value, env);
+
+      if (assignedType === undefined) {
+        accept("error", "No type assigned to this variable", {
+          node: stmt,
+          property: "name",
+        });
+      } else if (!isAssignable(assignedType, exprType)) {
+        accept("error", "Type mismatch", { node: stmt, property: "value" });
+      }
+
+      // env.setVariableType(stmt.name, assignedType);
+      // if (isErrorType(assignedType)) {
+      //   accept("error", assignedType.message, {
+      //     node: stmt,
+      //     property: "type",
+      //   });
+      // }
+      // if (isErrorType(exprType)) {
+      //   accept("error", exprType.message, {
+      //     node: stmt,
+      //     property: "value",
+      //   });
+      // }
+      // if (isModelType(assignedType) || isModelType(exprType)) {
+      //   this.checkModelAssignment(assignedType, exprType, env, accept);
+      // }
+      // if (assignedType.$type !== exprType.$type) {
+      //   accept(
+      //     "error",
+      //     `Type mismatch. Value of type '${exprType.$type}' cannot be assigned to a variable of type '${assignedType.$type}'.`,
+      //     { node: stmt, property: "value" }
+      //   );
+      // }
+    }
+
+    // else if (stmt.assignment && stmt.value) {
+    //   const exprType = inferType(stmt.value, env);
+    //   env.setVariableType(stmt.name, exprType);
+    // } else if (stmt.type) {
+    //   const assignedType = inferType(stmt.type, env);
+    //   env.setVariableType(stmt.name, assignedType);
+    // } else if (!stmt.assignment && !stmt.type && !stmt.value) {
+    //   accept("error", "No type assigned to this variable", {
+    //     node: stmt,
+    //     property: "name",
+    //   });
+    // }
+  }
 
   // checkModelAssignment(
   //   declaredModel: TypeDescription,

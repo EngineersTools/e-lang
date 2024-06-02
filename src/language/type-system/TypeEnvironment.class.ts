@@ -3,17 +3,18 @@ import { TypeDescription } from "./descriptions.js";
 
 export class TypeEnvironment {
   constructor() {
-    this.typeRegistry = new TypeRegistry();
     this.stack = [];
-    this._registerGlobalVariables();
+    this.typeRegistry = new TypeRegistry();
+    this._initialiseTypeEnvironment();
   }
 
   private typeRegistry: TypeRegistry;
 
   private stack: Map<string, TypeDescription>[];
 
-  private _registerGlobalVariables() {
+  private _initialiseTypeEnvironment() {
     this.enterScope(); // The global scope
+    this.typeRegistry.registerGlobalTypes();
   }
 
   numberOfScopes(): number {

@@ -42,15 +42,13 @@ import {
 } from "../generated/ast.js";
 import { TypeEnvironment } from "./TypeEnvironment.class.js";
 import { ListType } from "./descriptions.js";
-import { inferType } from "./infer.js";
+import { inferModelDeclaration, inferType } from "./infer.js";
 
 export function buildTypeEnvironment(
   ast: AstNode,
   env: TypeEnvironment = new TypeEnvironment()
 ): TypeEnvironment {
   if (isElangProgram(ast)) {
-    env.enterScope();
-
     for (const stmt of ast.statements) {
       addStatement(stmt, env);
     }
@@ -83,7 +81,7 @@ export function addStatement(stmt: Statement, env: TypeEnvironment): void {
   } else if (isMatchStatement(stmt)) {
     addMatchStatement(stmt, env);
   } else if (isModelDeclaration(stmt)) {
-    addModelDeclaration(stmt, env);
+    registerModelDeclaration(stmt, env);
   } else if (isPrintStatement(stmt)) {
     addPrintStatement(stmt, env);
   } else if (isProcedureDeclaration(stmt)) {
@@ -129,22 +127,19 @@ export function addStatementBlock(
   block: StatementBlock,
   env: TypeEnvironment
 ): void {
-  env.enterScope();
   block.statements.forEach((s) => addStatement(s, env));
 }
 
-export function addModelDeclaration(
+export function registerModelDeclaration(
   mdl: ModelDeclaration,
   env: TypeEnvironment
 ): void {
-  env.enterScope();
-  env.registerType(mdl.name, inferType(mdl, env));
+  env.registerType(mdl.name, inferModelDeclaration(mdl, env));
 }
 
 export function addModelValue(mdl: ModelValue, env: TypeEnvironment): void {
   const modelName = `Model_${env.getTypeRegistryVarIndex()}`;
   env.increaseTypeRegistryVarIndex();
-  env.enterScope();
   env.registerType(modelName, inferType(mdl, env));
 }
 
@@ -156,7 +151,6 @@ export function addModelMemberAssignment(
 }
 
 export function addListType(item: NamedElement, env: TypeEnvironment): void {
-  env.enterScope();
   const itemType = inferType(item, env);
   const listName = `List_${itemType.$type}`;
   const listType = inferType(item, env);
@@ -164,7 +158,6 @@ export function addListType(item: NamedElement, env: TypeEnvironment): void {
 }
 
 export function addListValue(lst: ListValue, env: TypeEnvironment): void {
-  env.enterScope();
   const lstType = inferType(lst, env) as ListType;
   const listName = `List_${lstType.itemType.$type}`;
   env.registerType(listName, lstType);
@@ -177,7 +170,6 @@ export function addFormulaDeclaration(
   env.setVariableType(fmr.name, inferType(fmr, env));
 
   if (fmr.parameters) {
-    env.enterScope();
     fmr.parameters.forEach((p) => {
       env.setVariableType(p.name, inferType(p.type, env));
     });
@@ -193,7 +185,6 @@ export function addProcedureDeclaration(
   if (prc.returnType) env.setVariableType(prc.name, inferType(prc, env));
 
   if (prc.parameters) {
-    env.enterScope();
     prc.parameters.forEach((p) => {
       env.setVariableType(p.name, inferType(p.type, env));
     });
@@ -213,7 +204,6 @@ export function addLambdaDeclaration(
   }
 
   if (lmb.parameters) {
-    env.enterScope();
     lmb.parameters.forEach((p) => {
       env.setVariableType(p.name, inferType(p.type, env));
     });
@@ -230,7 +220,6 @@ export function addLambdaType(lmb: LambdaType, env: TypeEnvironment): void {
   }
 
   if (lmb.parameters) {
-    env.enterScope();
     lmb.parameters.forEach((p) => {
       env.setVariableType(p.name, inferType(p.type, env));
     });
@@ -246,7 +235,6 @@ export function addMatchStatement(
   stmt: MatchStatement,
   env: TypeEnvironment
 ): void {
-  env.enterScope();
   stmt.options.forEach((opt) => {
     addStatement(opt.body, env);
   });
@@ -273,7 +261,6 @@ export function addUnitFamilyDeclaration(
   env.registerType(`number_[${unitFamily.name}]`, inferType(unitFamily, env));
 
   if (unitFamily.units && unitFamily.units.length > 0) {
-    env.enterScope();
     unitFamily.units.forEach((unit) => {
       env.registerType(unit.name, inferType(unit, env));
     });

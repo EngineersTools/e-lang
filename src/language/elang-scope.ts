@@ -52,7 +52,7 @@ export class ElangScopeProvider extends DefaultScopeProvider {
       const previousType = inferType(previous, this.types);
 
       if (isModelType(previousType)) {
-        return previousType !== undefined
+        return previousType !== undefined && previousType.$source === "value"
           ? this.scopeMemberTypes(previousType.memberTypes)
           : super.getScope(context);
       }

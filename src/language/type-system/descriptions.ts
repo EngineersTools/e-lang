@@ -193,14 +193,17 @@ export function isUnitType(item: TypeDescription): item is UnitType {
 
 export interface ModelMemberType {
   readonly $type: "modelMember";
+  readonly name: string;
   readonly typeDesc: TypeDescription;
 }
 
 export function createModelMemberType(
+  name: string,
   typeDesc: TypeDescription
 ): ModelMemberType {
   return {
     $type: "modelMember",
+    name,
     typeDesc,
   };
 }
@@ -220,7 +223,7 @@ export interface ModelType {
   readonly parentTypes?: ModelType[];
 }
 
-export function createModelType(
+export function createModelTypeDescription(
   source: ModelTypeSource,
   memberTypes: ModelMemberType[],
   parentTypes?: ModelType[]

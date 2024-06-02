@@ -64,7 +64,7 @@ import {
   createListType,
   createMeasurementType,
   createModelMemberType,
-  createModelType,
+  createModelTypeDescription,
   createNullType,
   createNumberType,
   createParameterType,
@@ -177,7 +177,7 @@ export function inferTypeReference(
     const memberTypes = typeRef.model.ref.properties.map((member) =>
       inferType(member, env)
     ) as ModelMemberType[];
-    resolvedType = createModelType("declaration", memberTypes);
+    resolvedType = createModelTypeDescription("declaration", memberTypes);
   } else if (isMeasurementType(typeRef)) {
     resolvedType = inferMeasurement(typeRef, env);
   } else {
@@ -237,7 +237,19 @@ export function inferPropertyDeclaration(
   expr: PropertyDeclaration,
   env: TypeEnvironment
 ): TypeDescription {
-  return createModelMemberType(inferType(expr.type, env));
+  if (expr.type.type) {
+    const propType = env.getRegisteredType(expr.type.type);
+    if (propType) {
+      return createModelMemberType(expr.name, propType);
+    }
+  } else if (expr.type.model && expr.type.model.ref) {
+    const propType = env.getRegisteredType(expr.type.model.ref.name);
+    if (propType) {
+      return createModelMemberType(expr.name, propType);
+    }
+  }
+
+  return createErrorType("Could not infer property type", expr);
 }
 
 export function inferMeasurement(
@@ -366,13 +378,14 @@ export function inferModelDeclaration(
   env: TypeEnvironment
 ): TypeDescription {
   const propertyTypes = expr.properties.map((prop) =>
-    inferType(prop, env)
+    inferPropertyDeclaration(prop, env)
   ) as ModelMemberType[];
+
   const parentTypes = expr.parentTypes
     .filter((p) => p.ref && isModelDeclaration(p.ref))
     .map((m) => inferType(m.ref, env) as ModelType);
 
-  return createModelType("declaration", propertyTypes, parentTypes);
+  return createModelTypeDescription("declaration", propertyTypes, parentTypes);
 }
 
 export function inferModelValue(
@@ -382,7 +395,7 @@ export function inferModelValue(
   const memberTypes = expr.members.map((member) =>
     inferExpression(member, env)
   ) as ModelMemberType[];
-  return createModelType("value", memberTypes);
+  return createModelTypeDescription("value", memberTypes);
 }
 
 export function inferModelMemberAssignment(
