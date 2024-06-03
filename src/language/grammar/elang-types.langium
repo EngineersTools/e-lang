@@ -42,11 +42,11 @@ TypeIntersection infers TypeReference:
     PrimaryTypeReference ({infer TypeIntersection.left=current} operator=('and') right=PrimaryTypeReference)*;
 
 PrimaryTypeReference infers TypeReference:
-    (array?='listof')?
-    ( ModelType |
+    (ModelType |
     PrimitiveType |
     MeasurementType |
     LambdaType)
+    (array?='list')?
 ;
 
 /**

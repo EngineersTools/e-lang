@@ -87,14 +87,14 @@ export function inferType(
     return createErrorType("Could not infer type for undefined", node);
   }
 
-  if (isConstantDeclaration(node)) {
+  if (isExpression(node)) {
+    type = inferExpression(node, env);
+  } else if (isConstantDeclaration(node)) {
     type = inferConstantDeclaration(node, env);
   } else if (isMutableDeclaration(node)) {
     type = inferMutableDeclaration(node, env);
   } else if (isTypeReference(node)) {
     type = inferTypeReference(node, env);
-  } else if (isExpression(node)) {
-    type = inferExpression(node, env);
   } else if (isParameterDeclaration(node)) {
     type = inferParameterDeclaration(node, env);
   } else if (isPropertyDeclaration(node)) {
@@ -240,12 +240,12 @@ export function inferPropertyDeclaration(
   if (expr.type.type) {
     const propType = env.getRegisteredType(expr.type.type);
     if (propType) {
-      return createModelMemberType(expr.name, propType);
+      return createModelMemberType(expr.name, propType, expr.isOptional);
     }
   } else if (expr.type.model && expr.type.model.ref) {
     const propType = env.getRegisteredType(expr.type.model.ref.name);
     if (propType) {
-      return createModelMemberType(expr.name, propType);
+      return createModelMemberType(expr.name, propType, expr.isOptional);
     }
   }
 
@@ -353,7 +353,7 @@ export function inferExpression(
   } else if (isModelValue(expr)) {
     return inferModelValue(expr, env);
   } else if (isListValue(expr)) {
-    return inferType(expr, env);
+    return inferListValue(expr, env);
   } else if (isModelMemberAssignment(expr)) {
     return inferModelMemberAssignment(expr, env);
   } else if (isBinaryExpression(expr)) {
@@ -393,8 +393,8 @@ export function inferModelValue(
   env: TypeEnvironment
 ): TypeDescription {
   const memberTypes = expr.members.map((member) =>
-    inferExpression(member, env)
-  ) as ModelMemberType[];
+    createModelMemberType(member.property, inferExpression(member, env))
+  );
   return createModelTypeDescription("value", memberTypes);
 }
 

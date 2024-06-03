@@ -1,58 +1,75 @@
 import {
   TypeDescription,
   isFormulaType,
+  isListType,
+  isModelMemberType,
   isModelType,
   isNullType,
 } from "./descriptions.js";
 
+export type IsAssignableResult =
+  | {
+      result: true;
+    }
+  | {
+      result: false;
+      reason: string;
+      typeDesc: TypeDescription;
+    };
+
 export function isAssignable(
   from: TypeDescription,
   to: TypeDescription
-): boolean {
-  if (isModelType(from)) {
-    if (!isModelType(to)) {
-      return false;
+): IsAssignableResult {
+  if (isModelType(from) && isModelType(to)) {
+    if (from.$source === "declaration") {
+      const messages: string[] = [];
+
+      const result = from.memberTypes.every((member) => {
+        const toMember = to.memberTypes.find((m) => m.name === member.name);
+        if (!toMember) {
+          return member.optional ?? false;
+        }
+
+        const result = isAssignable(member, toMember);
+
+        if (!result.result) {
+          messages.push(result.reason);
+        }
+
+        return result.result;
+      });
+
+      return result
+        ? createAssignableResult()
+        : createNonAssignableResult(from, to, messages.join("\n"));
     }
-
-    // if (from.declaration) {
-    //   const fromChain = getModelDeclarationChain(from.declaration);
-    //   const propNames = fromChain.flatMap((m) =>
-    //     m.properties.filter((p) => !p.isOptional).map((p) => p.name)
-    //   );
-
-    //   if (isModelType(to) && to.declaration) {
-    //     const memberNames = to.declaration.properties
-    //       .filter((p) => !p.isOptional)
-    //       .map((p) => p.name);
-    //     return propNames.every((p) => memberNames.includes(p));
-    //   } else if (to.value) {
-    //     const memberNames = to.value.members.map((p) => p.property);
-    //     return propNames.every((p) => memberNames.includes(p));
-    //   }
-    // } else {
-    //   return to.value == from.value;
-    // }
-
-    return false;
-  }
-
-  if (isNullType(from)) {
-    return isModelType(to);
-  }
-
-  if (isFormulaType(from)) {
+  } else if (isModelMemberType(from) && isModelMemberType(to)) {
+    return from.$type === to.$type &&
+      isAssignable(from.typeDesc, to.typeDesc).result
+      ? createAssignableResult()
+      : createNonAssignableResult(
+          from,
+          to,
+          `Type mismatch on property ${from.name}: '${to.typeDesc.$type}' is not assignable to '${from.typeDesc.$type}'`
+        );
+  } else if (isNullType(from)) {
+    return isModelType(to)
+      ? createAssignableResult()
+      : createNonAssignableResult(from, to);
+  } else if (isFormulaType(from)) {
     if (!isFormulaType(to)) {
-      return false;
+      return createNonAssignableResult(from, to);
     }
-    if (!isAssignable(from.returnType, to.returnType)) {
-      return false;
+    if (!isAssignable(from.returnType, to.returnType).result) {
+      return createNonAssignableResult(from, to);
     }
     if (
       from.parameterTypes &&
       to.parameterTypes &&
       from.parameterTypes.length !== to.parameterTypes.length
     ) {
-      return false;
+      return createNonAssignableResult(from, to);
     }
     if (from.parameterTypes)
       for (let i = 0; i < from.parameterTypes.length; i++) {
@@ -62,8 +79,33 @@ export function isAssignable(
         //   return false;
         // }
       }
-    return true;
+    return createAssignableResult();
+  } else if (isListType(from) && isListType(to)) {
+    return from.$type === to.$type &&
+      isAssignable(from.itemType, to.itemType).result
+      ? createAssignableResult()
+      : createNonAssignableResult(from, to);
   }
 
-  return from.$type === to.$type;
+  return from.$type === to.$type
+    ? createAssignableResult()
+    : createNonAssignableResult(from, to);
+}
+
+function createAssignableResult(): IsAssignableResult {
+  return { result: true };
+}
+
+function createNonAssignableResult(
+  from: TypeDescription,
+  to: TypeDescription,
+  reason?: string
+): IsAssignableResult {
+  return {
+    result: false,
+    reason:
+      reason ??
+      `Type mismatch: '${from.$type}' is not assignable to '${to.$type}'`,
+    typeDesc: to,
+  };
 }

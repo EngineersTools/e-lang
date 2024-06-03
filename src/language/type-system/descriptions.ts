@@ -190,21 +190,23 @@ export function isUnitType(item: TypeDescription): item is UnitType {
 }
 
 // MODEL
-
 export interface ModelMemberType {
   readonly $type: "modelMember";
   readonly name: string;
   readonly typeDesc: TypeDescription;
+  readonly optional?: boolean;
 }
 
 export function createModelMemberType(
   name: string,
-  typeDesc: TypeDescription
+  typeDesc: TypeDescription,
+  optional?: boolean
 ): ModelMemberType {
   return {
     $type: "modelMember",
     name,
     typeDesc,
+    optional,
   };
 }
 

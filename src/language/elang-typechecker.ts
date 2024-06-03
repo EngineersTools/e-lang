@@ -4,11 +4,14 @@ import {
   ConstantDeclaration,
   ElangAstType,
   ElangProgram,
+  ModelDeclaration,
+  ModelValue,
   MutableDeclaration,
   PropertyDeclaration,
   Statement,
   isConstantDeclaration,
   isModelDeclaration,
+  isModelValue,
   isMutableDeclaration,
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
@@ -16,8 +19,9 @@ import {
   addStatement,
   registerModelDeclaration,
 } from "./type-system/TypeEnvironment.functions.js";
-import { getModelDeclarationParentsChain } from "./type-system/getModelDeclarationChain.js";
 import { isAssignable } from "./type-system/assignment.js";
+import { isModelType } from "./type-system/descriptions.js";
+import { getModelDeclarationParentsChain } from "./type-system/getModelDeclarationChain.js";
 import { inferType } from "./type-system/infer.js";
 
 export function registerTypechecks(services: ElangServices) {
@@ -40,7 +44,7 @@ export class ElangTypechecker {
       this.typecheckStatement(env, stmt, accept);
     });
 
-    console.dir(env, { depth: 6 });
+    // console.dir(env, { depth: 6 });
 
     env.leaveScope();
   }
@@ -133,93 +137,61 @@ export class ElangTypechecker {
           node: stmt,
           property: "name",
         });
-      } else if (!isAssignable(assignedType, exprType)) {
-        accept("error", "Type mismatch", { node: stmt, property: "value" });
+      } else if (
+        stmt.type.model &&
+        stmt.type.model.ref &&
+        isModelValue(stmt.value)
+      ) {
+        this.typecheckModelAssignment(
+          env,
+          stmt.type.model.ref,
+          stmt.value,
+          accept
+        );
+      } else {
+        const isAssignableResult = isAssignable(assignedType, exprType);
+        if (!isAssignableResult.result) {
+          accept("error", isAssignableResult.reason, {
+            node: stmt,
+            property: "value",
+          });
+        }
       }
-
-      // env.setVariableType(stmt.name, assignedType);
-      // if (isErrorType(assignedType)) {
-      //   accept("error", assignedType.message, {
-      //     node: stmt,
-      //     property: "type",
-      //   });
-      // }
-      // if (isErrorType(exprType)) {
-      //   accept("error", exprType.message, {
-      //     node: stmt,
-      //     property: "value",
-      //   });
-      // }
-      // if (isModelType(assignedType) || isModelType(exprType)) {
-      //   this.checkModelAssignment(assignedType, exprType, env, accept);
-      // }
-      // if (assignedType.$type !== exprType.$type) {
-      //   accept(
-      //     "error",
-      //     `Type mismatch. Value of type '${exprType.$type}' cannot be assigned to a variable of type '${assignedType.$type}'.`,
-      //     { node: stmt, property: "value" }
-      //   );
-      // }
     }
-
-    // else if (stmt.assignment && stmt.value) {
-    //   const exprType = inferType(stmt.value, env);
-    //   env.setVariableType(stmt.name, exprType);
-    // } else if (stmt.type) {
-    //   const assignedType = inferType(stmt.type, env);
-    //   env.setVariableType(stmt.name, assignedType);
-    // } else if (!stmt.assignment && !stmt.type && !stmt.value) {
-    //   accept("error", "No type assigned to this variable", {
-    //     node: stmt,
-    //     property: "name",
-    //   });
-    // }
   }
 
-  // checkModelAssignment(
-  //   declaredModel: TypeDescription,
-  //   modelValue: TypeDescription,
-  //   env: TypeEnvironment,
-  //   accept: ValidationAcceptor
-  // ) {
-  //   if (isDeclaredModelType(declaredModel) && isImpliedModelType(modelValue)) {
-  //     const fromChain = getModelDeclarationChain(declaredModel.declaration);
-  //     const propTypes = fromChain.flatMap((m) => m.properties);
+  typecheckModelAssignment(
+    env: TypeEnvironment,
+    declaration: ModelDeclaration,
+    value: ModelValue,
+    accept: ValidationAcceptor
+  ) {
+    const from = env.getRegisteredType(declaration.name);
+    const to = inferType(value, env);
 
-  //     env.enterScope();
+    if (from && to && isModelType(from) && isModelType(to)) {
+      from.memberTypes.forEach((member) => {
+        const toMember = to.memberTypes.find((m) => m.name === member.name);
 
-  //     const memberNames = modelValue.value.members.map((m) => m.property);
+        if (!toMember) {
+          return (
+            member.optional ??
+            accept("error", "Property is missing", {
+              node: value,
+              property: "members",
+            })
+          );
+        }
 
-  //     propTypes.forEach((p) => env.setVariableType(p.name, inferType(p, env)));
+        const isAssignableResult = isAssignable(member, toMember);
 
-  //     // Check that all mandatory properties have been assigned
-  //     propTypes
-  //       .filter((p) => !p.isOptional)
-  //       .forEach((p) => {
-  //         if (!memberNames.includes(p.name)) {
-  //           accept(
-  //             "error",
-  //             `Property '${p.name}', defined in model '${declaredModel.declaration.name}', is missing from the model value.`,
-  //             { node: modelValue.value }
-  //           );
-  //         }
-  //       });
-
-  //     // Check that all assigned properties are of a valid type
-  //     modelValue.value.members.forEach((m) => {
-  //       const memberType = inferType(m, env);
-  //       const propType = env.getVariableType(m.property);
-
-  //       if (propType && memberType.$type !== propType.$type) {
-  //         accept(
-  //           "error",
-  //           `Property '${m.property}' cannot be assigned a value of type '${memberType.$type}'. Model '${declaredModel.declaration.name}' expects a value of type '${propType.$type}' for this property.`,
-  //           { node: m, property: "value" }
-  //         );
-  //       }
-  //     });
-
-  //     env.leaveScope();
-  //   }
-  // }
+        if (!isAssignableResult.result) {
+          accept("error", isAssignableResult.reason, {
+            node:
+              value.members.find((m) => m.property === toMember.name) ?? value,
+          });
+        }
+      });
+    }
+  }
 }
