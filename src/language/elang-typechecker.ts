@@ -4,23 +4,28 @@ import {
   ConstantDeclaration,
   ElangAstType,
   ElangProgram,
+  FormulaDeclaration,
   ModelDeclaration,
   ModelValue,
   MutableDeclaration,
   PropertyDeclaration,
   Statement,
   isConstantDeclaration,
+  isFormulaDeclaration,
   isModelDeclaration,
   isModelValue,
   isMutableDeclaration,
+  isReturnStatement,
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import {
+  addFormulaDeclaration,
   addStatement,
+  getReturnType,
   registerModelDeclaration,
 } from "./type-system/TypeEnvironment.functions.js";
 import { isAssignable } from "./type-system/assignment.js";
-import { isModelType } from "./type-system/descriptions.js";
+import { isFormulaType, isModelType } from "./type-system/descriptions.js";
 import { getModelDeclarationParentsChain } from "./type-system/getModelDeclarationChain.js";
 import { inferType } from "./type-system/infer.js";
 
@@ -44,8 +49,6 @@ export class ElangTypechecker {
       this.typecheckStatement(env, stmt, accept);
     });
 
-    // console.dir(env, { depth: 6 });
-
     env.leaveScope();
   }
 
@@ -56,38 +59,13 @@ export class ElangTypechecker {
   ): void {
     if (isModelDeclaration(stmt)) {
       registerModelDeclaration(stmt, env);
+    } else if (isFormulaDeclaration(stmt)) {
+      addFormulaDeclaration(stmt, env);
+      this.typecheckFormulaDeclaration(env, stmt, accept);
     } else if (isConstantDeclaration(stmt) || isMutableDeclaration(stmt)) {
       this.typecheckVariableDeclarationStatement(env, stmt, accept);
     }
-
-    // if (isExpression(stmt)) {
-    //   this.typecheckExpression(env, stmt, accept);
-    // } else
-    // if (isForStatement(stmt)) {
-    // } else
-    //if (isFormulaDeclaration(stmt)) {
-    // } else if (isIfStatement(stmt)) {
-    // } else if (isLambdaDeclaration(stmt)) {
-    // } else if (isMatchStatement(stmt)) {
-    // } else  else if (isPrintStatement(stmt)) {
-    // } else if (isProcedureDeclaration(stmt)) {
-    // } else if (isReturnStatement(stmt)) {
-    // } else if (isStatementBlock(stmt)) {
-    //   env.enterScope();
-    //   stmt.statements.forEach((s) => this.typecheckStatement(env, s, accept));
-    //   env.leaveScope();
-    // } else if (isUnitFamilyDeclaration(stmt)) {
-    // } else
   }
-
-  // typecheckExpression(
-  //   env: TypeEnvironment,
-  //   exp: Expression,
-  //   accept: ValidationAcceptor
-  // ): void {
-  //   const exprType = inferType(exp, env);
-  //   accept("info", exprType.$type, { node: exp });
-  // }
 
   checkModelPropertiesAreNotDuplicated(
     prop: PropertyDeclaration,
@@ -192,6 +170,33 @@ export class ElangTypechecker {
           });
         }
       });
+    }
+  }
+
+  typecheckFormulaDeclaration(
+    env: TypeEnvironment,
+    stmt: FormulaDeclaration,
+    accept: ValidationAcceptor
+  ) {
+    const formulaTypeDescription = env.getVariableType(stmt.name);
+    const returnType = getReturnType(stmt.body, env);
+
+    if (formulaTypeDescription && isFormulaType(formulaTypeDescription)) {
+      const returnStatements = stmt.body.statements.filter((s) =>
+        isReturnStatement(s)
+      );
+
+      if (returnStatements && returnStatements.length > 0) {
+        returnStatements.forEach((s) => {
+          const isAssignableResult = isAssignable(
+            returnType,
+            formulaTypeDescription.returnType
+          );
+          if (!isAssignableResult.result) {
+            accept("error", isAssignableResult.reason, { node: s });
+          }
+        });
+      }
     }
   }
 }

@@ -1,9 +1,11 @@
 import { AstNode } from "langium";
+import { unique } from "../../utils/array.functions.js";
 import {
   BinaryExpression,
   ConstantDeclaration,
   ConversionDeclaration,
   Expression,
+  FormulaDeclaration,
   LambdaDeclaration,
   LambdaType,
   ListValue,
@@ -24,6 +26,7 @@ import {
   isConstantDeclaration,
   isConversionDeclaration,
   isExpression,
+  isFormulaDeclaration,
   isLambdaDeclaration,
   isLambdaType,
   isListValue,
@@ -38,6 +41,7 @@ import {
   isNumberLiteral,
   isParameterDeclaration,
   isPropertyDeclaration,
+  isReturnStatement,
   isStringLiteral,
   isTypeReference,
   isTypeUnion,
@@ -60,6 +64,7 @@ import {
   createBooleanType,
   createEmptyListType,
   createErrorType,
+  createFormulaType,
   createLambdaType,
   createListType,
   createMeasurementType,
@@ -74,6 +79,7 @@ import {
   createUnitFamilyType,
   createUnitType,
   isNumberType,
+  isParameterType,
   isTextType,
 } from "./descriptions.js";
 
@@ -111,8 +117,12 @@ export function inferType(
     type = inferLambda(node, env);
   } else if (isLambdaDeclaration(node)) {
     type = inferLambda(node, env);
+  } else if (isFormulaDeclaration(node)) {
+    type = inferFormula(node, env);
   } else if (isModelDeclaration(node)) {
     type = inferModelDeclaration(node, env);
+  } else if (isReturnStatement(node)) {
+    type = inferType(node.value, env);
   }
 
   if (!type) {
@@ -163,10 +173,24 @@ export function inferTypeReference(
   if (typeRef.type) {
     resolvedType = inferPrimitive(typeRef);
   } else if (isTypeUnion(typeRef)) {
-    resolvedType = createUnionType(
-      inferType(typeRef.left, env),
-      inferType(typeRef.right, env)
-    );
+    const leftTypes = [];
+    const rightTypes = [];
+
+    if (isTypeUnion(typeRef.left)) {
+      leftTypes.push(inferType(typeRef.left.left, env));
+      leftTypes.push(inferType(typeRef.left.right, env));
+    } else {
+      leftTypes.push(inferType(typeRef.left, env));
+    }
+
+    if (isTypeUnion(typeRef.right)) {
+      rightTypes.push(inferType(typeRef.right.left, env));
+      rightTypes.push(inferType(typeRef.right.right, env));
+    } else {
+      rightTypes.push(inferType(typeRef.right, env));
+    }
+
+    resolvedType = createUnionType(...leftTypes, ...rightTypes);
   } else if (isLambdaType(typeRef)) {
     resolvedType = inferLambda(typeRef, env);
   } else if (
@@ -215,7 +239,7 @@ export function inferLambda(
       return createLambdaType(
         inferType(expr.returnType, env),
         expr.parameters.map((param) =>
-          inferType(param.type, env)
+          inferParameterDeclaration(param, env)
         ) as ParameterType[]
       );
     } else {
@@ -226,11 +250,31 @@ export function inferLambda(
   }
 }
 
+export function inferFormula(
+  expr: FormulaDeclaration,
+  env: TypeEnvironment
+): TypeDescription {
+  if (expr.returnType) {
+    if (expr.parameters && expr.parameters.length > 0) {
+      return createFormulaType(
+        inferType(expr.returnType, env),
+        expr.parameters.map((param) =>
+          inferParameterDeclaration(param, env)
+        ) as ParameterType[]
+      );
+    } else {
+      return createFormulaType(inferType(expr.returnType, env));
+    }
+  } else {
+    return createErrorType("Could not infer formula type", expr);
+  }
+}
+
 export function inferParameterDeclaration(
   expr: ParameterDeclaration,
   env: TypeEnvironment
 ): TypeDescription {
-  return createParameterType(inferType(expr.type, env));
+  return createParameterType(expr.name, inferType(expr.type, env));
 }
 
 export function inferPropertyDeclaration(
@@ -414,8 +458,13 @@ export function inferBinaryExpression(
     return createBooleanType();
   }
 
-  const left = inferType(expr.left, env);
-  const right = inferType(expr.right, env);
+  const leftExpr = inferType(expr.left, env);
+  const rightExpr = inferType(expr.right, env);
+
+  const left = isParameterType(leftExpr) ? leftExpr.typeDescription : leftExpr;
+  const right = isParameterType(rightExpr)
+    ? rightExpr.typeDescription
+    : rightExpr;
 
   // Operations that should return a number or numberTypeWithUnitFamily
   if (isMeasurementLiteral(left) || isMeasurementLiteral(right)) {
@@ -481,8 +530,12 @@ export function inferListValue(
   env: TypeEnvironment
 ): TypeDescription {
   if (expr.items.length > 0) {
-    const elementType = inferType(expr.items[0], env);
-    return createListType(elementType);
+    const elementTypes = unique(expr.items.map((item) => inferType(item, env)));
+    if (elementTypes.length === 1) {
+      return createListType(elementTypes[0]);
+    } else {
+      return createListType(createUnionType(...elementTypes));
+    }
   } else {
     return createEmptyListType();
   }

@@ -245,12 +245,17 @@ export function isModelType(item: TypeDescription): item is ModelType {
 // PARAMETER
 export interface ParameterType {
   readonly $type: "parameter";
+  readonly name: string;
   readonly typeDescription: TypeDescription;
 }
 
-export function createParameterType(type: TypeDescription): ParameterType {
+export function createParameterType(
+  name: string,
+  type: TypeDescription
+): ParameterType {
   return {
     $type: "parameter",
+    name,
     typeDescription: type,
   };
 }

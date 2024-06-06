@@ -42,7 +42,8 @@ TypeIntersection infers TypeReference:
     PrimaryTypeReference ({infer TypeIntersection.left=current} operator=('and') right=PrimaryTypeReference)*;
 
 PrimaryTypeReference infers TypeReference:
-    (ModelType |
+    ('(' TypeReference ')' |
+    ModelType |
     PrimitiveType |
     MeasurementType |
     LambdaType)
