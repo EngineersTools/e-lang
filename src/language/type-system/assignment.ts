@@ -3,6 +3,7 @@ import {
   TypeDescription,
   isFormulaType,
   isListType,
+  isMeasurementType,
   isModelMemberType,
   isModelType,
   isNullType,
@@ -145,6 +146,14 @@ export function isAssignable(
           `Type mismatch: '${from.types
             .map((t) => t.$type)
             .join(", ")}' is not assignable to '${to.$type}'`
+        );
+  } else if (isMeasurementType(from) && isMeasurementType(to)) {
+    return from.unitFamilyType.name === to.unitFamilyType.name
+      ? createAssignableResult()
+      : createNonAssignableResult(
+          from,
+          to,
+          `Type mismatch: Measurement units of family '${to.unitFamilyType.name}' are not assignable to Unit Family '${from.unitFamilyType.name}'`
         );
   }
 

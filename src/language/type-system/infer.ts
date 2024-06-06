@@ -302,12 +302,11 @@ export function inferMeasurement(
 ): TypeDescription {
   if (
     isMeasurementLiteral(expr) &&
-    isUnitDeclaration(expr.unit) &&
-    isUnitFamilyDeclaration(expr.unit.$container) &&
-    expr.unit.ref
+    isUnitDeclaration(expr.unit.ref) &&
+    isUnitFamilyDeclaration(expr.unit.ref.$container)
   ) {
     const unitFamily = inferUnitFamily(
-      expr.unit.$container,
+      expr.unit.ref.$container,
       env
     ) as UnitFamilyType;
     return createMeasurementType(unitFamily);
@@ -333,7 +332,13 @@ export function inferUnitFamily(
     inferType(conv, env)
   ) as UnitConversionType[];
 
-  return createUnitFamilyType(unitFamily.name, unitTypes, unitConversions);
+  const unitFamilyType = createUnitFamilyType(
+    unitFamily.name,
+    unitTypes,
+    unitConversions
+  );
+
+  return unitFamilyType;
 }
 
 export function inferUnit(unit: UnitDeclaration): TypeDescription {
