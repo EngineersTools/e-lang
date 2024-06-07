@@ -31,7 +31,8 @@ export class ElangNotebookKernel {
     _controller: vscode.NotebookController
   ): Promise<void> {
     for (let cell of cells) {
-      await this._doExecution(cell);
+      if (cell && cell.kind === vscode.NotebookCellKind.Code)
+        await this._doExecution(cell);
     }
   }
 
@@ -55,7 +56,7 @@ export class ElangNotebookKernel {
       } else if (typeof value == "object") {
         await execution.appendOutput(
           new vscode.NotebookCellOutput([
-            vscode.NotebookCellOutputItem.json(value, 'application/javascript'),
+            vscode.NotebookCellOutputItem.json(value, "application/javascript"),
           ])
         );
       }

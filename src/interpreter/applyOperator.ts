@@ -2,10 +2,10 @@ import {
   BinaryExpression,
   MeasurementLiteral,
 } from "../language/generated/ast.js";
-import { RunnerContext } from "./RunnerContext.js";
 import { AstNodeError } from "./AstNodeError.js";
-import { getBinaryQuadrant } from "./getBinaryQuadrant.js";
+import { RunnerContext } from "./RunnerContext.js";
 import { convertMeasurements } from "./convertMeasurements.js";
+import { getBinaryQuadrant } from "./getBinaryQuadrant.js";
 import { serialiseExpression } from "./serialiseExpression.js";
 
 /**

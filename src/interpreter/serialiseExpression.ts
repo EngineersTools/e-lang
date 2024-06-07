@@ -5,6 +5,7 @@ import {
   isLambdaDeclaration,
   isListValue,
   isMeasurementLiteral,
+  isModelMemberCall,
   isModelValue,
   isProcedureDeclaration,
 } from "../language/generated/ast.js";

@@ -17,13 +17,15 @@ import {
 } from "langium";
 import { LangiumServices } from "langium/lsp";
 import { CancellationToken } from "vscode-jsonrpc";
+import { getQualifiedName } from "../interpreter/AstNode.utils.js";
 import {
   ElangProgram,
   isConstantDeclaration,
   isModelMemberAssignment,
   isModelMemberCall,
+  isModelValue,
   isMutableDeclaration,
-  isUnitDeclaration,
+  isUnitDeclaration
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import { ModelMemberType, isModelType } from "./type-system/descriptions.js";
@@ -146,20 +148,20 @@ export class ElangScopeComputation extends DefaultScopeComputation {
       await interruptAndCheck(cancelToken);
 
       if (isConstantDeclaration(node) || isMutableDeclaration(node)) {
-        // if (node.assignment && isModelValue(node.value)) {
-        //   node.value.members.forEach((m) => {
-        //     const fullyQualifiedName = getQualifiedName(node, m.property); // `${node.name}.${m.property}`;
+        if (node.assignment && isModelValue(node.value)) {
+          node.value.members.forEach((m) => {
+            const fullyQualifiedName = getQualifiedName(node, m.property); // `${node.name}.${m.property}`;
 
-        //     scopes.add(
-        //       node.$container,
-        //       this.descriptions.createDescription(
-        //         node,
-        //         fullyQualifiedName,
-        //         document
-        //       )
-        //     );
-        //   });
-        // }
+            scopes.add(
+              node.$container,
+              this.descriptions.createDescription(
+                node,
+                fullyQualifiedName,
+                document
+              )
+            );
+          });
+        }
         this.processNode(node, document, scopes);
       } else if (isUnitDeclaration(node)) {
         scopes.add(

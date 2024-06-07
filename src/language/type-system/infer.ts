@@ -291,6 +291,12 @@ export function inferPropertyDeclaration(
     if (propType) {
       return createModelMemberType(expr.name, propType, expr.isOptional);
     }
+  } else if (isMeasurementType(expr.type)) {
+    return createModelMemberType(
+      expr.name,
+      inferMeasurement(expr.type, env),
+      expr.isOptional
+    );
   }
 
   return createErrorType("Could not infer property type", expr);
