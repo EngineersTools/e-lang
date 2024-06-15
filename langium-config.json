@@ -1,15 +1,17 @@
 {
-    "projectName": "Elang",
-    "languages": [{
-        "id": "elang",
-        "grammar": "src/language/grammar/elang.langium",
-        "fileExtensions": [".elang", ".elnb"],
-        "textMate": {
-            "out": "syntaxes/elang.tmLanguage.json"
-        },
-        "monarch": {
-            "out": "syntaxes/elang.monarch.ts"
-        }
-    }],
-    "out": "src/language/generated"
+  "projectName": "Elang",
+  "languages": [
+    {
+      "id": "elang",
+      "grammar": "src/language/grammar/elang.langium",
+      "fileExtensions": [".el", ".elnb"],
+      "textMate": {
+        "out": "syntaxes/elang.tmLanguage.json"
+      },
+      "monarch": {
+        "out": "syntaxes/elang.monarch.ts"
+      }
+    }
+  ],
+  "out": "src/language/generated"
 }

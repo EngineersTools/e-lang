@@ -6,12 +6,16 @@ import {
   DefaultScopeProvider,
   EMPTY_SCOPE,
   LangiumDocument,
+  LangiumDocuments,
+  MapScope,
   MultiMap,
   PrecomputedScopes,
   ReferenceInfo,
   Scope,
   ScopeOptions,
   StreamScope,
+  URI,
+  UriUtils,
   interruptAndCheck,
   stream,
 } from "langium";
@@ -20,12 +24,15 @@ import { CancellationToken } from "vscode-jsonrpc";
 import { getQualifiedName } from "../interpreter/AstNode.utils.js";
 import {
   ElangProgram,
+  Import,
   isConstantDeclaration,
+  isElangProgram,
+  isExportable,
   isModelMemberAssignment,
   isModelMemberCall,
   isModelValue,
   isMutableDeclaration,
-  isUnitDeclaration
+  isUnitDeclaration,
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import { ModelMemberType, isModelType } from "./type-system/descriptions.js";
@@ -34,10 +41,34 @@ import { inferType } from "./type-system/infer.js";
 export class ElangScopeProvider extends DefaultScopeProvider {
   constructor(services: LangiumServices) {
     super(services);
+    this.langiumDocuments = services.shared.workspace.LangiumDocuments;
     this.types = new TypeEnvironment();
   }
 
-  private types: TypeEnvironment;
+  protected readonly types: TypeEnvironment;
+  protected readonly langiumDocuments: LangiumDocuments;
+
+  protected override getGlobalScope(
+    referenceType: string,
+    context: ReferenceInfo
+  ): Scope {
+    const elangProgram = getContainerOfType(context.container, isElangProgram);
+
+    if (!elangProgram) {
+      return EMPTY_SCOPE;
+    }
+
+    const importedUris = new Set<string>();
+
+    this.gatherImports(elangProgram, importedUris);
+
+    let importedElements = this.indexManager.allElements(
+      referenceType,
+      importedUris
+    );
+
+    return new MapScope(importedElements);
+  }
 
   override getScope(context: ReferenceInfo): Scope {
     if (
@@ -69,17 +100,6 @@ export class ElangScopeProvider extends DefaultScopeProvider {
     return this.createScopeForNodes(allMembers);
   }
 
-  // private scopeModelDeclarationMembers(modelItem: ModelDeclaration): Scope {
-  //   const allMembers = getModelDeclarationChain(modelItem).flatMap(
-  //     (e) => e.properties
-  //   );
-  //   return this.createScopeForNodes(allMembers);
-  // }
-
-  // private scopeModelValueMembers(modelItem: ModelValue): Scope {
-  //   return this.createScopeForNodes(modelItem.members);
-  // }
-
   override createScopeForNodes(
     elements: Iterable<AstNode>,
     outerScope?: Scope | undefined,
@@ -101,6 +121,25 @@ export class ElangScopeProvider extends DefaultScopeProvider {
 
     return new StreamScope(s, outerScope, options);
   }
+
+  private gatherImports(
+    elangProgram: ElangProgram,
+    importedUris: Set<string>
+  ): void {
+    for (const imp0rt of elangProgram.imports) {
+      const uri = resolveImportUri(imp0rt);
+      if (uri && !importedUris.has(uri.toString())) {
+        importedUris.add(uri.toString());
+        const importedDocument = this.langiumDocuments.getDocument(uri);
+        if (importedDocument) {
+          const rootNode = importedDocument.parseResult.value;
+          if (isElangProgram(rootNode)) {
+            this.gatherImports(rootNode, importedUris);
+          }
+        }
+      }
+    }
+  }
 }
 
 export class ElangScopeComputation extends DefaultScopeComputation {
@@ -108,32 +147,15 @@ export class ElangScopeComputation extends DefaultScopeComputation {
     super(services);
   }
 
-  override async computeExports(
-    document: LangiumDocument,
-    cancelToken = CancellationToken.None
-  ): Promise<AstNodeDescription[]> {
-    const exportedDescriptions: AstNodeDescription[] = [];
-
-    // for (const node of streamAllContents(document.parseResult.value)) {
-    //   // if (isNodeExported(node)) {
-    //   //   console.log(getNodeChain(node).map((n) => n.$type));
-    //   //   if (isUnitFamilyDeclaration(node)) {
-    //   //     node.units.forEach((u) => {
-    //   //       console.log(getNodeChain(u).map((n) => n.$type));
-    //   //     });
-    //   //   }
-    //   // }
-    //   // exportedDescriptions.push(
-    //   //   ...(await this.computeExportsForNode(
-    //   //     node,
-    //   //     document,
-    //   //     undefined,
-    //   //     cancelToken
-    //   //   ))
-    //   // );
-    // }
-
-    return exportedDescriptions;
+  protected override exportNode(
+    node: AstNode,
+    exports: AstNodeDescription[],
+    document: LangiumDocument
+  ): void {
+    // this function is called in order to export nodes to the GLOBAL scope
+    if (isExportable(node) && node.export === true) {
+      super.exportNode(node, exports, document);
+    }
   }
 
   override async computeLocalScopes(
@@ -175,4 +197,62 @@ export class ElangScopeComputation extends DefaultScopeComputation {
 
     return scopes;
   }
+}
+
+/**
+ * Walk along the hierarchy of containers from the given AST node to the root and return the first
+ * node that matches the type predicate. If the start node itself matches, it is returned.
+ * If no container matches, `undefined` is returned.
+ */
+export function getContainerOfType<T extends AstNode>(
+  node: AstNode | undefined,
+  typePredicate: (n: AstNode) => n is T
+): T | undefined {
+  let item = node;
+  while (item) {
+    if (typePredicate(item)) {
+      return item;
+    }
+    item = item.$container;
+  }
+  return undefined;
+}
+
+export function resolveImportUri(imp: Import): URI | undefined {
+  if (imp.importSource === undefined || imp.importSource.length === 0) {
+    return undefined;
+  }
+  const dirUri = UriUtils.dirname(getDocument(imp).uri);
+  let grammarPath = imp.importSource;
+  if (!grammarPath.endsWith(".el")) {
+    grammarPath += ".el";
+  }
+  return UriUtils.resolvePath(dirUri, grammarPath);
+}
+
+/**
+ * Retrieve the document in which the given AST node is contained. A reference to the document is
+ * usually held by the root node of the AST.
+ *
+ * @throws an error if the node is not contained in a document.
+ */
+export function getDocument<T extends AstNode = AstNode>(
+  node: AstNode
+): LangiumDocument<T> {
+  const rootNode = findRootNode(node);
+  const result = rootNode.$document;
+  if (!result) {
+    throw new Error("AST node has no document.");
+  }
+  return result as LangiumDocument<T>;
+}
+
+/**
+ * Returns the root node of the given AST node by following the `$container` references.
+ */
+export function findRootNode(node: AstNode): AstNode {
+  while (node.$container) {
+    node = node.$container;
+  }
+  return node;
 }

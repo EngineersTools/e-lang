@@ -5,9 +5,8 @@ import {
   isLambdaDeclaration,
   isListValue,
   isMeasurementLiteral,
-  isModelMemberCall,
   isModelValue,
-  isProcedureDeclaration,
+  isProcedureDeclaration
 } from "../language/generated/ast.js";
 import { inferType } from "../language/type-system/infer.js";
 import { typeToString } from "../language/type-system/typeToString.js";
