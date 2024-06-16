@@ -223,18 +223,21 @@ export interface ModelType {
   readonly $source: ModelTypeSource;
   readonly memberTypes: ModelMemberType[];
   readonly parentTypes?: ModelType[];
+  readonly modelName?: string;
 }
 
 export function createModelTypeDescription(
   source: ModelTypeSource,
   memberTypes: ModelMemberType[],
-  parentTypes?: ModelType[]
+  parentTypes?: ModelType[],
+  modelName?: string
 ): ModelType {
   return {
     $type: "model",
     $source: source,
     memberTypes,
     parentTypes,
+    modelName
   };
 }
 

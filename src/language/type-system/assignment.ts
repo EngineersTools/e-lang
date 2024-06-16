@@ -117,10 +117,10 @@ export function isAssignable(
           from,
           to,
           `Type mismatch: '${from.types
-            .map((t) => t.$type)
-            .join(", ")}' is not assignable to '${to.types
-            .map((t) => t.$type)
-            .join(", ")}'`
+            .map((t) => (isModelType(t) ? t.modelName : t.$type))
+            .join(" or ")}' is not assignable to '${to.types
+            .map((t) => (isModelType(t) ? t.modelName : t.$type))
+            .join(" or ")}'`
         );
   } else if (isUnionType(to)) {
     const someIncluded = to.types.some((t) => t.$type === from.$type);
@@ -129,9 +129,11 @@ export function isAssignable(
       : createNonAssignableResult(
           from,
           to,
-          `Type mismatch: '${from.$type}' is not assignable to '${to.types
-            .map((t) => t.$type)
-            .join(", ")}'`
+          `Type mismatch: '${
+            isModelType(from) ? from.modelName : from.$type
+          }' is not assignable to '${to.types
+            .map((t) => (isModelType(t) ? t.modelName : t.$type))
+            .join(" or ")}'`
         );
   } else if (isUnionType(from)) {
     const allIncluded = from.types.every((t) => t.$type === from.$type);
@@ -141,8 +143,10 @@ export function isAssignable(
           from,
           to,
           `Type mismatch: '${from.types
-            .map((t) => t.$type)
-            .join(", ")}' is not assignable to '${to.$type}'`
+            .map((t) => (isModelType(t) ? t.modelName : t.$type))
+            .join(" or ")}' is not assignable to '${
+            isModelType(to) ? to.modelName : to.$type
+          }'`
         );
   } else if (isMeasurementType(from) && isMeasurementType(to)) {
     return from.unitFamilyType.name === to.unitFamilyType.name

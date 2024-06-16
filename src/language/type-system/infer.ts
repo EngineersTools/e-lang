@@ -201,7 +201,12 @@ export function inferTypeReference(
     const memberTypes = typeRef.model.ref.properties.map((member) =>
       inferType(member, env)
     ) as ModelMemberType[];
-    resolvedType = createModelTypeDescription("declaration", memberTypes);
+    resolvedType = createModelTypeDescription(
+      "declaration",
+      memberTypes,
+      undefined,
+      typeRef.model.ref.name
+    );
   } else if (isMeasurementType(typeRef)) {
     resolvedType = inferMeasurement(typeRef, env);
   } else {
@@ -440,7 +445,12 @@ export function inferModelDeclaration(
     .filter((p) => p.ref && isModelDeclaration(p.ref))
     .map((m) => inferType(m.ref, env) as ModelType);
 
-  return createModelTypeDescription("declaration", propertyTypes, parentTypes);
+  return createModelTypeDescription(
+    "declaration",
+    propertyTypes,
+    parentTypes,
+    expr.name
+  );
 }
 
 export function inferModelValue(
@@ -450,7 +460,12 @@ export function inferModelValue(
   const memberTypes = expr.members.map((member) =>
     createModelMemberType(member.property, inferExpression(member, env))
   );
-  return createModelTypeDescription("value", memberTypes);
+  return createModelTypeDescription(
+    "value",
+    memberTypes,
+    undefined,
+    `{${memberTypes.map((m) => `${m.name}:${m.typeDesc.$type}`).join(", ")}}`
+  );
 }
 
 export function inferModelMemberAssignment(
