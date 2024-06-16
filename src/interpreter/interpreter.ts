@@ -33,7 +33,7 @@ export const services = createElangServices(NodeFileSystem);
  */
 async function buildDocument(program: string): Promise<BuildResult> {
   const uuid = v4();
-  const uri = URI.parse(`memory:///${uuid}.elang`);
+  const uri = URI.parse(`memory:///${uuid}.el`);
   const document = services.shared.workspace.LangiumDocumentFactory.fromString(
     program,
     uri

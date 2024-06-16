@@ -223,11 +223,11 @@ export function resolveImportUri(imp: Import): URI | undefined {
     return undefined;
   }
   const dirUri = UriUtils.dirname(getDocument(imp).uri);
-  let grammarPath = imp.importSource;
-  if (!grammarPath.endsWith(".el")) {
-    grammarPath += ".el";
+  let importPath = imp.importSource;
+  if (!importPath.endsWith(".el")) {
+    importPath += ".el";
   }
-  return UriUtils.resolvePath(dirUri, grammarPath);
+  return UriUtils.resolvePath(dirUri, importPath);
 }
 
 /**

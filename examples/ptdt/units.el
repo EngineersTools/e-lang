@@ -2,7 +2,7 @@ domain UnitsOfMeasure
 
 import './utils'
 
-unit_family Voltage {
+export unit_family Voltage {
     unit V:Volt
     unit kV:kiloVolt
 

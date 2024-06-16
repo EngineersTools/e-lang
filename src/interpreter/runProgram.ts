@@ -1,6 +1,6 @@
-import { UriUtils, interruptAndCheck } from "langium";
-import * as vscode from "vscode";
+import { interruptAndCheck } from "langium";
 import { CancellationTokenSource } from "vscode-languageserver";
+import { resolveImportUri } from "../language/elang-scope.js";
 import {
   ElangProgram,
   MeasurementLiteral,
@@ -67,35 +67,35 @@ export async function runProgram(
     // Get currently active notebook directory
     // All import references will be resolved
     // from this as s base
-    const currentDir = UriUtils.dirname(
-      (vscode.window.activeTextEditor as vscode.TextEditor).document.uri
-    );
+
+    // const currentDir
+    // const currentDir = UriUtils.dirname(
+    //   (vscode.window.activeTextEditor as vscode.TextEditor).document.uri
+    // );
 
     for (const imp of program.imports) {
       let importPath = imp.importSource;
-      if (
-        !imp.importSource.includes(".") &&
-        !imp.importSource.endsWith("el")
-      ) {
+      if (!importPath.endsWith(".el")) {
         importPath += ".el";
       }
 
-      const importUri = UriUtils.resolvePath(currentDir, importPath);
-      const importedDocument =
-        await services.shared.workspace.LangiumDocumentFactory.fromUri(
-          importUri
-        );
+      const importUri = resolveImportUri(imp);
 
-      if (importedDocument) {
-        const importedProgram = <ElangProgram>(
-          importedDocument.parseResult.value
-        );
+      if (importUri) {
+        const importedDocument =
+          services.shared.workspace.LangiumDocuments.getDocument(importUri);
 
-        program.statements = [
-          ...importedProgram.statements.filter(
-            (s) => isExportable(s) && s.export
-          ),
-        ];
+        if (importedDocument) {
+          const importedProgram = <ElangProgram>(
+            importedDocument.parseResult.value
+          );
+
+          program.statements.push(
+            ...importedProgram.statements.filter(
+              (s) => isExportable(s) && s.export
+            )
+          );
+        }
       }
     }
   }

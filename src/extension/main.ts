@@ -1,12 +1,12 @@
+import * as path from "node:path";
+import * as vscode from "vscode";
 import type {
   LanguageClientOptions,
   ServerOptions,
 } from "vscode-languageclient/node.js";
-import * as vscode from "vscode";
-import * as path from "node:path";
 import { LanguageClient, TransportKind } from "vscode-languageclient/node.js";
-import { ElangNotebookSerializer } from "../notebook/notebook-serialiser.js";
 import { ElangNotebookKernel } from "../notebook/notebook-kernel.js";
+import { ElangNotebookSerializer } from "../notebook/notebook-serialiser.js";
 
 let client: LanguageClient;
 
@@ -59,9 +59,8 @@ function startLanguageClient(context: vscode.ExtensionContext): LanguageClient {
     },
   };
 
-  const fileSystemWatcher = vscode.workspace.createFileSystemWatcher(
-    "**/*.{el,elnb}"
-  );
+  const fileSystemWatcher =
+    vscode.workspace.createFileSystemWatcher("**/*.{el,elnb}");
   context.subscriptions.push(fileSystemWatcher);
 
   // Options to control the language client
