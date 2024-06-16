@@ -127,7 +127,7 @@ export class ElangTypechecker {
           accept
         );
       } else {
-        const isAssignableResult = isAssignable(assignedType, exprType);
+        const isAssignableResult = isAssignable(exprType, assignedType);
         if (!isAssignableResult.result) {
           accept("error", isAssignableResult.reason, {
             node: stmt,

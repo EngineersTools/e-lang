@@ -104,41 +104,38 @@ export function isAssignable(
           `Type mismatch: '${from.itemType.$type}' is not assignable to '${to.itemType.$type}'`
       );
     }
-  } else if (isUnionType(to)) {
-    if (isUnionType(from)) {
-      const allToIncluded = to.types
-        .map((t) => t.$type)
-        .every((t) => from.types.map((t) => t.$type).includes(t));
-      const allFromIncluded = from.types
-        .map((t) => t.$type)
-        .every((t) => to.types.map((t) => t.$type).includes(t));
+  } else if (isUnionType(to) && isUnionType(from)) {
+    // If both are union types, check that all times in 'from'
+    // are contained in 'to'
+    const allFromIncluded = from.types
+      .map((t) => t.$type)
+      .every((t) => to.types.map((t) => t.$type).includes(t));
 
-      return allFromIncluded && allToIncluded
-        ? createAssignableResult()
-        : createNonAssignableResult(
-            from,
-            to,
-            `Type mismatch: '${from.types
-              .map((t) => t.$type)
-              .join(", ")}' is not assignable to '${to.types
-              .map((t) => t.$type)
-              .join(", ")}'`
-          );
-    } else {
-      const someIncluded = to.types.some((t) => t.$type === from.$type);
-      return someIncluded
-        ? createAssignableResult()
-        : createNonAssignableResult(
-            from,
-            to,
-            `Type mismatch: '${from.$type}' is not assignable to '${to.types
-              .map((t) => t.$type)
-              .join(", ")}'`
-          );
-    }
-  } else if (isUnionType(from)) {
-    const someIncluded = from.types.some((t) => t.$type === from.$type);
+    return allFromIncluded
+      ? createAssignableResult()
+      : createNonAssignableResult(
+          from,
+          to,
+          `Type mismatch: '${from.types
+            .map((t) => t.$type)
+            .join(", ")}' is not assignable to '${to.types
+            .map((t) => t.$type)
+            .join(", ")}'`
+        );
+  } else if (isUnionType(to)) {
+    const someIncluded = to.types.some((t) => t.$type === from.$type);
     return someIncluded
+      ? createAssignableResult()
+      : createNonAssignableResult(
+          from,
+          to,
+          `Type mismatch: '${from.$type}' is not assignable to '${to.types
+            .map((t) => t.$type)
+            .join(", ")}'`
+        );
+  } else if (isUnionType(from)) {
+    const allIncluded = from.types.every((t) => t.$type === from.$type);
+    return allIncluded
       ? createAssignableResult()
       : createNonAssignableResult(
           from,
