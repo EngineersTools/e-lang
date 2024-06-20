@@ -7,6 +7,7 @@ import {
   isModelMemberType,
   isModelType,
   isNullType,
+  isParameterType,
   isUnionType,
 } from "./descriptions.js";
 
@@ -155,6 +156,14 @@ export function isAssignable(
           from,
           to,
           `Type mismatch: Measurement units of family '${to.unitFamilyType.name}' are not assignable to Unit Family '${from.unitFamilyType.name}'`
+        );
+  } else if (isParameterType(from)) {
+    return isAssignable(from.typeDescription, to).result
+      ? createAssignableResult()
+      : createNonAssignableResult(
+          from.typeDescription,
+          to,
+          `Type mismatch: '${from.name}: ${from.typeDescription.$type}' is not assignable to '${to.$type}'`
         );
   }
 

@@ -24,11 +24,9 @@ export async function runVariableDeclaration(
 
       context.types.setVariableType(statement.name, type);
 
-      if (!isAssignable(type, valueType)) {
-        throw new AstNodeError(
-          statement,
-          "Invalid types between variable and its assigned value."
-        );
+      const isAssignableResult = isAssignable(type, valueType);
+      if (!isAssignableResult.result) {
+        throw new AstNodeError(statement, isAssignableResult.reason);
       }
 
       const value = statement.value

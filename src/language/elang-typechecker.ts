@@ -10,12 +10,16 @@ import {
   MutableDeclaration,
   PropertyDeclaration,
   Statement,
+  isBinaryExpression,
   isConstantDeclaration,
   isFormulaDeclaration,
+  isMatchStatement,
   isModelDeclaration,
+  isModelMemberCall,
   isModelValue,
   isMutableDeclaration,
   isReturnStatement,
+  isStatementBlock,
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import {
@@ -64,6 +68,35 @@ export class ElangTypechecker {
       this.typecheckFormulaDeclaration(env, stmt, accept);
     } else if (isConstantDeclaration(stmt) || isMutableDeclaration(stmt)) {
       this.typecheckVariableDeclarationStatement(env, stmt, accept);
+    } else if (isMatchStatement(stmt)) {
+      stmt.options.forEach((opt) => {
+        this.typecheckStatement(env, opt.condition, accept);
+        if (opt.block) this.typecheckStatement(env, opt.block, accept);
+        if (opt.value) this.typecheckStatement(env, opt.value, accept);
+      });
+      if (stmt.block) this.typecheckStatement(env, stmt.block, accept);
+      if (stmt.value) this.typecheckStatement(env, stmt.value, accept);
+    } else if (isStatementBlock(stmt)) {
+      stmt.statements.forEach((s) => this.typecheckStatement(env, s, accept));
+    } else if (isBinaryExpression(stmt)) {
+      switch (stmt.operator) {
+        case "=":
+          if (isModelMemberCall(stmt.left)) {
+            const to = env.getVariableType(stmt.left.element.$refText);
+            const from = inferType(stmt.right, env);
+
+            if (to && from) {
+              const assignable = isAssignable(from, to);
+
+              if (!assignable.result) {
+                accept("error", assignable.reason, {
+                  node: stmt,
+                  property: "right",
+                });
+              }
+            }
+          }
+      }
     }
   }
 
@@ -182,6 +215,8 @@ export class ElangTypechecker {
     const returnType = getReturnType(stmt.body, env);
 
     if (formulaTypeDescription && isFormulaType(formulaTypeDescription)) {
+      this.typecheckStatement(env, stmt.body, accept);
+
       const returnStatements = stmt.body.statements.filter((s) =>
         isReturnStatement(s)
       );
