@@ -22,6 +22,7 @@ import {
   isUnitFamilyDeclaration,
 } from "../language/generated/ast.js";
 import { inferType } from "../language/type-system/infer.js";
+import { runForStatement } from "../runForStatement.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { runExpression } from "./runExpression.js";
 import { runVariableDeclaration } from "./runVariableDeclaration.js";
@@ -48,27 +49,7 @@ export async function runElangStatement(
   if (isExpression(statement)) {
     await runExpression(statement, context);
   } else if (isForStatement(statement)) {
-    const { counter, from, to, step, block } = statement;
-    context.variables.enter();
-    context.types.enterScope();
-
-    if (counter) {
-      await runElangStatement(counter, context, returnFn);
-    }
-
-    const calcStep = step ? Number(await runExpression(step, context)) : 1;
-
-    for (
-      let i = Number(await runExpression(from, context));
-      i < Number(await runExpression(to, context));
-      i = i + calcStep
-    ) {
-      context.variables.set(counter, counter.name, i);
-      await runElangStatement(block, context, returnFn);
-    }
-
-    context.variables.leave();
-    context.types.leaveScope();
+    await runForStatement(statement, context, returnFn);
   } else if (isFormulaDeclaration(statement)) {
     context.types.setVariableType(
       statement.name,
