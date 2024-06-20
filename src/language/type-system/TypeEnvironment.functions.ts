@@ -260,7 +260,8 @@ export function addMatchStatement(
   env: TypeEnvironment
 ): void {
   stmt.options.forEach((opt) => {
-    addStatement(opt.body, env);
+    if (opt.block) addStatement(opt.block, env);
+    else if (opt.value) addStatement(opt.value, env);
   });
 }
 

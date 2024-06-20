@@ -36,13 +36,12 @@ export async function runVariableDeclaration(
         : null;
 
       context.variables.push(statement.name, value);
-    } else {
-      // The variable hasn't been assigned a value when declared
-      // In Elang, any variable that doesn't have a value
-      // is assigned the value of null
-      context.variables.push(statement.name, null);
+    } else if (isLambdaDeclaration(statement.value)) {
     }
-  } else if (isLambdaDeclaration(statement.value)) {
-    
+  } else {
+    // The variable hasn't been assigned a value when declared
+    // In Elang, any variable that doesn't have a value
+    // is assigned the value of null
+    context.variables.push(statement.name, null);
   }
 }

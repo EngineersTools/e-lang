@@ -94,14 +94,19 @@ IfStatement:
 ;
 
 ForStatement:
-    'for' '(' counter=VariableDeclaration 'from' from=Expression 'to' to=Expression 'step' step=Expression ')' block=StatementBlock
+    'for' '(' counter=VariableDeclaration 'from' from=Expression 'to' to=Expression ('step' step=Expression)? ')' block=StatementBlock
 ;
 
 MatchStatement:
     'match' condition=Expression '{'
-        options+=LambdaDeclaration 
-        (',' options+=LambdaDeclaration)*
+        options+=MatchOption
+        (options+=MatchOption)*
+        ('default' '=>' block=StatementBlock | value=Expression)?
     '}'
+;
+
+MatchOption:
+    condition=Expression '=>' (block=StatementBlock | value=Expression)
 ;
 
 PrintStatement:

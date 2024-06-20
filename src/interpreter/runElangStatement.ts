@@ -56,10 +56,12 @@ export async function runElangStatement(
       await runElangStatement(counter, context, returnFn);
     }
 
+    const calcStep = step ? Number(await runExpression(step, context)) : 1;
+
     for (
       let i = Number(await runExpression(from, context));
       i < Number(await runExpression(to, context));
-      i = i + Number(await runExpression(step, context))
+      i = i + calcStep
     ) {
       context.variables.set(counter, counter.name, i);
       await runElangStatement(block, context, returnFn);
@@ -117,9 +119,23 @@ export async function runElangStatement(
     }
   } else if (isMatchStatement(statement)) {
     const condition = await runExpression(statement.condition, context);
+    let matched = false;
     for (let i = 0; i < statement.options.length; i++) {
       const element = statement.options[i];
-      if (element.parameters == condition) context.log("Found it");
+      const elementValue = await runExpression(element.condition, context);
+      if (elementValue == condition) {
+        if (element.block) {
+          await runElangStatement(element.block, context, returnFn);
+        } else if (element.value) {
+          returnFn(element.value);
+        }
+        matched = true;
+      }
+    }
+    if (statement.block && !matched) {
+      await runElangStatement(statement.block, context, returnFn);
+    } else if (statement.value) {
+      returnFn(statement.value);
     }
   } else if (isModelDeclaration(statement)) {
     context.types.setVariableType(

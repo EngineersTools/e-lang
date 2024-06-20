@@ -15,7 +15,7 @@ import { runElangStatement } from "./runElangStatement.js";
 
 // A constant used to determine if the program has been running for
 // too long and execution needs to be cancelled
-export const TIMEOUT_MS = 1000 * 5;
+export const TIMEOUT_MS = 100000 * 5;
 
 /**
  * Main function that runs an Elang program. This is called by the interpreter
