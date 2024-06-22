@@ -63,7 +63,7 @@ export function isAssignable(
       : createNonAssignableResult(from, to);
   } else if (isFormulaType(from)) {
     if (!isFormulaType(to)) {
-      return createNonAssignableResult(from, to);
+      return isAssignable(from.returnType, to);
     } else if (!isAssignable(from.returnType, to.returnType).result) {
       return createNonAssignableResult(from, to);
     } else if (
