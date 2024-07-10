@@ -1,10 +1,10 @@
-import { RunnerContext } from "./interpreter/RunnerContext.js";
+import { RunnerContext } from "./RunnerContext.js";
 import {
     ReturnFunction,
     runElangStatement,
-} from "./interpreter/runElangStatement.js";
-import { runExpression } from "./interpreter/runExpression.js";
-import { ForStatement } from "./language/generated/ast.js";
+} from "./runElangStatement.js";
+import { runExpression } from "./runExpression.js";
+import { ForStatement } from "../language/generated/ast.js";
 
 export async function runForStatement(
   forStmt: ForStatement,

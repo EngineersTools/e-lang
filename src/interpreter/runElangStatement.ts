@@ -22,7 +22,7 @@ import {
   isUnitFamilyDeclaration,
 } from "../language/generated/ast.js";
 import { inferType } from "../language/type-system/infer.js";
-import { runForStatement } from "../runForStatement.js";
+import { runForStatement } from "./runForStatement.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { runExpression } from "./runExpression.js";
 import { runVariableDeclaration } from "./runVariableDeclaration.js";

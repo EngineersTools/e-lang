@@ -16,7 +16,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
       return {
         contents: {
           kind: "markdown",
-          language: "e-lang",
+          language: "elang",
           value: `(Constant) ${node.name}`,
         },
       };
@@ -24,7 +24,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
       return {
         contents: {
           kind: "markdown",
-          language: "e-lang",
+          language: "elang",
           value: `(Variable) ${node.name}`,
         },
       };
@@ -32,7 +32,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
       return {
         contents: {
           kind: "markdown",
-          language: "e-lang",
+          language: "elang",
           value: `(Unit) [${node.name}]: ${node.longName ?? ""}\n ${
             node.description ?? ""
           }`,
@@ -42,7 +42,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
       return {
         contents: {
           kind: "markdown",
-          language: "e-lang",
+          language: "elang",
           value: `(Unit Family) ${node.name} \n ${node.description ?? ""}`,
         },
       };
@@ -50,7 +50,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
       return {
         contents: {
           kind: "markdown",
-          language: "e-lang",
+          language: "elang",
           value: `(Model) ${node.name} { ${node.properties.map(
             (p) => `\n\t${p.name}: ${p.type.$type}`
           )} \n}`,
@@ -60,7 +60,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
       return {
         contents: {
           kind: "markdown",
-          language: "e-lang",
+          language: "elang",
           value: `(Model Property) ${node.name}: ${node.type.$type}`,
         },
       };

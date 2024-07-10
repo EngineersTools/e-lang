@@ -7,7 +7,6 @@ import {
   EMPTY_SCOPE,
   LangiumDocument,
   LangiumDocuments,
-  MapScope,
   MultiMap,
   PrecomputedScopes,
   ReferenceInfo,
@@ -48,28 +47,6 @@ export class ElangScopeProvider extends DefaultScopeProvider {
   protected readonly types: TypeEnvironment;
   protected readonly langiumDocuments: LangiumDocuments;
 
-  protected override getGlobalScope(
-    referenceType: string,
-    context: ReferenceInfo
-  ): Scope {
-    const elangProgram = getContainerOfType(context.container, isElangProgram);
-
-    if (!elangProgram) {
-      return EMPTY_SCOPE;
-    }
-
-    const importedUris = new Set<string>();
-
-    this.gatherImports(elangProgram, importedUris);
-
-    let importedElements = this.indexManager.allElements(
-      referenceType,
-      importedUris
-    );
-
-    return new MapScope(importedElements);
-  }
-
   override getScope(context: ReferenceInfo): Scope {
     if (
       context.property === "element" &&
@@ -95,11 +72,6 @@ export class ElangScopeProvider extends DefaultScopeProvider {
     return super.getScope(context);
   }
 
-  private scopeMemberTypes(memberTypes: ModelMemberType[]): Scope {
-    const allMembers = memberTypes.flatMap((e) => e.typeDesc);
-    return this.createScopeForNodes(allMembers);
-  }
-
   override createScopeForNodes(
     elements: Iterable<AstNode>,
     outerScope?: Scope | undefined,
@@ -120,6 +92,33 @@ export class ElangScopeProvider extends DefaultScopeProvider {
       .nonNullable();
 
     return new StreamScope(s, outerScope, options);
+  }
+
+  protected override getGlobalScope(
+    referenceType: string,
+    context: ReferenceInfo
+  ): Scope {
+    const elangProgram = getContainerOfType(context.container, isElangProgram);
+
+    if (!elangProgram) {
+      return EMPTY_SCOPE;
+    }
+
+    const importedUris = new Set<string>();
+
+    this.gatherImports(elangProgram, importedUris);
+
+    let importedElements = this.indexManager.allElements(
+      referenceType,
+      importedUris
+    );
+
+    return new StreamScope(importedElements);
+  }
+
+  private scopeMemberTypes(memberTypes: ModelMemberType[]): Scope {
+    const allMembers = memberTypes.flatMap((e) => e.typeDesc);
+    return this.createScopeForNodes(allMembers);
   }
 
   private gatherImports(
