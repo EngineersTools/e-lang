@@ -10,21 +10,17 @@ import {
   isIfStatement,
   isLambdaDeclaration,
   isMatchStatement,
-  isModelDeclaration,
   isModelMemberCall,
   isMutableDeclaration,
-  isParameterDeclaration,
   isPrintStatement,
   isProcedureDeclaration,
-  isPropertyDeclaration,
   isReturnStatement,
   isStatementBlock,
-  isUnitFamilyDeclaration,
+  isUnitFamilyDeclaration
 } from "../language/generated/ast.js";
-import { inferType } from "../language/type-system/infer.js";
+import { runExpression } from "./runExpression.js";
 import { runForStatement } from "./runForStatement.js";
 import { RunnerContext } from "./RunnerContext.js";
-import { runExpression } from "./runExpression.js";
 import { runVariableDeclaration } from "./runVariableDeclaration.js";
 import { serialiseExpression } from "./serialiseExpression.js";
 
@@ -51,16 +47,8 @@ export async function runELangStatement(
   } else if (isForStatement(statement)) {
     await runForStatement(statement, context, returnFn);
   } else if (isFormulaDeclaration(statement)) {
-    context.types.setVariableType(
-      statement.name,
-      inferType(statement, context.types)
-    );
     context.variables.push(statement.name, statement);
   } else if (isProcedureDeclaration(statement)) {
-    context.types.setVariableType(
-      statement.name,
-      inferType(statement, context.types)
-    );
     context.variables.push(statement.name, statement);
   } else if (isIfStatement(statement)) {
     const condition = await runExpression(statement.condition, context);
@@ -70,10 +58,6 @@ export async function runELangStatement(
       await runELangStatement(statement.elseBlock, context, returnFn);
     }
   } else if (isLambdaDeclaration(statement)) {
-    context.types.setVariableType(
-      statement.$type,
-      inferType(statement, context.types)
-    );
     // This caters for the case where the lambda is
     // immediately invoked
     if (statement.explicitOperationCall) {
@@ -82,21 +66,17 @@ export async function runELangStatement(
       );
 
       context.variables.enter();
-      context.types.enterScope();
 
       const names = statement.parameters.map((e) => e.name);
 
       for (let i = 0; i < statement.parameters.length; i++) {
         const argValue = args[i] ?? null;
         context.variables.push(names[i], argValue);
-        const type = inferType(statement.parameters[i], context.types);
-        context.types.setVariableType(statement.parameters[i].name, type);
       }
 
       await runELangStatement(statement.body, context, returnFn);
 
       context.variables.leave();
-      context.types.leaveScope();
     }
   } else if (isMatchStatement(statement)) {
     const condition = await runExpression(statement.condition, context);
@@ -118,22 +98,11 @@ export async function runELangStatement(
     } else if (statement.value) {
       returnFn(statement.value);
     }
-  } else if (isModelDeclaration(statement)) {
-    context.types.setVariableType(
-      statement.name,
-      inferType(statement, context.types)
-    );
   } else if (
     isConstantDeclaration(statement) ||
     isMutableDeclaration(statement)
   ) {
     await runVariableDeclaration(statement, context);
-  } else if (isParameterDeclaration(statement)) {
-    const type = inferType(statement, context.types);
-    context.types.setVariableType(statement.name, type);
-  } else if (isPropertyDeclaration(statement)) {
-    const type = inferType(statement, context.types);
-    context.types.setVariableType(statement.name, type);
   } else if (isPrintStatement(statement)) {
     if (isExpression(statement.value)) {
       context.log(await serialiseExpression(statement.value, context));
@@ -141,11 +110,6 @@ export async function runELangStatement(
       context.log("This statement or expression cannot be printed.");
     }
   } else if (isReturnStatement(statement)) {
-    context.types.setVariableType(
-      statement.$type,
-      inferType(statement, context.types)
-    );
-
     const result = statement.value
       ? await runExpression(statement.value, context)
       : null;
@@ -172,20 +136,6 @@ export async function runELangStatement(
   } else if (isModelMemberCall(statement)) {
     await runExpression(statement, context);
   } else if (isUnitFamilyDeclaration(statement)) {
-    context.types.setVariableType(
-      statement.name,
-      inferType(statement, context.types)
-    );
-
-    if (statement.units && statement.units.length > 0) {
-      for (const unit of statement.units) {
-        context.types.setVariableType(
-          unit.name,
-          inferType(unit, context.types)
-        );
-      }
-    }
-
     if (statement.conversions && statement.conversions.length > 0) {
       for (const conversion of statement.conversions) {
         if (conversion.from.ref && conversion.to.ref) {

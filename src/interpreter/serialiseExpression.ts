@@ -6,9 +6,8 @@ import {
   isListValue,
   isMeasurementLiteral,
   isModelValue,
-  isProcedureDeclaration
+  isProcedureDeclaration,
 } from "../language/generated/ast.js";
-import { inferType } from "../language/type-system/infer.js";
 import { typeToString } from "../language/type-system/typeToString.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
@@ -69,30 +68,24 @@ export async function serialiseExpression(
   } else if (isFormulaDeclaration(result) || isProcedureDeclaration(result)) {
     const params = result.parameters
       .map((e) => {
-        if (e.type)
-          return `${e.name}: ${typeToString(inferType(e.type, context.types))}`;
+        if (e.type) return `${e.name}: ${typeToString(e.type)}`;
         else return `${e.name}`;
       })
       .join(", ");
 
     if (result.returnType)
-      return `${result.name}(${params}) => ${typeToString(
-        inferType(result.returnType, context.types)
-      )}`;
+      return `${result.name}(${params}) => ${typeToString(result.returnType)}`;
     else return `${result.name}(${params})`;
   } else if (isLambdaDeclaration(result)) {
     const params = result.parameters
       .map((e) => {
-        if (e.type)
-          return `${e.name}: ${typeToString(inferType(e.type, context.types))}`;
+        if (e.type) return `${e.name}: ${typeToString(e.type)}`;
         else return `${e.name}`;
       })
       .join(", ");
 
     if (result.returnType)
-      return `(${params}) => ${typeToString(
-        inferType(result.returnType, context.types)
-      )}`;
+      return `(${params}) => ${typeToString(result.returnType)}`;
     else return `(${params})`;
   } else {
     return JSON.stringify(result);

@@ -13,7 +13,6 @@ export async function runForStatement(
 ): Promise<void> {
   const { counter, from, to, step, block } = forStmt;
   context.variables.enter();
-  context.types.enterScope();
 
   if (counter) {
     await runELangStatement(counter, context, returnFn);
@@ -31,5 +30,4 @@ export async function runForStatement(
   }
 
   context.variables.leave();
-  context.types.leaveScope();
 }

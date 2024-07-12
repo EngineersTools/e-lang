@@ -1,8 +1,9 @@
+import { TypeReference } from "../generated/ast.js";
 import { TypeDescription } from "./descriptions.js";
 
 // TO STRING
 
-export function typeToString(item: TypeDescription): string {
+export function typeToString(item: TypeDescription | TypeReference): string {
   // if (isModelType(item)) {
   //   return (
   //     item.declaration?.name ??

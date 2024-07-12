@@ -3,11 +3,10 @@ import { CancellationTokenSource } from "vscode-languageserver";
 import { resolveImportUri } from "../language/e-lang-scope.js";
 import {
   ELangProgram,
-  MeasurementLiteral,
   isExportable,
   isMeasurementLiteral,
+  MeasurementLiteral,
 } from "../language/generated/ast.js";
-import { TypeEnvironment } from "../language/type-system/TypeEnvironment.class.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { Variables } from "./Variables.js";
 import { InterpreterContext, services } from "./interpreter.js";
@@ -44,7 +43,6 @@ export async function runProgram(
   // Create a context for the run of this program
   const context: RunnerContext = outerRunnerContext ?? {
     variables: new Variables(),
-    types: new TypeEnvironment(),
     cancellationToken,
     timeout,
     // Pass the context and onStart function
@@ -55,7 +53,6 @@ export async function runProgram(
 
   // Initialise the Variables and Types objects of this program
   context.variables.enter();
-  context.types.enterScope();
 
   // If an onStart function was passed, run it now
   if (context.onStart) {
@@ -102,7 +99,6 @@ export async function runProgram(
 
   // If the program contains statements, run through
   // them in sequence
-
   let end = false;
 
   if (program.statements)
@@ -123,7 +119,6 @@ export async function runProgram(
 
   // Close and finalise the Variables and Types objects for this run
   context.variables.leave();
-  context.types.leaveScope();
 }
 
 export function isNumber(value: unknown): value is number {
