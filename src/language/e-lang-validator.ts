@@ -239,8 +239,8 @@ export class ELangValidator {
     value: ModelValue,
     accept: ValidationAcceptor
   ) {
-    const from = env.getRegisteredType(declaration.name);
-    const to = inferType(value, env);
+    const to = env.getRegisteredType(declaration.name);
+    const from = inferType(value, env);
 
     if (from && to && isModelType(from) && isModelType(to)) {
       from.memberTypes.forEach((member) => {

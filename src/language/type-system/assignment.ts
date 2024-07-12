@@ -49,8 +49,7 @@ export function isAssignable(
         : createNonAssignableResult(from, to, messages.join("\n"));
     }
   } else if (isModelMemberType(from) && isModelMemberType(to)) {
-    return from.$type === to.$type &&
-      isAssignable(from.typeDesc, to.typeDesc).result
+    return isAssignable(from.typeDesc, to.typeDesc).result
       ? createAssignableResult()
       : createNonAssignableResult(
           from,

@@ -296,6 +296,12 @@ export function inferPropertyDeclaration(
     if (propType) {
       return createModelMemberType(expr.name, propType, expr.isOptional);
     }
+  } else if (isTypeUnion(expr.type)) {
+    return createModelMemberType(
+      expr.name,
+      inferType(expr.type, env),
+      expr.isOptional
+    );
   } else if (isMeasurementType(expr.type)) {
     return createModelMemberType(
       expr.name,
