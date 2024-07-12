@@ -1,6 +1,6 @@
 # e-lang
 
-![e-lang logo](./img/e-lang-social-card.png)
+![e-lang logo](/img/elang-social-card.png)
 
 `e-lang` is an experimental programming language that provides higher level abstractions specific to the needs of engineering disciplines.
 
