@@ -1,4 +1,4 @@
-import { interruptAndCheck } from "langium";
+import { interruptAndCheck, ValidationAcceptor } from "langium";
 import { CancellationTokenSource } from "vscode-languageserver";
 import { resolveImportUri } from "../language/e-lang-scope.js";
 import {
@@ -96,6 +96,15 @@ export async function runProgram(
       }
     }
   }
+
+  // Typecheck the program
+  const validator: ValidationAcceptor = (severity, message, info) => {
+    if (severity === "error") {
+      throw new Error(message);
+    }
+  };
+
+  services.ELang.validation.ELangValidator.typecheckProgram(program, validator);
 
   // If the program contains statements, run through
   // them in sequence
