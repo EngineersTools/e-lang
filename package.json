@@ -1,7 +1,7 @@
 {
-  "name": "elang",
+  "name": "e-lang",
   "description": "The engineering programming language",
-  "icon": "elang-social-card.png",
+  "icon": "img/elang-social-card.png",
   "repository": {
     "url": "https://github.com/EngineersTools/elang"
   },
@@ -23,48 +23,49 @@
     "lint": "eslint src --ext ts",
     "langium:generate": "langium generate",
     "langium:watch": "langium generate --watch",
-    "vscode:prepublish": "npm run esbuild-base -- --minify && npm run lint",
-    "esbuild-base": "esbuild ./src/extension/main.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
-    "prepare:static": "node ./scripts/prepare.js",
-    "build:web": "bun run build && bun run prepare:static && bun run build:monarch && bun run build:worker && bun run build:bundle",
-    "build:monarch": "tsc -b tsconfig.monarch.json",
-    "build:bundle": "vite --config ./vite.bundle.config.ts build",
-    "build:worker": "esbuild --minify ./out/language/main-browser.js --bundle --format=iife --outfile=./static/worker/elang-server-worker.js",
+    "vscode:prepublish": "npm run build && npm run lint",
+    "build:web": "npm run build",
+    "bundle": "vite build",
+    "bundle:serve": "http-server ./dist --port 5175",
     "dev": "vite",
     "dev:debug": "vite --debug --force",
-    "serve": "bun run dev",
+    "serve": "npm run dev",
     "test": "vitest run"
   },
   "dependencies": {
-    "@codingame/monaco-vscode-editor-service-override": "1.83.16",
-    "@codingame/monaco-vscode-keybindings-service-override": "1.83.16",
-    "chalk": "^5.3.0",
-    "commander": "^11.1.0",
-    "langium": "^3.1.2",
-    "monaco-editor": "npm:@codingame/monaco-editor-treemended@1.83.16",
-    "monaco-editor-workers": "^0.44.0",
-    "monaco-editor-wrapper": "^3.6.0",
-    "monaco-languageclient": "^7.3.0",
-    "uuid": "^9.0.1",
-    "vscode-languageclient": "^9.0.1",
-    "vscode-languageserver": "^9.0.1"
+    "@codingame/monaco-vscode-editor-service-override": "~3.2.3",
+    "@codingame/monaco-vscode-keybindings-service-override": "~3.2.3",
+    "chalk": "~5.3.0",
+    "commander": "~11.0.0",
+    "langium": "~3.1.0",
+    "monaco-editor": "npm:@codingame/monaco-vscode-editor-api@~3.2.3",
+    "monaco-editor-wrapper": "~4.0.2",
+    "monaco-languageclient": "~8.1.1",
+    "uuid": "^10.0.0",
+    "vscode-languageclient": "~9.0.1",
+    "vscode-languageserver": "~9.0.1"
   },
   "devDependencies": {
-    "@types/node": "^18.19.39",
-    "@types/uuid": "^9.0.8",
-    "@types/vscode": "^1.91.0",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "concurrently": "^8.2.2",
-    "esbuild": "^0.19.12",
-    "eslint": "^8.57.0",
-    "langium-cli": "^3.1.0",
-    "typescript": "^5.5.3",
-    "vite": "^5.3.3",
-    "vitest": "^1.6.0",
-    "vscode": "npm:@codingame/monaco-vscode-api@1.83.16"
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/parser": "~7.3.1",
+    "@typescript-eslint/eslint-plugin": "~7.3.1",
+    "eslint": "~8.57.0",
+    "langium-cli": "~3.1.0",
+    "typescript": "~5.1.6",
+    "@types/vscode": "~1.67.0",
+    "concurrently": "~8.2.1",
+    "esbuild": "~0.20.2",
+    "@codingame/esbuild-import-meta-url-plugin": "~1.0.2",
+    "vite": "~5.2.7",
+    "http-server": "~14.1.1",
+    "vitest": "~1.4.0",
+    "vscode": "npm:@codingame/monaco-vscode-api@~3.2.3"
   },
-  "displayName": "elang",
+  "volta": {
+    "node": "18.19.1",
+    "npm": "10.2.4"
+  },
+  "displayName": "e-lang",
   "engines": {
     "vscode": "^1.67.0",
     "node": ">=18.0.0"
@@ -75,54 +76,35 @@
   "contributes": {
     "languages": [
       {
-        "id": "elang",
+        "id": "e-lang",
         "aliases": [
-          "Elang",
-          "elang"
+          "e-lang",
+          "e-lang"
         ],
         "extensions": [
           ".el",
           ".elnb"
         ],
         "icon": {
-          "dark": "./elang-file-icon-dark.png",
-          "light": "./elang-file-icon-light.png"
+          "dark": "./img/elang-file-icon-dark.png",
+          "light": "./img/elang-file-icon-light.png"
         },
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
       {
-        "language": "elang",
-        "scopeName": "source.elang",
-        "path": "syntaxes/elang.tmLanguage.json"
-      }
-    ],
-    "notebooks": [
-      {
-        "type": "elang-notebook",
-        "displayName": "Elang Notebook",
-        "selector": [
-          {
-            "filenamePattern": "*.elnb"
-          }
-        ]
+        "language": "e-lang",
+        "scopeName": "source.e-lang",
+        "path": "syntaxes/e-lang.tmLanguage.json"
       }
     ]
   },
   "activationEvents": [
-    "onLanguage:elang"
+    "onLanguage:e-lang"
   ],
   "main": "./out/extension/main.cjs",
   "bin": {
-    "elang-cli": "./bin/cli.js"
-  },
-  "overrides": {
-    "monaco-editor": "$monaco-editor",
-    "vscode": "$vscode"
-  },
-  "resolutions": {
-    "monaco-editor": "bun:@codingame/monaco-editor-treemended@1.83.16",
-    "vscode": "bun:@codingame/monaco-vscode-api@1.83.16"
+    "e-lang-cli": "./bin/cli.js"
   }
 }

@@ -20,7 +20,7 @@ import {
   StatementBlock,
   UnitFamilyDeclaration,
   isConstantDeclaration,
-  isElangProgram,
+  isELangProgram,
   isExpression,
   isForStatement,
   isFormulaDeclaration,
@@ -48,7 +48,7 @@ export function buildTypeEnvironment(
   ast: AstNode,
   env: TypeEnvironment = new TypeEnvironment()
 ): TypeEnvironment {
-  if (isElangProgram(ast)) {
+  if (isELangProgram(ast)) {
     for (const stmt of ast.statements) {
       addStatement(stmt, env);
     }

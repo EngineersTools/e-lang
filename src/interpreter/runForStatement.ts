@@ -1,8 +1,8 @@
 import { RunnerContext } from "./RunnerContext.js";
 import {
     ReturnFunction,
-    runElangStatement,
-} from "./runElangStatement.js";
+    runELangStatement,
+} from "./runELangStatement.js";
 import { runExpression } from "./runExpression.js";
 import { ForStatement } from "../language/generated/ast.js";
 
@@ -16,7 +16,7 @@ export async function runForStatement(
   context.types.enterScope();
 
   if (counter) {
-    await runElangStatement(counter, context, returnFn);
+    await runELangStatement(counter, context, returnFn);
   }
 
   const calcStep = step ? Number(await runExpression(step, context)) : 1;
@@ -27,7 +27,7 @@ export async function runForStatement(
     i = i + calcStep
   ) {
     context.variables.set(counter, counter.name, i);
-    await runElangStatement(block, context, returnFn);
+    await runELangStatement(block, context, returnFn);
   }
 
   context.variables.leave();

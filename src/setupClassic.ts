@@ -1,17 +1,15 @@
-import { addMonacoStyles, defineUserServices, MonacoEditorLanguageClientWrapper } from './bundle/index.js';
-import monarchSyntax from "../syntaxes/elang.monarch.js";
-import { configureWorker } from './setup.js';
+import { MonacoEditorLanguageClientWrapper, UserConfig } from 'monaco-editor-wrapper';
+import { configureWorker, defineUserServices } from './setupCommon.js';
+import monarchSyntax from "./syntaxes/e-lang.monarch.js";
 
-addMonacoStyles('monaco-editor-styles');
-
-export const setupConfigClassic = () => {
+export const setupConfigClassic = (): UserConfig => {
     return {
         wrapperConfig: {
             serviceConfig: defineUserServices(),
             editorAppConfig: {
                 $type: 'classic',
-                languageId: 'elang',
-                code: `// Elang is running in the web!`,
+                languageId: 'e-lang',
+                code: `// e-lang is running in the web!`,
                 useDiffEditor: false,
                 languageExtensionConfig: { id: 'langium' },
                 languageDef: monarchSyntax,
@@ -25,7 +23,7 @@ export const setupConfigClassic = () => {
     };
 };
 
-export const executeClassic = async (htmlElement) => {
+export const executeClassic = async (htmlElement: HTMLElement) => {
     const userConfig = setupConfigClassic();
     const wrapper = new MonacoEditorLanguageClientWrapper();
     await wrapper.initAndStart(userConfig, htmlElement);

@@ -2,7 +2,7 @@ import { AstNode } from "langium";
 
 /**
  * A class used to represent errors in the execution of specific
- * AstNodes of an Elang program. The error retrieves and outputs
+ * AstNodes of an ELang program. The error retrieves and outputs
  * the position in which the error is found.
  */
 

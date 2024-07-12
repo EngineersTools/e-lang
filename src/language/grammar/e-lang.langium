@@ -1,10 +1,10 @@
-grammar Elang
+grammar ELang
 
-import './elang-terminals'
-import './elang-types'
-import './elang-expressions'
+import './e-lang-terminals'
+import './e-lang-types'
+import './e-lang-expressions'
 
-entry ElangProgram:
+entry ELangProgram:
     Domain
     (imports+=Import (imports+=Import)*)?
     (statements+=Statement (statements+=Statement)*)?

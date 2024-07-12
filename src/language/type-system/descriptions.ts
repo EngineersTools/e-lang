@@ -1,6 +1,6 @@
 /**
  * This modulde contains all the type descriptions
- * used in the type system of the elang language.
+ * used in the type system of the e-lang language.
  */
 
 import { AstNode } from "langium";

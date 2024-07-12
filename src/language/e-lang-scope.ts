@@ -22,10 +22,10 @@ import { LangiumServices } from "langium/lsp";
 import { CancellationToken } from "vscode-jsonrpc";
 import { getQualifiedName } from "../interpreter/AstNode.utils.js";
 import {
-  ElangProgram,
+  ELangProgram,
   Import,
   isConstantDeclaration,
-  isElangProgram,
+  isELangProgram,
   isExportable,
   isModelMemberAssignment,
   isModelMemberCall,
@@ -37,7 +37,7 @@ import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import { ModelMemberType, isModelType } from "./type-system/descriptions.js";
 import { inferType } from "./type-system/infer.js";
 
-export class ElangScopeProvider extends DefaultScopeProvider {
+export class ELangScopeProvider extends DefaultScopeProvider {
   constructor(services: LangiumServices) {
     super(services);
     this.langiumDocuments = services.shared.workspace.LangiumDocuments;
@@ -98,7 +98,7 @@ export class ElangScopeProvider extends DefaultScopeProvider {
     referenceType: string,
     context: ReferenceInfo
   ): Scope {
-    const elangProgram = getContainerOfType(context.container, isElangProgram);
+    const elangProgram = getContainerOfType(context.container, isELangProgram);
 
     if (!elangProgram) {
       return EMPTY_SCOPE;
@@ -122,7 +122,7 @@ export class ElangScopeProvider extends DefaultScopeProvider {
   }
 
   private gatherImports(
-    elangProgram: ElangProgram,
+    elangProgram: ELangProgram,
     importedUris: Set<string>
   ): void {
     for (const imp0rt of elangProgram.imports) {
@@ -132,7 +132,7 @@ export class ElangScopeProvider extends DefaultScopeProvider {
         const importedDocument = this.langiumDocuments.getDocument(uri);
         if (importedDocument) {
           const rootNode = importedDocument.parseResult.value;
-          if (isElangProgram(rootNode)) {
+          if (isELangProgram(rootNode)) {
             this.gatherImports(rootNode, importedUris);
           }
         }
@@ -141,7 +141,7 @@ export class ElangScopeProvider extends DefaultScopeProvider {
   }
 }
 
-export class ElangScopeComputation extends DefaultScopeComputation {
+export class ELangScopeComputation extends DefaultScopeComputation {
   constructor(services: LangiumServices) {
     super(services);
   }
@@ -164,7 +164,7 @@ export class ElangScopeComputation extends DefaultScopeComputation {
     const scopes = new MultiMap<AstNode, AstNodeDescription>();
 
     for (const node of AstUtils.streamAllContents(
-      document.parseResult.value as ElangProgram
+      document.parseResult.value as ELangProgram
     )) {
       await interruptAndCheck(cancelToken);
 

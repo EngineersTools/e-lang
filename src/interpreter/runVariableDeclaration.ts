@@ -38,7 +38,7 @@ export async function runVariableDeclaration(
     }
   } else {
     // The variable hasn't been assigned a value when declared
-    // In Elang, any variable that doesn't have a value
+    // In ELang, any variable that doesn't have a value
     // is assigned the value of null
     context.variables.push(statement.name, null);
   }

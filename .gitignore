@@ -7,7 +7,7 @@
 node_modules/
 out/
 src/language/generated/
+syntaxes/
 static/bundle/
 static/monaco-editor-workers/
 static/worker/
-syntaxes/

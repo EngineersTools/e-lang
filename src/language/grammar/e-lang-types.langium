@@ -1,5 +1,5 @@
-import './elang-terminals'
-import './elang'
+import './e-lang-terminals'
+import './e-lang'
 
 ModelDeclaration:
     (export?='export')? 'model' name=ID ('extends' parentTypes+=[ModelDeclaration:ID] (',' parentTypes+=[ModelDeclaration:ID])*)? PropertyBlock

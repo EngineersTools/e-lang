@@ -2,16 +2,16 @@ import { beforeAll, describe, expect, test } from "vitest";
 import { EmptyFileSystem, type LangiumDocument } from "langium";
 import { expandToString as s } from "langium/generate";
 import { parseHelper } from "langium/test";
-import { createElangServices } from "../../src/language/elang-module.js";
+import { createELangServices } from "../../src/language/e-lang-module.js";
 import { Model, isModel } from "../../src/language/generated/ast.js";
 
-let services: ReturnType<typeof createElangServices>;
+let services: ReturnType<typeof createELangServices>;
 let parse:    ReturnType<typeof parseHelper<Model>>;
 let document: LangiumDocument<Model> | undefined;
 
 beforeAll(async () => {
-    services = createElangServices(EmptyFileSystem);
-    parse = parseHelper<Model>(services.Elang);
+    services = createELangServices(EmptyFileSystem);
+    parse = parseHelper<Model>(services.ELang);
 
     // activate the following if your linking test requires elements from a built-in library, for example
     // await services.shared.workspace.WorkspaceManager.initializeWorkspace([]);
@@ -19,7 +19,7 @@ beforeAll(async () => {
 
 describe('Parsing tests', () => {
 
-    test.skip('parse simple model', async () => {
+    test('parse simple model', async () => {
         document = await parse(`
             person Langium
             Hello Langium!

@@ -1,7 +1,7 @@
 import { EmptyFileSystem } from 'langium';
 import { startLanguageServer } from 'langium/lsp';
 import { BrowserMessageReader, BrowserMessageWriter, createConnection } from 'vscode-languageserver/browser.js';
-import { createElangServices } from './elang-module.js';
+import { createELangServices } from './e-lang-module.js';
 
 declare const self: DedicatedWorkerGlobalScope;
 
@@ -10,6 +10,6 @@ const messageWriter = new BrowserMessageWriter(self);
 
 const connection = createConnection(messageReader, messageWriter);
 
-const { shared } = createElangServices({ connection, ...EmptyFileSystem });
+const { shared } = createELangServices({ connection, ...EmptyFileSystem });
 
 startLanguageServer(shared);

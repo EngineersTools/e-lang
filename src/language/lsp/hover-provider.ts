@@ -10,13 +10,13 @@ import {
   isUnitFamilyDeclaration,
 } from "../generated/ast.js";
 
-export class ElangHoverProvider extends AstNodeHoverProvider {
+export class ELangHoverProvider extends AstNodeHoverProvider {
   protected getAstNodeHoverContent(node: AstNode): Hover | undefined {
     if (isConstantDeclaration(node)) {
       return {
         contents: {
           kind: "markdown",
-          language: "elang",
+          language: "e-lang",
           value: `(Constant) ${node.name}`,
         },
       };
@@ -24,7 +24,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
       return {
         contents: {
           kind: "markdown",
-          language: "elang",
+          language: "e-lang",
           value: `(Variable) ${node.name}`,
         },
       };
@@ -32,7 +32,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
       return {
         contents: {
           kind: "markdown",
-          language: "elang",
+          language: "e-lang",
           value: `(Unit) [${node.name}]: ${node.longName ?? ""}\n ${
             node.description ?? ""
           }`,
@@ -42,7 +42,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
       return {
         contents: {
           kind: "markdown",
-          language: "elang",
+          language: "e-lang",
           value: `(Unit Family) ${node.name} \n ${node.description ?? ""}`,
         },
       };
@@ -50,7 +50,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
       return {
         contents: {
           kind: "markdown",
-          language: "elang",
+          language: "e-lang",
           value: `(Model) ${node.name} { ${node.properties.map(
             (p) => `\n\t${p.name}: ${p.type.$type}`
           )} \n}`,
@@ -60,7 +60,7 @@ export class ElangHoverProvider extends AstNodeHoverProvider {
       return {
         contents: {
           kind: "markdown",
-          language: "elang",
+          language: "e-lang",
           value: `(Model Property) ${node.name}: ${node.type.$type}`,
         },
       };

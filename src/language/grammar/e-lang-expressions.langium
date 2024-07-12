@@ -1,5 +1,5 @@
-import './elang-terminals'
-import './elang-types'
+import './e-lang-terminals'
+import './e-lang-types'
 
 Expression:
     Assignment

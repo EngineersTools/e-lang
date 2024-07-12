@@ -16,8 +16,8 @@ interface RawNotebookCell {
     editable?: boolean;
 }
 
-export class ElangNotebookSerializer implements vscode.NotebookSerializer {
-    public readonly label: string = 'Elang Content Serializer';
+export class ELangNotebookSerializer implements vscode.NotebookSerializer {
+    public readonly label: string = 'ELang Content Serializer';
 
     public async deserializeNotebook(data: Uint8Array, token: vscode.CancellationToken): Promise<vscode.NotebookData> {
         var contents = new TextDecoder().decode(data);    // convert to String to make JSON object

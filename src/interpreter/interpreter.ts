@@ -1,9 +1,9 @@
 import { MaybePromise, URI } from "langium";
 import { NodeFileSystem } from "langium/node";
 import { v4 } from "uuid";
-import { createElangServices } from "../language/elang-module.js";
+import { createELangServices } from "../language/e-lang-module.js";
 import {
-  ElangProgram
+  ELangProgram
 } from "../language/generated/ast.js";
 import { BuildResult } from "./BuildResult.js";
 import { runProgram } from "./runProgram.js";
@@ -23,12 +23,12 @@ export interface InterpreterContext {
   onStart?: () => void;
 }
 
-export const services = createElangServices(NodeFileSystem);
+export const services = createELangServices(NodeFileSystem);
 
 /**
  * A function that builds a LangiumDocument in memory from
- * the text of an Elang program
- * @param program The text with the Elang program code
+ * the text of an ELang program
+ * @param program The text with the ELang program code
  * @returns A promise with the built document
  */
 async function buildDocument(program: string): Promise<BuildResult> {
@@ -49,7 +49,7 @@ async function buildDocument(program: string): Promise<BuildResult> {
 }
 
 /**
- * Runs an Elang program. This is the entry point of a program
+ * Runs an ELang program. This is the entry point of a program
  * execution as called by the notebook-kernel or the cli.
  * @param program Text containing the code of the program
  * @param context The context in which this program is running
@@ -64,8 +64,8 @@ export async function runInterpreter(
   // Try to run the built program
   try {
     // Take the result of parsing the built document and parse it as an
-    // Elang program type
-    const elangProgram = <ElangProgram>buildResult.document.parseResult.value;
+    // ELang program type
+    const elangProgram = <ELangProgram>buildResult.document.parseResult.value;
     await runProgram(elangProgram, context);
   } finally {
     // Call the 'dispose()' function after the program is finished

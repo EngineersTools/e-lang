@@ -4,12 +4,12 @@ import {
   ValidationChecks,
   ValidationRegistry,
 } from "langium";
-import { ElangServices } from "./elang-module.js";
+import { ELangServices } from "./e-lang-module.js";
 import {
   BinaryExpression,
   ConstantDeclaration,
-  ElangAstType,
-  ElangProgram,
+  ELangAstType,
+  ELangProgram,
   Expression,
   FormulaDeclaration,
   LambdaDeclaration,
@@ -48,12 +48,12 @@ import { inferType } from "./type-system/infer.js";
 import { isLegalOperation } from "./type-system/operator.js";
 import { typeToString } from "./type-system/typeToString.js";
 
-export class ElangValidationRegistry extends ValidationRegistry {
-  constructor(services: ElangServices) {
+export class ELangValidationRegistry extends ValidationRegistry {
+  constructor(services: ELangServices) {
     super(services);
-    const validator = services.validation.ElangValidator;
-    const checks: ValidationChecks<ElangAstType> = {
-      ElangProgram: validator.typecheckProgram,
+    const validator = services.validation.ELangValidator;
+    const checks: ValidationChecks<ELangAstType> = {
+      ELangProgram: validator.typecheckProgram,
       PropertyDeclaration: validator.checkModelPropertiesAreNotDuplicated,
       // ModelDeclaration: validator.checkParentModelsForDuplicatedProperties,
       // PropertyDeclaration: validator.checkModelPropertiesAreNotDuplicated,
@@ -101,12 +101,12 @@ export class ElangValidationRegistry extends ValidationRegistry {
 /**
  * Implementation of custom validations.
  */
-export class ElangValidator {
+export class ELangValidator {
   private getTypeCache(): TypeEnvironment {
     return new TypeEnvironment();
   }
 
-  typecheckProgram(program: ElangProgram, accept: ValidationAcceptor): void {
+  typecheckProgram(program: ELangProgram, accept: ValidationAcceptor): void {
     const env = new TypeEnvironment();
 
     env.enterScope();

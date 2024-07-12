@@ -8,7 +8,7 @@ import {
 } from "../language/generated/ast.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { getConversion } from "./getConversion.js";
-import { runElangStatement } from "./runElangStatement.js";
+import { runELangStatement } from "./runELangStatement.js";
 import { runExpression } from "./runExpression.js";
 
 export async function convertMeasurements(
@@ -44,7 +44,7 @@ export async function convertMeasurements(
           convertedMeasurement.unit = right.unit;
         }
       } else {
-        await runElangStatement(conversion.body, context, (val) => {
+        await runELangStatement(conversion.body, context, (val) => {
           convertedMeasurement = val;
         });
       }
@@ -71,7 +71,7 @@ export async function convertMeasurements(
           convertedMeasurement.unit = right.unit;
         }
       } else {
-        await runElangStatement(conversion.ref.body, context, (val) => {
+        await runELangStatement(conversion.ref.body, context, (val) => {
           convertedMeasurement = val;
         });
       }

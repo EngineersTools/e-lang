@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import { runInterpreter } from "../interpreter/interpreter.js";
 
-export class ElangNotebookKernel {
-  readonly id = "elang-kernel";
-  public readonly label = "Elang Kernel";
-  readonly supportedLanguages = ["elang"];
+export class ELangNotebookKernel {
+  readonly id = "e-lang-kernel";
+  public readonly label = "ELang Kernel";
+  readonly supportedLanguages = ["e-lang"];
 
   private _executionOrder = 0;
   private readonly _controller: vscode.NotebookController;
@@ -12,7 +12,7 @@ export class ElangNotebookKernel {
   constructor() {
     this._controller = vscode.notebooks.createNotebookController(
       this.id,
-      "elang-notebook",
+      "e-lang-notebook",
       this.label
     );
 
@@ -67,7 +67,7 @@ export class ElangNotebookKernel {
       execution.end(true, Date.now());
     } catch (err) {
       const errString = err instanceof Error ? err.message : String(err);
-      const errName = err instanceof Error ? err.name : "elang error";
+      const errName = err instanceof Error ? err.name : "e-lang error";
       await execution.appendOutput(
         new vscode.NotebookCellOutput([
           vscode.NotebookCellOutputItem.error({

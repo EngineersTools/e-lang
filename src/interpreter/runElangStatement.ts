@@ -31,13 +31,13 @@ import { serialiseExpression } from "./serialiseExpression.js";
 export type ReturnFunction = (value: unknown) => void;
 
 /**
- * This function runs an individual Elang Statement
- * @param statement The Elang statement to be run
+ * This function runs an individual ELang Statement
+ * @param statement The ELang statement to be run
  * @param context The context in which this statement is running
  * @param returnFn A return function that indicates if the statement
  *                 returns anything????
  */
-export async function runElangStatement(
+export async function runELangStatement(
   statement: Statement,
   context: RunnerContext,
   returnFn: ReturnFunction
@@ -65,9 +65,9 @@ export async function runElangStatement(
   } else if (isIfStatement(statement)) {
     const condition = await runExpression(statement.condition, context);
     if (Boolean(condition)) {
-      await runElangStatement(statement.block, context, returnFn);
+      await runELangStatement(statement.block, context, returnFn);
     } else if (statement.elseBlock) {
-      await runElangStatement(statement.elseBlock, context, returnFn);
+      await runELangStatement(statement.elseBlock, context, returnFn);
     }
   } else if (isLambdaDeclaration(statement)) {
     context.types.setVariableType(
@@ -93,7 +93,7 @@ export async function runElangStatement(
         context.types.setVariableType(statement.parameters[i].name, type);
       }
 
-      await runElangStatement(statement.body, context, returnFn);
+      await runELangStatement(statement.body, context, returnFn);
 
       context.variables.leave();
       context.types.leaveScope();
@@ -106,7 +106,7 @@ export async function runElangStatement(
       const elementValue = await runExpression(element.condition, context);
       if (elementValue == condition) {
         if (element.block) {
-          await runElangStatement(element.block, context, returnFn);
+          await runELangStatement(element.block, context, returnFn);
         } else if (element.value) {
           returnFn(element.value);
         }
@@ -114,7 +114,7 @@ export async function runElangStatement(
       }
     }
     if (statement.block && !matched) {
-      await runElangStatement(statement.block, context, returnFn);
+      await runELangStatement(statement.block, context, returnFn);
     } else if (statement.value) {
       returnFn(statement.value);
     }
@@ -163,7 +163,7 @@ export async function runElangStatement(
     };
 
     for (const subStatement of statement.statements) {
-      await runElangStatement(subStatement, context, blockReturn);
+      await runELangStatement(subStatement, context, blockReturn);
       if (end) {
         break;
       }

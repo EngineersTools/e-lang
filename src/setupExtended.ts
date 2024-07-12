@@ -1,26 +1,22 @@
-import { addMonacoStyles, defineUserServices, MonacoEditorLanguageClientWrapper } from './bundle/index.js';
-import { configureWorker } from './setup.js';
+import { MonacoEditorLanguageClientWrapper, UserConfig } from 'monaco-editor-wrapper';
+import { configureWorker, defineUserServices } from './setupCommon.js';
 
-addMonacoStyles('monaco-editor-styles');
-
-export const setupConfigExtended = () => {
+export const setupConfigExtended = (): UserConfig => {
     const extensionFilesOrContents = new Map();
-    const languageConfigUrl = new URL('../language-configuration.json', window.location.href);
-    const textmateConfigUrl = new URL('../syntaxes/elang.tmLanguage.json', window.location.href);
-    extensionFilesOrContents.set('/language-configuration.json', languageConfigUrl);
-    extensionFilesOrContents.set('/elang-grammar.json', textmateConfigUrl);
+    extensionFilesOrContents.set('/language-configuration.json', new URL('../language-configuration.json', import.meta.url));
+    extensionFilesOrContents.set('/e-lang-grammar.json', new URL('../syntaxes/e-lang.tmLanguage.json', import.meta.url));
 
     return {
         wrapperConfig: {
             serviceConfig: defineUserServices(),
             editorAppConfig: {
                 $type: 'extended',
-                languageId: 'elang',
-                code: `// Elang is running in the web!`,
+                languageId: 'e-lang',
+                code: `// e-lang is running in the web!`,
                 useDiffEditor: false,
                 extensions: [{
                     config: {
-                        name: 'elang-web',
+                        name: 'e-lang-web',
                         publisher: 'generator-langium',
                         version: '1.0.0',
                         engines: {
@@ -28,16 +24,16 @@ export const setupConfigExtended = () => {
                         },
                         contributes: {
                             languages: [{
-                                id: 'elang',
+                                id: 'e-lang',
                                 extensions: [
-                                    '.elang'
+                                    '.e-lang'
                                 ],
                                 configuration: './language-configuration.json'
                             }],
                             grammars: [{
-                                language: 'elang',
-                                scopeName: 'source.elang',
-                                path: './elang-grammar.json'
+                                language: 'e-lang',
+                                scopeName: 'source.e-lang',
+                                path: './e-lang-grammar.json'
                             }]
                         }
                     },
@@ -55,7 +51,7 @@ export const setupConfigExtended = () => {
     };
 };
 
-export const executeExtended = async (htmlElement) => {
+export const executeExtended = async (htmlElement: HTMLElement) => {
     const userConfig = setupConfigExtended();
     const wrapper = new MonacoEditorLanguageClientWrapper();
     await wrapper.initAndStart(userConfig, htmlElement);

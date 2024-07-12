@@ -23,8 +23,8 @@ import { runMemberCall } from "./runMemberCall.js";
 import { isMeasurement } from "./runProgram.js";
 
 /**
- * Runs an individual Elang expression returning the evaluated value
- * @param expression An Elang expression that returns a value
+ * Runs an individual ELang expression returning the evaluated value
+ * @param expression An ELang expression that returns a value
  * @param context The context in which this expression is running
  */
 

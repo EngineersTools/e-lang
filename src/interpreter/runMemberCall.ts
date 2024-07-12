@@ -13,7 +13,7 @@ import {
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { runExpression } from "./runExpression.js";
-import { ReturnFunction, runElangStatement } from "./runElangStatement.js";
+import { ReturnFunction, runELangStatement } from "./runELangStatement.js";
 
 export async function runMemberCall(
   memberCall: ModelMemberCall,
@@ -89,7 +89,7 @@ export async function runMemberCall(
       const returnFn: ReturnFunction = (returnValue) => {
         functionValue = returnValue;
       };
-      await runElangStatement(ref.body, context, returnFn);
+      await runELangStatement(ref.body, context, returnFn);
       context.variables.leave();
       return functionValue;
     } else if (isFormulaDeclaration(value) || isLambdaDeclaration(value)) {
@@ -105,7 +105,7 @@ export async function runMemberCall(
       const returnFn: ReturnFunction = (returnValue) => {
         functionValue = returnValue;
       };
-      await runElangStatement(value.body, context, returnFn);
+      await runELangStatement(value.body, context, returnFn);
       context.variables.leave();
       return functionValue;
     } else {
