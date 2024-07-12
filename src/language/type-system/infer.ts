@@ -451,6 +451,10 @@ export function inferModelDeclaration(
     .filter((p) => p.ref && isModelDeclaration(p.ref))
     .map((m) => inferType(m.ref, env) as ModelType);
 
+  const parentTypesProperties = parentTypes.map((p) => p.memberTypes).flat();
+
+  propertyTypes.push(...parentTypesProperties);
+
   return createModelTypeDescription(
     "declaration",
     propertyTypes,

@@ -249,10 +249,15 @@ export class ELangValidator {
         if (!toMember) {
           return (
             member.optional ??
-            accept("error", "Property is missing", {
-              node: value,
-              property: "members",
-            })
+            accept(
+              "error",
+              `Property '${member.name}' is not defined on type '${declaration.name}'`,
+              {
+                node: value,
+                property: "members",
+                index: from.memberTypes.indexOf(member),
+              }
+            )
           );
         }
 
