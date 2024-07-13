@@ -1,9 +1,7 @@
 import { interruptAndCheck, ValidationAcceptor } from "langium";
 import { CancellationTokenSource } from "vscode-languageserver";
-import { resolveImportUri } from "../language/e-lang-scope.js";
 import {
   ELangProgram,
-  isExportable,
   isMeasurementLiteral,
   MeasurementLiteral,
 } from "../language/generated/ast.js";
@@ -14,7 +12,7 @@ import { runELangStatement } from "./runELangStatement.js";
 
 // A constant used to determine if the program has been running for
 // too long and execution needs to be cancelled
-export const TIMEOUT_MS = 100000 * 5;
+export const TIMEOUT_MS = 1000 * 5;
 
 /**
  * Main function that runs an ELang program. This is called by the interpreter
@@ -59,48 +57,18 @@ export async function runProgram(
     context.onStart();
   }
 
-  // Import any files referenced in this program
-  if (program.imports) {
-    // Get currently active notebook directory
-    // All import references will be resolved
-    // from this as s base
-
-    // const currentDir
-    // const currentDir = UriUtils.dirname(
-    //   (vscode.window.activeTextEditor as vscode.TextEditor).document.uri
-    // );
-
-    for (const imp of program.imports) {
-      let importPath = imp.importSource;
-      if (!importPath.endsWith(".el")) {
-        importPath += ".el";
-      }
-
-      const importUri = resolveImportUri(imp);
-
-      if (importUri) {
-        const importedDocument =
-          services.shared.workspace.LangiumDocuments.getDocument(importUri);
-
-        if (importedDocument) {
-          const importedProgram = <ELangProgram>(
-            importedDocument.parseResult.value
-          );
-
-          program.statements.push(
-            ...importedProgram.statements.filter(
-              (s) => isExportable(s) && s.export
-            )
-          );
-        }
-      }
-    }
-  }
-
   // Typecheck the program
   const validator: ValidationAcceptor = (severity, message, info) => {
+    const range = info.node.$cstNode?.range;
+
     if (severity === "error") {
-      throw new Error(message);
+      throw new Error(
+        `[Ln ${range?.end.line}, Col ${range?.end.character}] - ${message}`
+      );
+    } else {
+      context.log(
+        `${severity}: [Ln ${range?.end.line}, Col ${range?.end.character}] - ${message}`
+      );
     }
   };
 

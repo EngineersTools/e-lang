@@ -77,28 +77,6 @@ export class ELangValidationRegistry extends ValidationRegistry {
 }
 
 /**
- * Helper functions
- */
-
-// function getInheritedModelProperties(
-//   model: ModelDeclaration
-// ): PropertyDeclaration[] {
-//   const props = new Array<PropertyDeclaration>();
-
-//   model.parentTypes.forEach((p) => {
-//     if (p.ref) {
-//       const parentProps = p.ref.properties;
-//       props.push(...parentProps);
-//       props.push(...getInheritedModelProperties(p.ref));
-//     }
-//   });
-
-//   props.push(...model.properties);
-
-//   return props;
-// }
-
-/**
  * Implementation of custom validations.
  */
 export class ELangValidator {
@@ -226,7 +204,7 @@ export class ELangValidator {
         if (!isAssignableResult.result) {
           accept("error", isAssignableResult.reason, {
             node: stmt,
-            property: "value",
+            property: "value"
           });
         }
       }

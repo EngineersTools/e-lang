@@ -32,6 +32,7 @@ import {
   isModelValue,
   isMutableDeclaration,
   isUnitDeclaration,
+  isUnitFamilyDeclaration,
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import { ModelMemberType, isModelType } from "./type-system/descriptions.js";
@@ -129,7 +130,9 @@ export class ELangScopeProvider extends DefaultScopeProvider {
       const uri = resolveImportUri(imp0rt);
       if (uri && !importedUris.has(uri.toString())) {
         importedUris.add(uri.toString());
+
         const importedDocument = this.langiumDocuments.getDocument(uri);
+
         if (importedDocument) {
           const rootNode = importedDocument.parseResult.value;
           if (isELangProgram(rootNode)) {
@@ -154,6 +157,15 @@ export class ELangScopeComputation extends DefaultScopeComputation {
     // this function is called in order to export nodes to the GLOBAL scope
     if (isExportable(node) && node.export === true) {
       super.exportNode(node, exports, document);
+
+      if (isUnitFamilyDeclaration(node)) {
+        node.units.forEach((unit) => {
+          super.exportNode(unit, exports, document);
+        });
+        node.conversions.forEach((conversion) => {
+          super.exportNode(conversion, exports, document);
+        });
+      }
     }
   }
 
@@ -183,14 +195,14 @@ export class ELangScopeComputation extends DefaultScopeComputation {
             );
           });
         }
-        this.processNode(node, document, scopes);
+        super.processNode(node, document, scopes);
       } else if (isUnitDeclaration(node)) {
         scopes.add(
           document.parseResult.value,
           this.descriptions.createDescription(node, node.name, document)
         );
       } else {
-        this.processNode(node, document, scopes);
+        super.processNode(node, document, scopes);
       }
     }
 
@@ -221,12 +233,15 @@ export function resolveImportUri(imp: Import): URI | undefined {
   if (imp.importSource === undefined || imp.importSource.length === 0) {
     return undefined;
   }
+
   const dirUri = UriUtils.dirname(getDocument(imp).uri);
   let importPath = imp.importSource;
+
   if (!importPath.endsWith(".el")) {
     importPath += ".el";
   }
-  return UriUtils.resolvePath(dirUri, importPath);
+
+  return URI.file(UriUtils.resolvePath(dirUri, importPath).path);
 }
 
 /**
