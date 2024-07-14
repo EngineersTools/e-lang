@@ -15,5 +15,6 @@ export function generateJavaScript(filePath: string, destination: string | undef
     //     fs.mkdirSync(data.destination, { recursive: true });
     // }
     // fs.writeFileSync(generatedFilePath, toString(fileNode));
+    
     return generatedFilePath;
 }

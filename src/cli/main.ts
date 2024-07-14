@@ -1,47 +1,22 @@
-import chalk from "chalk";
 import { Command } from "commander";
-import * as fs from "node:fs/promises";
-import * as path from "node:path";
-import * as url from "node:url";
-import { ELangLanguageMetaData } from "../language/generated/module.js";
-const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
+import fs from "node:fs";
+import { runInterpreter } from "../interpreter/interpreter.js";
 
-const packagePath = path.resolve(__dirname, "..", "..", "package.json");
-const packageContent = await fs.readFile(packagePath, "utf-8");
-
-export const generateAction = async (
-  fileName: string,
-  opts: GenerateOptions
-): Promise<void> => {
-  // const services = createELangServices(NodeFileSystem).ELang;
-  // const model = await extractAstNode<Model>(fileName, services);
-  // const generatedFilePath = generateJavaScript(model, fileName, opts.destination);
-  console.log(
-    chalk.green(`JavaScript code generated successfully: generatedFilePath`)
-  );
-};
-
-export type GenerateOptions = {
-  destination?: string;
-};
+async function runCommand(file: string): Promise<void> {
+  const now = Date.now();
+  const content = await fs.promises.readFile(file, "utf-8");
+  await runInterpreter(content, {
+    log: (value) => console.log(`${value}`),
+  });
+  console.log(`ELang program finished running in ${Date.now() - now}ms`);
+}
 
 export default function (): void {
   const program = new Command();
 
-  program.version(JSON.parse(packageContent).version);
+  program.version("0.0.5");
 
-  const fileExtensions = ELangLanguageMetaData.fileExtensions.join(", ");
-  program
-    .command("generate")
-    .argument(
-      "<file>",
-      `source file (possible file extensions: ${fileExtensions})`
-    )
-    .option("-d, --destination <dir>", "destination directory of generating")
-    .description(
-      'generates JavaScript code that prints "Hello, {name}!" for each greeting in a source file'
-    )
-    .action(generateAction);
+  program.command("run").argument("<file>").action(runCommand);
 
   program.parse(process.argv);
 }
