@@ -55,10 +55,11 @@ PrimaryExpression infers Expression:
     NullLiteral |
     MeasurementLiteral |
     ModelValue |
-    ListValue |
     ModelMemberAssignment |
     UnaryExpression |
+    ListValue |
     ListAccess |
+    ListCount |
     FeatureCall
 ;
 
@@ -121,4 +122,12 @@ ListValue:
     '['
         (items+=Expression (',' items+=Expression)*)?
     ']'
+;
+
+ListCount:
+    'listCount' '(' list=Expression')'
+;
+
+ListAdd:
+    'listAdd' '(' list=Expression ',' item=Expression ')'
 ;

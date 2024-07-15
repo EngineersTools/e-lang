@@ -104,7 +104,10 @@ export function isAssignable(
           `Type mismatch: '${from.itemType.$type}' is not assignable to '${to.itemType.$type}'`
       );
     }
-  } else if (isUnionType(to) && isUnionType(from)) {
+  } else if (isListType(to)) {
+    return createAssignableResult()
+  } 
+  else if (isUnionType(to) && isUnionType(from)) {
     // If both are union types, check that all times in 'from'
     // are contained in 'to'
     const allFromIncluded = from.types

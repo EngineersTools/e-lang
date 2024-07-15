@@ -4,6 +4,7 @@ import {
   MeasurementLiteral,
   isBinaryExpression,
   isBooleanLiteral,
+  isListCount,
   isListValue,
   isMeasurementLiteral,
   isModelMemberAssignment,
@@ -115,6 +116,16 @@ export async function runExpression(
         expression,
         "Unit conversion cannot be applied to this expression " +
           expression.left.$type
+      );
+    }
+  } else if (isListCount(expression)) {
+    const list = await runExpression(expression.list, context);
+    if (isListValue(list)) {
+      return list.items.length;
+    } else {
+      throw new AstNodeError(
+        expression,
+        `Cannot get the count of elements in list '${expression.list.$cstNode?.text}'`
       );
     }
   }

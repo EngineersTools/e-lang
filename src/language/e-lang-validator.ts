@@ -26,11 +26,13 @@ import {
   isBinaryExpression,
   isConstantDeclaration,
   isFormulaDeclaration,
+  isListCount,
   isMatchStatement,
   isModelDeclaration,
   isModelMemberCall,
   isModelValue,
   isMutableDeclaration,
+  isPrintStatement,
   isReturnStatement,
   isStatementBlock,
 } from "./generated/ast.js";
@@ -42,7 +44,12 @@ import {
   registerModelDeclaration,
 } from "./type-system/TypeEnvironment.functions.js";
 import { isAssignable } from "./type-system/assignment.js";
-import { isFormulaType, isModelType } from "./type-system/descriptions.js";
+import {
+  isEmtpyListType,
+  isFormulaType,
+  isListType,
+  isModelType,
+} from "./type-system/descriptions.js";
 import { getModelDeclarationParentsChain } from "./type-system/getModelDeclarationChain.js";
 import { inferType } from "./type-system/infer.js";
 import { isLegalOperation } from "./type-system/operator.js";
@@ -137,6 +144,19 @@ export class ELangValidator {
             }
           }
       }
+    } else if (isListCount(stmt)) {
+      const inferredType = inferType(stmt.list, env);
+      if (!isListType(inferredType) && !isEmtpyListType(inferredType))
+        accept(
+          "error",
+          `Element '${stmt.list.$cstNode?.text}' is not a valid list type`,
+          {
+            node: stmt,
+            property: "list",
+          }
+        );
+    } else if (isPrintStatement(stmt)) {
+      this.typecheckStatement(env, stmt.value, accept);
     }
   }
 
@@ -204,7 +224,7 @@ export class ELangValidator {
         if (!isAssignableResult.result) {
           accept("error", isAssignableResult.reason, {
             node: stmt,
-            property: "value"
+            property: "value",
           });
         }
       }

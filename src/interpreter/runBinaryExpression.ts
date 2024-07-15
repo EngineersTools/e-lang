@@ -21,9 +21,9 @@ export async function runBinaryExpression(
   const rightValue = await runExpression(right, context);
   // If this is an assignment, set the value accordingly
   if (operator === "=") {
-    return await setExpressionValue(left, rightValue, context);
+    return await setExpressionValue(left, right, context);
   }
-  // Get the value of the right expression
+  // Get the value of the left expression
   const leftValue = await runExpression(left, context);
 
   // If both sides are measurements

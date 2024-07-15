@@ -39,14 +39,14 @@ import { ModelMemberType, isModelType } from "./type-system/descriptions.js";
 import { inferType } from "./type-system/infer.js";
 
 export class ELangScopeProvider extends DefaultScopeProvider {
+  protected readonly types: TypeEnvironment;
+  protected readonly langiumDocuments: LangiumDocuments;
+
   constructor(services: LangiumServices) {
     super(services);
     this.langiumDocuments = services.shared.workspace.LangiumDocuments;
     this.types = new TypeEnvironment();
   }
-
-  protected readonly types: TypeEnvironment;
-  protected readonly langiumDocuments: LangiumDocuments;
 
   override getScope(context: ReferenceInfo): Scope {
     if (

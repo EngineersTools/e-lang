@@ -59,6 +59,8 @@ export async function serialiseExpression(
         items.push(value);
       } else if (isMeasurement(value)) {
         items.push(await serialiseExpression(value, context));
+      } else if (isListValue(value)) {
+        items.push(JSON.parse(await serialiseExpression(value, context)));
       } else {
         items.push(value);
       }

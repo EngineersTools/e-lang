@@ -1,6 +1,8 @@
 import {
   Expression,
   isConstantDeclaration,
+  isExpression,
+  isListValue,
   isModelMemberCall,
   isModelValue,
   isMutableDeclaration,
@@ -10,7 +12,6 @@ import {
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { runExpression } from "./runExpression.js";
-import { runMemberCall } from "./runMemberCall.js";
 
 /**
  * Stores the value of an expression evaluation on the context
@@ -20,15 +21,17 @@ import { runMemberCall } from "./runMemberCall.js";
  * @param context the context in which this expression is evaluated
  * @returns A promise with the evaluation result
  */
-export async function setExpressionValue<TValue>(
+export async function setExpressionValue(
   left: Expression,
-  right: TValue,
+  right: Expression,
   context: RunnerContext
 ): Promise<unknown> {
   if (isModelMemberCall(left)) {
     if (left.explicitOperationCall) {
-      await runMemberCall(left, context);
-      return right;
+      throw new AstNodeError(
+        left,
+        "Cannot assign values to formula or procedure calls"
+      );
     }
 
     let previous: unknown = undefined;
@@ -40,29 +43,43 @@ export async function setExpressionValue<TValue>(
     const name = ref?.name;
 
     if (!name) {
-      throw new AstNodeError(left, "Cannot resolve name");
+      throw new AstNodeError(
+        left,
+        `Cannot resolve name to element '${left.element.$refText}'`
+      );
     }
 
     if (isConstantDeclaration(ref)) {
       throw new AstNodeError(
         left,
-        `Cannot re-assign values to constant ${ref.name}`
+        `Cannot re-assign values to constant '${ref.name}'`
       );
     }
+
     if (isPropertyDeclaration(ref) && isModelValue(previous)) {
-      const member = previous.members.find(
-        (m) => m //m.property.ref?.name == ref.name
-      );
+      const member = previous.members.find((m) => m.property == ref.name);
 
       if (member) {
-        // member.value = right;
+        member.value = right;
       }
-    } else if (isMutableDeclaration(ref) || isParameterDeclaration(ref)) {
+    } else if (isMutableDeclaration(ref)) {
+      if (left.accessElement && left.index && isListValue(ref.value)) {
+        const index = isExpression(left.index)
+          ? await runExpression(left.index, context)
+          : left.index;
+        if (typeof index === "number") {
+          ref.value.items[index] = right;
+          context.variables.set(left, name, ref.value);
+        }
+      } else {
+        context.variables.set(left, name, right);
+      }
+    } else if (isParameterDeclaration(ref)) {
       context.variables.set(left, name, right);
     }
-  } else {
-    throw new AstNodeError(left, "Cannot re-assign values to constant");
   }
 
-  return right;
+  const rightValue = await runExpression(right, context);
+
+  return rightValue;
 }

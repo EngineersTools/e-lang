@@ -22,7 +22,7 @@ export async function runForStatement(
 
   for (
     let i = Number(await runExpression(from, context));
-    i < Number(await runExpression(to, context));
+    i <= Number(await runExpression(to, context));
     i = i + calcStep
   ) {
     context.variables.set(counter, counter.name, i);
