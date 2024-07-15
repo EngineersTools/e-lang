@@ -4,7 +4,9 @@ import {
   MeasurementLiteral,
   isBinaryExpression,
   isBooleanLiteral,
+  isListAdd,
   isListCount,
+  isListRemove,
   isListValue,
   isMeasurementLiteral,
   isModelMemberAssignment,
@@ -126,6 +128,28 @@ export async function runExpression(
       throw new AstNodeError(
         expression,
         `Cannot get the count of elements in list '${expression.list.$cstNode?.text}'`
+      );
+    }
+  } else if (isListAdd(expression)) {
+    const list = await runExpression(expression.list, context);
+    if (isListValue(list) && expression.item) {
+      list.items.push(expression.item);
+      return list;
+    } else {
+      throw new AstNodeError(
+        expression,
+        `Cannot add element to list '${expression.list.$cstNode?.text}'`
+      );
+    }
+  } else if (isListRemove(expression)) {
+    const list = await runExpression(expression.list, context);
+    if (isListValue(list)) {
+      list.items.pop();
+      return list;
+    } else {
+      throw new AstNodeError(
+        expression,
+        `Cannot remove element from list '${expression.list.$cstNode?.text}'`
       );
     }
   }

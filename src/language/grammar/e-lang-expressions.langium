@@ -60,6 +60,8 @@ PrimaryExpression infers Expression:
     ListValue |
     ListAccess |
     ListCount |
+    ListAdd |
+    ListRemove |
     FeatureCall
 ;
 
@@ -130,4 +132,8 @@ ListCount:
 
 ListAdd:
     'listAdd' '(' list=Expression ',' item=Expression ')'
+;
+
+ListRemove:
+    'listRemove' '(' list=Expression ')'
 ;
