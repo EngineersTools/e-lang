@@ -133,8 +133,9 @@ export async function runExpression(
   } else if (isListAdd(expression)) {
     const list = await runExpression(expression.list, context);
     if (isListValue(list) && expression.item) {
-      list.items.push(expression.item);
-      return list;
+      const newList = { ...list, items: [...list.items] };
+      newList.items.push(expression.item);
+      return newList;
     } else {
       throw new AstNodeError(
         expression,
@@ -144,8 +145,9 @@ export async function runExpression(
   } else if (isListRemove(expression)) {
     const list = await runExpression(expression.list, context);
     if (isListValue(list)) {
-      list.items.pop();
-      return list;
+      const newList = { ...list, items: [...list.items] };
+      newList.items.pop();
+      return newList;
     } else {
       throw new AstNodeError(
         expression,

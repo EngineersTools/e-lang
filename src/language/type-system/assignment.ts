@@ -1,6 +1,7 @@
 import {
   ParameterType,
   TypeDescription,
+  isEmtpyListType,
   isFormulaType,
   isListType,
   isMeasurementType,
@@ -105,9 +106,14 @@ export function isAssignable(
       );
     }
   } else if (isListType(to)) {
-    return createAssignableResult()
-  } 
-  else if (isUnionType(to) && isUnionType(from)) {
+    if (isListType(from)) {
+      return isAssignable(from.itemType, to.itemType);
+    } else if (isEmtpyListType(from)) {
+      return createAssignableResult();
+    } else {
+      return isAssignable(from, to.itemType);
+    }
+  } else if (isUnionType(to) && isUnionType(from)) {
     // If both are union types, check that all times in 'from'
     // are contained in 'to'
     const allFromIncluded = from.types

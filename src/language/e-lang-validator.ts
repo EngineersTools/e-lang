@@ -26,6 +26,7 @@ import {
   isBinaryExpression,
   isConstantDeclaration,
   isFormulaDeclaration,
+  isListAdd,
   isListCount,
   isMatchStatement,
   isModelDeclaration,
@@ -155,6 +156,32 @@ export class ELangValidator {
             property: "list",
           }
         );
+    } else if (isListAdd(stmt)) {
+      const listInferredType = inferType(stmt.list, env);
+      const addedElementInferredType = inferType(stmt.item, env);
+
+      if (!isListType(listInferredType) && !isEmtpyListType(listInferredType)) {
+        accept(
+          "error",
+          `Element '${stmt.list.$cstNode?.text}' is not a valid list type`,
+          {
+            node: stmt,
+            property: "list",
+          }
+        );
+      } else {
+        const assignable = isAssignable(
+          addedElementInferredType,
+          listInferredType
+        );
+
+        if (!assignable.result) {
+          accept("error", assignable.reason, {
+            node: stmt,
+            property: "item",
+          });
+        }
+      }
     } else if (isPrintStatement(stmt)) {
       this.typecheckStatement(env, stmt.value, accept);
     }
