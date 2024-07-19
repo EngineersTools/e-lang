@@ -72,7 +72,8 @@ export async function setExpressionValue(
           context.variables.set(left, name, ref.value);
         }
       } else {
-        context.variables.set(left, name, right);
+        const rightValue = await runExpression(right, context);
+        context.variables.set(left, name, rightValue);
       }
     } else if (isParameterDeclaration(ref)) {
       context.variables.set(left, name, right);

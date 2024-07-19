@@ -29,6 +29,8 @@ import {
   isFormulaDeclaration,
   isLambdaDeclaration,
   isLambdaType,
+  isListAdd,
+  isListRemove,
   isListValue,
   isMeasurementLiteral,
   isMeasurementType,
@@ -420,6 +422,8 @@ export function inferExpression(
     return inferModelValue(expr, env);
   } else if (isListValue(expr)) {
     return inferListValue(expr, env);
+  } else if (isListAdd(expr) || isListRemove(expr)) {
+    return inferType(expr.list, env);
   } else if (isModelMemberAssignment(expr)) {
     return inferModelMemberAssignment(expr, env);
   } else if (isBinaryExpression(expr)) {
