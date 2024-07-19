@@ -5,13 +5,16 @@ import {
   isLambdaDeclaration,
   isListValue,
   isMeasurementLiteral,
+  isModelMemberCall,
   isModelValue,
   isProcedureDeclaration,
+  isStatement,
 } from "../language/generated/ast.js";
 import { typeToString } from "../language/type-system/typeToString.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { runExpression } from "./runExpression.js";
+import { runMemberCall } from "./runMemberCall.js";
 import { isBoolean, isMeasurement, isNull, isNumber } from "./runProgram.js";
 
 export async function serialiseExpression(
@@ -20,6 +23,8 @@ export async function serialiseExpression(
 ): Promise<string> {
   const result = isExpression(statement)
     ? await runExpression(statement, context)
+    : isModelMemberCall(statement)
+    ? await runMemberCall(statement, context)
     : statement;
 
   if (isMeasurementLiteral(result)) {
@@ -89,6 +94,8 @@ export async function serialiseExpression(
     if (result.returnType)
       return `(${params}) => ${typeToString(result.returnType)}`;
     else return `(${params})`;
+  } else if (isStatement(result)) {
+    return serialiseExpression(result, context);
   } else {
     return JSON.stringify(result);
   }

@@ -19,7 +19,6 @@
         "forceConsistentCasingInFileNames": true,
         "rootDir": ".",
         "noEmit": true,
-        "resolveJsonModule": true
     },
     "include": [
         "src/**/*.ts",

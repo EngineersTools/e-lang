@@ -14,7 +14,7 @@ async function runCommand(file: string): Promise<void> {
 export default function (): void {
   const program = new Command();
 
-  program.version("0.0.5");
+  program.version("0.0.6");
 
   program.command("run").argument("<file>").action(runCommand);
 
