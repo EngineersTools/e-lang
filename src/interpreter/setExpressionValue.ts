@@ -63,10 +63,15 @@ export async function setExpressionValue(
         member.value = right;
       }
     } else if (isMutableDeclaration(ref)) {
-      if (left.accessElement && left.index && isListValue(ref.value)) {
+      if (
+        left.accessElement &&
+        left.index !== undefined &&
+        isListValue(ref.value)
+      ) {
         const index = isExpression(left.index)
           ? await runExpression(left.index, context)
           : left.index;
+
         if (typeof index === "number") {
           ref.value.items[index] = right;
           context.variables.set(left, name, ref.value);

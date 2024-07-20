@@ -1,4 +1,5 @@
 import {
+  NullLiteral,
   Statement,
   isExpression,
   isFormulaDeclaration,
@@ -58,7 +59,7 @@ export async function serialiseExpression(
     const items = [];
 
     for (const item of result.items) {
-      const value = await runExpression(item, context);
+      const value = item === undefined ? null : await runExpression(item, context);
 
       if (isNumber(value) || isBoolean(value) || isNull(value)) {
         items.push(value);

@@ -1,5 +1,7 @@
 import {
   BinaryExpression,
+  isListValue,
+  isModelValue,
   MeasurementLiteral,
 } from "../language/generated/ast.js";
 import { AstNodeError } from "./AstNodeError.js";
@@ -8,7 +10,13 @@ import { applyOperator } from "./applyOperator.js";
 import { checkUnitCompatibility } from "./checkUnitCompatibility.js";
 import { getBinaryQuadrant } from "./getBinaryQuadrant.js";
 import { runExpression } from "./runExpression.js";
-import { isBoolean, isMeasurement, isNumber, isString } from "./runProgram.js";
+import {
+  isBoolean,
+  isMeasurement,
+  isNull,
+  isNumber,
+  isString,
+} from "./runProgram.js";
 import { setExpressionValue } from "./setExpressionValue.js";
 
 export async function runBinaryExpression(
@@ -17,12 +25,13 @@ export async function runBinaryExpression(
 ): Promise<unknown> {
   const { left, right, operator } = expression;
 
-  // Get the value of the right expression
-  const rightValue = await runExpression(right, context);
   // If this is an assignment, set the value accordingly
   if (operator === "=") {
     return await setExpressionValue(left, right, context);
   }
+
+  // Get the value of the right expression
+  const rightValue = await runExpression(right, context);
   // Get the value of the left expression
   const leftValue = await runExpression(left, context);
 
@@ -45,7 +54,14 @@ export async function runBinaryExpression(
       leftValue,
       rightValue,
       context,
-      (e) => isString(e) || isNumber(e) || isMeasurement(e)
+      (e) =>
+        isString(e) ||
+        isNumber(e) ||
+        isNull(e) ||
+        isBoolean(e) ||
+        isMeasurement(e) ||
+        isListValue(e) ||
+        isModelValue(e)
     );
   } else if (["-", "*", "^", "/", "<", "<=", ">", ">="].includes(operator)) {
     return await applyOperator(

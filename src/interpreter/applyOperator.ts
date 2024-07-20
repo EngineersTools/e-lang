@@ -1,5 +1,7 @@
 import {
   BinaryExpression,
+  isListValue,
+  isModelValue,
   MeasurementLiteral,
 } from "../language/generated/ast.js";
 import { AstNodeError } from "./AstNodeError.js";
@@ -63,9 +65,17 @@ export async function applyOperator(
       return anyLeft + (await serialiseExpression(anyRight, context));
     } else if (binaryQuadrant == "LeftMeasurementRightString") {
       return (await serialiseExpression(anyLeft, context)) + anyRight;
+    } else if (isListValue(anyRight) || isModelValue(anyRight)) {
+      return anyLeft + (await serialiseExpression(anyRight, context));
     }
 
-    return anyLeft + anyRight;
+    if (anyLeft === null || anyLeft === undefined) {
+      return `null${anyRight}`;
+    } else if (anyRight === null || anyRight === undefined) {
+      return `${anyLeft}null`;
+    } else {
+      return `${anyLeft}${anyRight}`;
+    }
   } else if (operator === "-") {
     if (binaryQuadrant == "LeftMeasurementRightMeasurement") {
       const { left, right } = await convertMeasurements(

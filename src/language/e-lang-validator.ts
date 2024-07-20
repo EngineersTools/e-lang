@@ -63,22 +63,6 @@ export class ELangValidationRegistry extends ValidationRegistry {
     const checks: ValidationChecks<ELangAstType> = {
       ELangProgram: validator.typecheckProgram,
       PropertyDeclaration: validator.checkModelPropertiesAreNotDuplicated,
-      // ModelDeclaration: validator.checkParentModelsForDuplicatedProperties,
-      // PropertyDeclaration: validator.checkModelPropertiesAreNotDuplicated,
-      // MutableDeclaration: [
-      //   validator.checkUnitsAreOfCorrectFamily,
-      //   validator.checkModelHasBeenAssignedCorrectProperties,
-      // ],
-      // ConstantDeclaration: [
-      //   validator.checkUnitsAreOfCorrectFamily,
-      //   validator.checkModelHasBeenAssignedCorrectProperties,
-      // ],
-      // FormulaDeclaration: [validator.checkItHasReturn, validator.checkReturnType],
-      // ProcedureDeclaration: validator.checkReturnType,
-      // LambdaDeclaration: validator.checkReturnType,
-      // BinaryExpression: validator.checkBinaryOperationAllowed,
-      // UnaryExpression: validator.checkUnaryOperationAllowed,
-      // ModelMemberAssignment: validator.checkAssignmentOperationAllowed,
     };
     this.register(checks, validator);
   }
@@ -130,6 +114,17 @@ export class ELangValidator {
       switch (stmt.operator) {
         case "=":
           if (isModelMemberCall(stmt.left)) {
+            if (isConstantDeclaration(stmt.left.element.ref)) {
+              accept(
+                "error",
+                `Cannot re-assign new values to constant '${stmt.left.element.ref.name}'`,
+                {
+                  node: stmt,
+                  property: "left",
+                }
+              );
+            }
+
             const to = env.getVariableType(stmt.left.element.$refText);
             const from = inferType(stmt.right, env);
 

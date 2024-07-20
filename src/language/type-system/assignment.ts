@@ -93,7 +93,15 @@ export function isAssignable(
         : createNonAssignableResult(from, to, messages.join("\n"));
     }
   } else if (isListType(from) && isListType(to)) {
-    const isAssignableResult = isAssignable(from.itemType, to.itemType);
+    let isAssignableResult;
+
+    if (isListType(from.itemType)) {
+      isAssignableResult = isAssignable(from.itemType.itemType, to.itemType);
+    } else if (isListType(to.itemType)) {
+      isAssignableResult = isAssignable(from.itemType, to.itemType.itemType);
+    } else {
+      isAssignableResult = isAssignable(from.itemType, to.itemType);
+    }
 
     if (from.$type === to.$type && isAssignableResult.result) {
       return createAssignableResult();

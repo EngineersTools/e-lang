@@ -60,14 +60,13 @@ export async function runProgram(
   // Typecheck the program
   const validator: ValidationAcceptor = (severity, message, info) => {
     const range = info.node.$cstNode?.range;
+    const messageWithLine = `${message}@${range?.end.line}:${range?.end.character}`;
 
     if (severity === "error") {
-      throw new Error(
-        `[Ln ${range?.end.line}, Col ${range?.end.character}] - ${message}`
-      );
+      throw new Error(messageWithLine);
     } else {
       context.log(
-        `${severity}: [Ln ${range?.end.line}, Col ${range?.end.character}] - ${message}`
+        `${severity}: ${messageWithLine}`
       );
     }
   };

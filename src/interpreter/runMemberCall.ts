@@ -12,8 +12,8 @@ import {
 } from "../language/generated/ast.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
-import { runExpression } from "./runExpression.js";
 import { ReturnFunction, runELangStatement } from "./runELangStatement.js";
+import { runExpression } from "./runExpression.js";
 
 export async function runMemberCall(
   memberCall: ModelMemberCall,
@@ -66,7 +66,9 @@ export async function runMemberCall(
     } else {
       throw new AstNodeError(
         memberCall,
-        `Index out of range. The list '${memberCall.element.$refText}' has less than ${memberCall.index} elements`
+        `Index out of range. The list '${
+          memberCall.element.$refText
+        }' has less than ${index + 1} elements`
       );
     }
   }
