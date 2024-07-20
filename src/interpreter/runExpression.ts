@@ -24,7 +24,6 @@ import { convertMeasurements } from "./convertMeasurements.js";
 import { runBinaryExpression } from "./runBinaryExpression.js";
 import { runMemberCall } from "./runMemberCall.js";
 import { isMeasurement } from "./runProgram.js";
-import exp from "constants";
 
 /**
  * Runs an individual ELang expression returning the evaluated value

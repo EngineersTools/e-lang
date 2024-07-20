@@ -1,5 +1,4 @@
 import {
-  NullLiteral,
   Statement,
   isExpression,
   isFormulaDeclaration,
@@ -9,7 +8,7 @@ import {
   isModelMemberCall,
   isModelValue,
   isProcedureDeclaration,
-  isStatement,
+  isStatement
 } from "../language/generated/ast.js";
 import { typeToString } from "../language/type-system/typeToString.js";
 import { AstNodeError } from "./AstNodeError.js";
