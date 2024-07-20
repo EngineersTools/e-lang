@@ -8,13 +8,12 @@ docs/
 examples/
 scripts/
 src/
-syntaxes/
 bin/
 tsconfig.json
+langium-config.json
 bun.lockb
 esbuild.mjs
 index.html
-langium-config.json
 tsconfig.src.json
 tsconfig.src.tsbuildinfo
 vite.config.ts
