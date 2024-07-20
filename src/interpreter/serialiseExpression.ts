@@ -7,15 +7,23 @@ import {
   isMeasurementLiteral,
   isModelMemberCall,
   isModelValue,
+  isNullLiteral,
   isProcedureDeclaration,
-  isStatement
+  isStatement,
+  isStringLiteral,
 } from "../language/generated/ast.js";
 import { typeToString } from "../language/type-system/typeToString.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { runExpression } from "./runExpression.js";
 import { runMemberCall } from "./runMemberCall.js";
-import { isBoolean, isMeasurement, isNull, isNumber } from "./runProgram.js";
+import {
+  isBoolean,
+  isMeasurement,
+  isNull,
+  isNumber,
+  isString,
+} from "./runProgram.js";
 
 export async function serialiseExpression(
   statement: Statement,
@@ -27,7 +35,11 @@ export async function serialiseExpression(
     ? await runMemberCall(statement, context)
     : statement;
 
-  if (isMeasurementLiteral(result)) {
+  if (isStringLiteral(result)) {
+    return result.value;
+  } else if (isString(result)) {
+    return result;
+  } else if (isMeasurementLiteral(result)) {
     if (result.unit.error)
       throw new AstNodeError(result, `Print: ${result.unit.error.message}`);
     if (result.unit.ref) return `${result.value}_[${result.unit.ref.name}]`;
@@ -58,7 +70,8 @@ export async function serialiseExpression(
     const items = [];
 
     for (const item of result.items) {
-      const value = item === undefined ? null : await runExpression(item, context);
+      const value =
+        item === undefined ? null : await runExpression(item, context);
 
       if (isNumber(value) || isBoolean(value) || isNull(value)) {
         items.push(value);
@@ -96,6 +109,8 @@ export async function serialiseExpression(
     else return `(${params})`;
   } else if (isStatement(result)) {
     return serialiseExpression(result, context);
+  } else if (isNullLiteral(result) || isNull(result) || result === undefined) {
+    return "null";
   } else {
     return JSON.stringify(result);
   }

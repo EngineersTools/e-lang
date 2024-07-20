@@ -1,13 +1,13 @@
 import {
   BinaryExpression,
-  isListValue,
-  isModelValue,
+  isStringLiteral,
   MeasurementLiteral,
 } from "../language/generated/ast.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { convertMeasurements } from "./convertMeasurements.js";
 import { getBinaryQuadrant } from "./getBinaryQuadrant.js";
+import { isString } from "./runProgram.js";
 import { serialiseExpression } from "./serialiseExpression.js";
 
 /**
@@ -20,7 +20,6 @@ import { serialiseExpression } from "./serialiseExpression.js";
  * @param check a function to check whether the operator can be applied
  *              to this expression
  */
-
 export async function applyOperator(
   node: BinaryExpression,
   operator: string,
@@ -41,41 +40,7 @@ export async function applyOperator(
   const binaryQuadrant = getBinaryQuadrant(anyLeft, anyRight);
 
   if (operator === "+") {
-    if (binaryQuadrant == "LeftMeasurementRightMeasurement") {
-      const { left, right } = await convertMeasurements(
-        anyLeft,
-        anyRight,
-        context
-      );
-      return {
-        ...right,
-        value: left.value + right.value,
-      } as MeasurementLiteral;
-    } else if (binaryQuadrant == "LeftMeasurementRightNumber") {
-      return {
-        ...(anyLeft as MeasurementLiteral),
-        value: (anyLeft as MeasurementLiteral).value + (right as number),
-      } as MeasurementLiteral;
-    } else if (binaryQuadrant == "LeftNumberRightMeasurement") {
-      return {
-        ...(anyRight as MeasurementLiteral),
-        value: (anyRight as MeasurementLiteral).value + (left as number),
-      } as MeasurementLiteral;
-    } else if (binaryQuadrant == "LeftStringRightMeasurement") {
-      return anyLeft + (await serialiseExpression(anyRight, context));
-    } else if (binaryQuadrant == "LeftMeasurementRightString") {
-      return (await serialiseExpression(anyLeft, context)) + anyRight;
-    } else if (isListValue(anyRight) || isModelValue(anyRight)) {
-      return anyLeft + (await serialiseExpression(anyRight, context));
-    }
-
-    if (anyLeft === null || anyLeft === undefined) {
-      return `null${anyRight}`;
-    } else if (anyRight === null || anyRight === undefined) {
-      return `${anyLeft}null`;
-    } else {
-      return `${anyLeft}${anyRight}`;
-    }
+    return await evaluatePlusOperator(anyLeft, anyRight, context);
   } else if (operator === "-") {
     if (binaryQuadrant == "LeftMeasurementRightMeasurement") {
       const { left, right } = await convertMeasurements(
@@ -261,5 +226,52 @@ export async function applyOperator(
       node,
       `Invalid Operator: operator ${operator} is unknown`
     );
+  }
+}
+
+export async function evaluatePlusOperator(
+  left: unknown,
+  right: unknown,
+  context: RunnerContext
+) {
+  const anyLeft = left as any;
+  const anyRight = right as any;
+  const binaryQuadrant = getBinaryQuadrant(left, right);
+
+  if (
+    isStringLiteral(anyLeft) ||
+    isString(anyLeft) ||
+    isStringLiteral(anyRight) ||
+    isString(anyRight)
+  ) {
+    const serialisedLeft = await serialiseExpression(anyLeft, context);
+    const serialisedRight = await serialiseExpression(anyRight, context);
+    return `${serialisedLeft}${serialisedRight}`;
+  } else if (binaryQuadrant == "LeftMeasurementRightMeasurement") {
+    const { left, right } = await convertMeasurements(
+      anyLeft,
+      anyRight,
+      context
+    );
+    return {
+      ...right,
+      value: left.value + right.value,
+    } as MeasurementLiteral;
+  } else if (binaryQuadrant == "LeftMeasurementRightNumber") {
+    return {
+      ...(anyLeft as MeasurementLiteral),
+      value: (anyLeft as MeasurementLiteral).value + (right as number),
+    } as MeasurementLiteral;
+  } else if (binaryQuadrant == "LeftNumberRightMeasurement") {
+    return {
+      ...(anyRight as MeasurementLiteral),
+      value: (anyRight as MeasurementLiteral).value + (left as number),
+    } as MeasurementLiteral;
+  } else if (binaryQuadrant == "LeftStringRightMeasurement") {
+    return anyLeft + (await serialiseExpression(anyRight, context));
+  } else if (binaryQuadrant == "LeftMeasurementRightString") {
+    return (await serialiseExpression(anyLeft, context)) + anyRight;
+  } else {
+    return anyLeft + anyRight;
   }
 }
