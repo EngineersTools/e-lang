@@ -135,5 +135,5 @@ ListAdd:
 ;
 
 ListRemove:
-    'listRemove' '(' list=Expression ')'
+    'listRemove' '(' list=Expression (',' index=(NUM | Expression))? ')'
 ;
