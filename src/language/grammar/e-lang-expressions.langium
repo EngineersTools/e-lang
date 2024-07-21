@@ -87,7 +87,7 @@ ListAccess infers Expression:
 ;
 
 UnaryExpression:
-    operator=('!' | '-') value=Expression (postOperator=('++' | '--'))?
+    operator=('!' | '-') value=Expression
 ;
 
 // Most granular, low-level expressions
