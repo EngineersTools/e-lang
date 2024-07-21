@@ -9,6 +9,7 @@ import {
   isListCount,
   isListRemove,
   isListValue,
+  isMathematicalFunction,
   isMeasurementLiteral,
   isModelMemberAssignment,
   isModelMemberCall,
@@ -20,6 +21,7 @@ import {
   isUnitConversionExpression,
 } from "../language/generated/ast.js";
 import { AstNodeError } from "./AstNodeError.js";
+import { runMathFunction } from "./Math.functions.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { convertMeasurements } from "./convertMeasurements.js";
 import { runBinaryExpression } from "./runBinaryExpression.js";
@@ -44,6 +46,8 @@ export async function runExpression(
   // their evaluated value
   if (expression === undefined) {
     return null;
+  } else if (isMathematicalFunction(expression)) {
+    return await runMathFunction(expression, context);
   } else if (isNumberLiteral(expression)) {
     return expression.value;
   } else if (isBooleanLiteral(expression)) {
@@ -65,16 +69,17 @@ export async function runExpression(
   } else if (isUnaryExpression(expression)) {
     const { operator, value } = expression;
     const actualValue = await runExpression(value, context);
-    if (operator === "+") {
-      if (typeof actualValue === "number" || isMeasurement(actualValue)) {
-        return actualValue;
-      } else {
-        throw new AstNodeError(
-          expression,
-          `Cannot apply operator '${operator}' to value of type '${typeof actualValue}'`
-        );
-      }
-    } else if (operator === "-") {
+    // if (operator === "+") {
+    //   if (typeof actualValue === "number" || isMeasurement(actualValue)) {
+    //     return actualValue;
+    //   } else {
+    //     throw new AstNodeError(
+    //       expression,
+    //       `Cannot apply operator '${operator}' to value of type '${typeof actualValue}'`
+    //     );
+    //   }
+    // } else
+    if (operator === "-") {
       if (typeof actualValue === "number") {
         return -actualValue;
       } else if (isMeasurement(actualValue)) {

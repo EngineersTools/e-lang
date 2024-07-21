@@ -62,7 +62,8 @@ PrimaryExpression infers Expression:
     ListCount |
     ListAdd |
     ListRemove |
-    FeatureCall
+    FeatureCall |
+    MathematicalFunction
 ;
 
 FeatureCall infers Expression:
@@ -86,7 +87,7 @@ ListAccess infers Expression:
 ;
 
 UnaryExpression:
-    operator=('!' | '-' | '+') value=Expression postOperator=('++' | '--')
+    operator=('!' | '-') value=Expression (postOperator=('++' | '--'))?
 ;
 
 // Most granular, low-level expressions
@@ -136,4 +137,90 @@ ListAdd:
 
 ListRemove:
     'listRemove' '(' list=Expression (',' index=(NUM | Expression))? ')'
+;
+
+// Mathematical Functions
+// 'abs' | 'acos' | 'asin' | 'atan' | 'atan2' | 'ceil' | 'cos' | 'cosh' | 'exp' | 'floor' | 'log' | 'log10' | 'max' | 'min' | 'pow' | 'round' | 'sin' | 'sinh' | 'sqrt' | 'tan' | 'tanh'
+
+MathematicalFunction:
+    Absolute |
+    Cosine |
+    Sine |
+    Tangent |
+    ArcCosine |
+    ArcSine |
+    ArcTangent |
+    Round |
+    Ceiling |
+    Floor |
+    Root |
+    SuqareRoot |
+    LogarithmBaseTen |
+    NaturalLogarithm |
+    Minimum |
+    Maximum
+;
+
+Absolute:
+    'abs' '(' value=Expression')'
+;
+
+Cosine:
+    'cos' '(' value=Expression')'
+;
+
+Sine:
+    'sin' '(' value=Expression')'
+;
+
+Tangent:
+    'tan' '(' value=Expression')'
+;
+
+ArcCosine:
+    'acos' '(' value=Expression')'
+;
+
+ArcSine:
+    'asin' '(' value=Expression')'
+;
+
+ArcTangent:
+    'atan' '(' value=Expression')'
+;
+
+Round:
+    'round' '(' value=Expression')'
+;
+
+Ceiling:
+    'ceil' '(' value=Expression')'
+;
+
+Floor:
+    'floor' '(' value=Expression')'
+;
+
+Root:
+    'root' '(' root=Expression ',' value=Expression ')'
+;
+
+SuqareRoot:
+    'sqrt' '(' value=Expression')'
+;
+
+LogarithmBaseTen:
+    'log10' '(' value=Expression')'
+;
+
+NaturalLogarithm:
+    'ln' '(' value=Expression')'
+;
+
+Minimum:
+    'min' '(' value=Expression ')'
+;
+
+Maximum:
+    'max' '(' value=Expression ')'
 ;
