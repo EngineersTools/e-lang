@@ -23,6 +23,7 @@ export async function runVariableDeclaration(
 
       context.variables.push(statement.name, value);
     } else if (isLambdaDeclaration(statement.value)) {
+      context.variables.push(statement.name, statement.value);
     }
   } else {
     // The variable hasn't been assigned a value when declared

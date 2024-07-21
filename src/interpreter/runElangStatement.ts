@@ -16,7 +16,7 @@ import {
   isProcedureDeclaration,
   isReturnStatement,
   isStatementBlock,
-  isUnitFamilyDeclaration
+  isUnitFamilyDeclaration,
 } from "../language/generated/ast.js";
 import { runExpression } from "./runExpression.js";
 import { runForStatement } from "./runForStatement.js";
@@ -43,6 +43,11 @@ export async function runELangStatement(
   await interruptAndCheck(context.cancellationToken);
 
   if (isExpression(statement)) {
+    const result = await runExpression(statement, context);
+    if (isLambdaDeclaration(statement.$container)) {
+      returnFn(result);
+    }
+  } else if (isExpression(statement)) {
     await runExpression(statement, context);
   } else if (isForStatement(statement)) {
     await runForStatement(statement, context, returnFn);

@@ -1,0 +1,1 @@
+{"cells":[{"kind":2,"language":"e-lang","value":"domain Lambdas\n\nconst add = (x: number, y: number) => x + y \n\nprint add(1,2)\n\nformula addNumbers(x: number, y: number) returns number {\n    return x + y\n}\n\nprint addNumbers(1,2)"}]}

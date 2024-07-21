@@ -52,7 +52,7 @@ LambdaDeclaration:
     ParameterList 
     (':' returnType=TypeReference)? 
     '=>' 
-    body=(Expression | StatementBlock) 
+    body=(Expression | StatementBlock)
     (explicitOperationCall?='(' 
             (arguments+=Expression (',' arguments+=Expression)*)?
         ')'
