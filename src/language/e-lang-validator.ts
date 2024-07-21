@@ -25,7 +25,9 @@ import {
   UnaryExpression,
   isBinaryExpression,
   isConstantDeclaration,
+  isExpression,
   isFormulaDeclaration,
+  isLambdaDeclaration,
   isListAdd,
   isListCount,
   isMatchStatement,
@@ -40,7 +42,9 @@ import {
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import {
   addFormulaDeclaration,
+  addLambdaDeclaration,
   addStatement,
+  getReturnStatements,
   getReturnType,
   registerModelDeclaration,
 } from "./type-system/TypeEnvironment.functions.js";
@@ -98,6 +102,9 @@ export class ELangValidator {
     } else if (isFormulaDeclaration(stmt)) {
       addFormulaDeclaration(stmt, env);
       this.typecheckFormulaDeclaration(env, stmt, accept);
+    } else if (isLambdaDeclaration(stmt)) {
+      addLambdaDeclaration(stmt, env);
+      this.typecheckLambdaDeclaration(env, stmt, accept);
     } else if (isConstantDeclaration(stmt) || isMutableDeclaration(stmt)) {
       this.typecheckVariableDeclarationStatement(env, stmt, accept);
     } else if (isMatchStatement(stmt)) {
@@ -221,9 +228,12 @@ export class ELangValidator {
   ) {
     addStatement(stmt, env);
 
-    if (stmt.assignment && stmt.type && stmt.value) {
+    if (stmt.assignment && stmt.value) {
       const assignedType = env.getVariableType(stmt.name);
       const exprType = inferType(stmt.value, env);
+
+      if (isLambdaDeclaration(stmt.value))
+        this.typecheckLambdaDeclaration(env, stmt.value, accept);
 
       if (assignedType === undefined) {
         accept("error", "No type assigned to this variable", {
@@ -231,6 +241,7 @@ export class ELangValidator {
           property: "name",
         });
       } else if (
+        stmt.type &&
         stmt.type.model &&
         stmt.type.model.ref &&
         isModelValue(stmt.value)
@@ -317,6 +328,51 @@ export class ELangValidator {
           if (!isAssignableResult.result) {
             accept("error", isAssignableResult.reason, { node: s });
           }
+        });
+      }
+    }
+  }
+
+  typecheckLambdaDeclaration(
+    env: TypeEnvironment,
+    stmt: LambdaDeclaration,
+    accept: ValidationAcceptor
+  ) {
+    const returnType =
+      stmt.returnType !== undefined
+        ? inferType(stmt.returnType, env)
+        : isStatementBlock(stmt.body)
+        ? getReturnType(stmt.body, env)
+        : inferType(stmt.body, env);
+
+    if (isStatementBlock(stmt.body)) {
+      this.typecheckStatement(env, stmt.body, accept);
+
+      const returnStatements = getReturnStatements(stmt.body, env);
+
+      if (returnStatements && returnStatements.length > 0) {
+        returnStatements.forEach((s) => {
+          const isAssignableResult = isAssignable(
+            inferType(s, env),
+            returnType
+          );
+          if (!isAssignableResult.result) {
+            accept(
+              "error",
+              `Incorrect return type. ${isAssignableResult.reason}`,
+              { node: s }
+            );
+          }
+        });
+      }
+    } else if (isExpression(stmt.body)) {
+      const isAssignableResult = isAssignable(
+        inferType(stmt.body, env),
+        returnType
+      );
+      if (!isAssignableResult.result) {
+        accept("error", `Incorrect return type. ${isAssignableResult.reason}`, {
+          node: stmt.body,
         });
       }
     }

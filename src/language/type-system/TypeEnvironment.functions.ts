@@ -202,6 +202,30 @@ export function getReturnType(prc: StatementBlock, env: TypeEnvironment) {
   else return createUnionType(...returnTypes);
 }
 
+export function getReturnStatements(prc: StatementBlock, env: TypeEnvironment) {
+  const returnStatements: Statement[] = [];
+
+  prc.statements.forEach((stmt) => {
+    if (isReturnStatement(stmt)) {
+      returnStatements.push(stmt.value);
+    } else if (isFormulaDeclaration(stmt) || isProcedureDeclaration(stmt)) {
+      returnStatements.push(...getReturnStatements(stmt.body, env));
+    } else if (isLambdaDeclaration(stmt)) {
+      if (isStatementBlock(stmt.body)) {
+        returnStatements.push(...getReturnStatements(stmt.body, env));
+      } else {
+        returnStatements.push(stmt.body);
+      }
+    } else if (isIfStatement(stmt)) {
+      returnStatements.push(...getReturnStatements(stmt.block, env));
+      if (stmt.elseBlock)
+        returnStatements.push(...getReturnStatements(stmt.elseBlock, env));
+    }
+  });
+
+  return returnStatements;
+}
+
 export function addProcedureDeclaration(
   prc: ProcedureDeclaration,
   env: TypeEnvironment
