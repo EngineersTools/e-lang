@@ -5,6 +5,7 @@ import {
   isMeasurementLiteral,
   MeasurementLiteral,
 } from "../language/generated/ast.js";
+import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { Variables } from "./Variables.js";
 import { InterpreterContext, services } from "./interpreter.js";
@@ -63,11 +64,9 @@ export async function runProgram(
     const messageWithLine = `${message}@${range?.end.line}:${range?.end.character}`;
 
     if (severity === "error") {
-      throw new Error(messageWithLine);
+      throw new AstNodeError(info.node, message);
     } else {
-      context.log(
-        `${severity}: ${messageWithLine}`
-      );
+      context.log(`${severity}: ${messageWithLine}`);
     }
   };
 
