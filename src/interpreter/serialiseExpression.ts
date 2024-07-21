@@ -9,9 +9,12 @@ import {
   isModelValue,
   isNullLiteral,
   isProcedureDeclaration,
+  isReturnStatement,
   isStatement,
   isStringLiteral,
 } from "../language/generated/ast.js";
+import { TypeEnvironment } from "../language/type-system/TypeEnvironment.class.js";
+import { inferType } from "../language/type-system/infer.js";
 import { typeToString } from "../language/type-system/typeToString.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
@@ -104,9 +107,22 @@ export async function serialiseExpression(
       })
       .join(", ");
 
-    if (result.returnType)
+    if (result.returnType) {
       return `(${params}) => ${typeToString(result.returnType)}`;
-    else return `(${params})`;
+    } else if (isExpression(result.body)) {
+      return `(${params}) => ${
+        inferType(result.body, new TypeEnvironment()).$type
+      }`;
+    } else if (isStatement(result.body)) {
+      result.body.statements.forEach((s) => {
+        if (isReturnStatement(s)) {
+          return `(${params}) => ${inferType(s, new TypeEnvironment()).$type}`;
+        } else {
+          return `(${params})`;
+        }
+      });
+    }
+    return `(${params})`;
   } else if (isStatement(result)) {
     return serialiseExpression(result, context);
   } else if (isNullLiteral(result) || isNull(result) || result === undefined) {
