@@ -6,26 +6,68 @@ import {
   isModelDeclaration,
   isMutableDeclaration,
   isPropertyDeclaration,
+  isTypeReference,
   isUnitDeclaration,
   isUnitFamilyDeclaration,
 } from "../generated/ast.js";
+import {
+  isListType,
+  isModelType,
+  isUnionType,
+} from "../type-system/descriptions.js";
+import { inferType } from "../type-system/infer.js";
+import { TypeEnvironment } from "../type-system/TypeEnvironment.class.js";
 
 export class ELangHoverProvider extends AstNodeHoverProvider {
   protected getAstNodeHoverContent(node: AstNode): Hover | undefined {
     if (isConstantDeclaration(node)) {
+      const type = inferType(node.type, new TypeEnvironment());
+      let hoverText = "";
+
+      if (isModelType(type)) {
+        hoverText = `(Constant) ${node.name}: model ${type.modelName}`;
+      } else if (isUnionType(type)) {
+        hoverText = `(Constant) ${node.name}: ${type.types
+          .map((t) => t.$type)
+          .join(" or ")}`;
+      } else if (isListType(type)) {
+        hoverText = `(Constant) ${node.name}: ${type.itemType.$type} list`;
+      } else if (isTypeReference(type.$type)) {
+        hoverText = `(Constant) ${node.name}: ${type.$type.$type}`;
+      } else {
+        hoverText = `(Constant) ${node.name}: ${type.$type}`;
+      }
+
       return {
         contents: {
           kind: "markdown",
           language: "e-lang",
-          value: `(Constant) ${node.name}`,
+          value: hoverText,
         },
       };
     } else if (isMutableDeclaration(node)) {
+      const type = inferType(node.type, new TypeEnvironment());
+      let hoverText = "";
+
+      if (isModelType(type)) {
+        hoverText = `(Variable) ${node.name}: model ${type.modelName}`;
+      } else if (isUnionType(type)) {
+        hoverText = `(Variable) ${node.name}: ${type.types
+          .map((t) => t.$type)
+          .join(" or ")}`;
+      } else if (isListType(type)) {
+        hoverText = `(Variable) ${node.name}: ${type.itemType.$type} list`;
+      } else if (isTypeReference(type.$type)) {
+        hoverText = `(Variable) ${node.name}: ${type.$type.$type}`;
+      } else {
+        hoverText = `(Variable) ${node.name}: ${type.$type}`;
+      }
+
       return {
         contents: {
           kind: "markdown",
           language: "e-lang",
-          value: `(Variable) ${node.name}`,
+          value: hoverText,
         },
       };
     } else if (isUnitDeclaration(node)) {
@@ -57,11 +99,28 @@ export class ELangHoverProvider extends AstNodeHoverProvider {
         },
       };
     } else if (isPropertyDeclaration(node)) {
+      const type = inferType(node.type, new TypeEnvironment());
+      let hoverText = "";
+
+      if (isModelType(type)) {
+        hoverText = `(Model Property) ${node.name}: model ${type.modelName}`;
+      } else if (isUnionType(type)) {
+        hoverText = `(Model Property) ${node.name}: ${type.types
+          .map((t) => t.$type)
+          .join(" or ")}`;
+      } else if (isListType(type)) {
+        hoverText = `(Model Property) ${node.name}: ${type.itemType.$type} list`;
+      } else if (isTypeReference(type.$type)) {
+        hoverText = `(Model Property) ${node.name}: ${type.$type.$type}`;
+      } else {
+        hoverText = `(Model Property) ${node.name}: ${type.$type}`;
+      }
+
       return {
         contents: {
           kind: "markdown",
           language: "e-lang",
-          value: `(Model Property) ${node.name}: ${node.type.$type}`,
+          value: hoverText,
         },
       };
     }
