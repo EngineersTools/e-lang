@@ -3,6 +3,7 @@ import {
   isConstantDeclaration,
   isExpression,
   isListValue,
+  isModelMemberAssignment,
   isModelMemberCall,
   isModelValue,
   isMutableDeclaration,
@@ -59,6 +60,15 @@ export async function setExpressionValue(
     if (isPropertyDeclaration(ref) && isModelValue(previous)) {
       const member = previous.members.find((m) => m.property == ref.name);
 
+      if (member) {
+        member.value = right;
+      }
+    } else if (
+      isPropertyDeclaration(ref) &&
+      isModelMemberAssignment(previous) &&
+      isModelValue(previous.value)
+    ) {
+      const member = previous.value.members.find((m) => m.property == ref.name);
       if (member) {
         member.value = right;
       }
