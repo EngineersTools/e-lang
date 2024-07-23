@@ -6,9 +6,12 @@ import {
   isFormulaDeclaration,
   isLambdaDeclaration,
   isListValue,
+  isModelMemberAssignment,
+  isModelValue,
   isMutableDeclaration,
   isParameterDeclaration,
-  isProcedureDeclaration
+  isProcedureDeclaration,
+  isPropertyDeclaration,
 } from "../language/generated/ast.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
@@ -38,6 +41,13 @@ export async function runMemberCall(
     isParameterDeclaration(ref)
   ) {
     value = context.variables.get(memberCall, ref.name);
+  } else if (isModelValue(previous)) {
+    value = previous.members.find((e) => e.property == ref?.name);
+  } else if (
+    isModelMemberAssignment(previous) &&
+    isModelValue(previous.value)
+  ) {
+    value = previous.value.members.find((e) => e.property == ref?.name);
   } else {
     value = previous;
   }
