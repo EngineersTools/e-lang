@@ -1,14 +1,14 @@
 import { interruptAndCheck } from "langium";
 import {
   ModelMemberCall,
+  isConstantDeclaration,
   isExpression,
   isFormulaDeclaration,
   isLambdaDeclaration,
   isListValue,
-  isModelMemberAssignment,
-  isModelValue,
-  isProcedureDeclaration,
-  isPropertyDeclaration,
+  isMutableDeclaration,
+  isParameterDeclaration,
+  isProcedureDeclaration
 } from "../language/generated/ast.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
@@ -30,23 +30,19 @@ export async function runMemberCall(
   const ref = memberCall.element?.ref;
   let value: unknown;
 
-  if (
-    (isPropertyDeclaration(ref) || isModelMemberAssignment(ref)) &&
-    isModelValue(previous)
+  if (isFormulaDeclaration(ref) || isProcedureDeclaration(ref)) {
+    value = ref;
+  } else if (
+    isConstantDeclaration(ref) ||
+    isMutableDeclaration(ref) ||
+    isParameterDeclaration(ref)
   ) {
-    const member = isModelMemberAssignment(ref)
-      ? previous.members.find((m) => m == ref)
-      : previous.members.find((m) => m.property == ref.name);
-
-    if (member) {
-      value = await runExpression(member.value, context);
-    } else {
-      value = null;
-    }
-  } else if (ref) {
     value = context.variables.get(memberCall, ref.name);
+  } else {
+    value = previous;
   }
 
+  // List access
   if (
     memberCall.accessElement == true &&
     memberCall.index !== undefined &&
@@ -73,6 +69,7 @@ export async function runMemberCall(
     }
   }
 
+  // Call a formula, a procedure or a lambda
   if (memberCall.explicitOperationCall) {
     if (
       isFormulaDeclaration(ref) ||
@@ -121,7 +118,7 @@ export async function runMemberCall(
   if (value == undefined) {
     throw new AstNodeError(
       memberCall,
-      `Variable ${memberCall.element.$refText} not found.`
+      `Variable '${memberCall.element.$refText}' not found.`
     );
   }
 

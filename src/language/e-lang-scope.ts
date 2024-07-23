@@ -5,37 +5,32 @@ import {
   DefaultScopeComputation,
   DefaultScopeProvider,
   EMPTY_SCOPE,
+  interruptAndCheck,
   LangiumDocument,
   LangiumDocuments,
   MultiMap,
   PrecomputedScopes,
   ReferenceInfo,
   Scope,
-  ScopeOptions,
   StreamScope,
   URI,
   UriUtils,
-  interruptAndCheck,
-  stream,
 } from "langium";
 import { LangiumServices } from "langium/lsp";
-import { CancellationToken } from "vscode-jsonrpc";
-import { getQualifiedName } from "../interpreter/AstNode.utils.js";
+import { CancellationToken } from "vscode-languageserver";
 import {
   ELangProgram,
   Import,
-  isConstantDeclaration,
   isELangProgram,
   isExportable,
-  isModelMemberAssignment,
   isModelMemberCall,
-  isModelValue,
-  isMutableDeclaration,
   isUnitDeclaration,
   isUnitFamilyDeclaration,
+  ModelDeclaration,
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
-import { ModelMemberType, isModelType } from "./type-system/descriptions.js";
+import { isModelMemberType, isModelType } from "./type-system/descriptions.js";
+import { getModelDeclarationChain } from "./type-system/getModelDeclarationChain.js";
 import { inferType } from "./type-system/infer.js";
 
 export class ELangScopeProvider extends DefaultScopeProvider {
@@ -53,46 +48,26 @@ export class ELangScopeProvider extends DefaultScopeProvider {
       context.property === "element" &&
       isModelMemberCall(context.container)
     ) {
-      const memberCall = context.container;
-      const previous = memberCall.previous;
-
-      if (!previous) {
+      if (!context.container.previous) {
         return super.getScope(context);
       }
-
-      const previousType = inferType(previous, this.types);
-
-      if (isModelType(previousType)) {
-        return previousType !== undefined && previousType.$source === "value"
-          ? this.scopeMemberTypes(previousType.memberTypes)
-          : super.getScope(context);
+      const previousType = inferType(context.container.previous, this.types);
+      if (isModelType(previousType) && previousType.modelDeclaration) {
+        return this.scopeModelProperties(previousType.modelDeclaration);
+      } else if (
+        isModelMemberType(previousType) &&
+        isModelType(previousType.typeDesc) &&
+        previousType.typeDesc.modelDeclaration
+      ) {
+        return this.scopeModelProperties(
+          previousType.typeDesc.modelDeclaration
+        );
       }
+
       return EMPTY_SCOPE;
     }
 
     return super.getScope(context);
-  }
-
-  override createScopeForNodes(
-    elements: Iterable<AstNode>,
-    outerScope?: Scope | undefined,
-    options?: ScopeOptions | undefined
-  ): Scope {
-    const s = stream(elements)
-      .map((e) => {
-        const name = isModelMemberAssignment(e)
-          ? e.property
-          : this.nameProvider.getName(e);
-
-        if (name) {
-          return this.descriptions.createDescription(e, name);
-        }
-
-        return undefined;
-      })
-      .nonNullable();
-
-    return new StreamScope(s, outerScope, options);
   }
 
   protected override getGlobalScope(
@@ -117,8 +92,10 @@ export class ELangScopeProvider extends DefaultScopeProvider {
     return new StreamScope(importedElements);
   }
 
-  private scopeMemberTypes(memberTypes: ModelMemberType[]): Scope {
-    const allMembers = memberTypes.flatMap((e) => e.typeDesc);
+  private scopeModelProperties(model: ModelDeclaration): Scope {
+    const allMembers = getModelDeclarationChain(model).flatMap(
+      (e) => e.properties
+    );
     return this.createScopeForNodes(allMembers);
   }
 
@@ -180,23 +157,7 @@ export class ELangScopeComputation extends DefaultScopeComputation {
     )) {
       await interruptAndCheck(cancelToken);
 
-      if (isConstantDeclaration(node) || isMutableDeclaration(node)) {
-        if (node.assignment && isModelValue(node.value)) {
-          node.value.members.forEach((m) => {
-            const fullyQualifiedName = getQualifiedName(node, m.property); // `${node.name}.${m.property}`;
-
-            scopes.add(
-              node.$container,
-              this.descriptions.createDescription(
-                node,
-                fullyQualifiedName,
-                document
-              )
-            );
-          });
-        }
-        super.processNode(node, document, scopes);
-      } else if (isUnitDeclaration(node)) {
+      if (isUnitDeclaration(node)) {
         scopes.add(
           document.parseResult.value,
           this.descriptions.createDescription(node, node.name, document)

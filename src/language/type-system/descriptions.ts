@@ -4,6 +4,7 @@
  */
 
 import { AstNode } from "langium";
+import { ModelDeclaration } from "../generated/ast.js";
 
 export type TypeDescription =
   | BooleanType
@@ -224,20 +225,23 @@ export interface ModelType {
   readonly memberTypes: ModelMemberType[];
   readonly parentTypes?: ModelType[];
   readonly modelName?: string;
+  readonly modelDeclaration?: ModelDeclaration;
 }
 
 export function createModelTypeDescription(
   source: ModelTypeSource,
   memberTypes: ModelMemberType[],
   parentTypes?: ModelType[],
-  modelName?: string
+  modelName?: string,
+  modelDeclaration?: ModelDeclaration
 ): ModelType {
   return {
     $type: "model",
     $source: source,
     memberTypes,
     parentTypes,
-    modelName
+    modelName,
+    modelDeclaration,
   };
 }
 

@@ -43,7 +43,19 @@ UnitConversionExpression infers Expression:
 ModelMemberCall infers Expression:
     PrimaryExpression
     ({infer ModelMemberCall.previous=current} 
-        ("." element=[NamedElement:ID])
+        ("." element=[NamedElement:ID] (
+            explicitOperationCall?='(' 
+                (
+                    arguments+=Expression (',' arguments+=Expression)*
+                )?
+            ')')?
+        ) | (
+            explicitOperationCall?='('
+                (
+                    arguments+=Expression (',' arguments+=Expression)*
+                )?
+            ')'
+        )
     )*
 ;
 
@@ -62,18 +74,19 @@ PrimaryExpression infers Expression:
     ListCount |
     ListAdd |
     ListRemove |
-    FeatureCall |
-    MathematicalFunction
+    MathematicalFunction |
+    FeatureCall
 ;
 
 FeatureCall infers Expression:
-    {infer ModelMemberCall}
-	element=[NamedElement:ID]
-    (explicitOperationCall?='('
-        (
-            arguments+=Expression (',' arguments+=Expression)*
-        )?
-    ')')?
+	{infer ModelMemberCall}
+	    element=[NamedElement:ID]
+            // Optional function call after referencing an element
+            (explicitOperationCall?='('
+            (
+                arguments+=Expression (',' arguments+=Expression)*
+            )?
+	    ')')?
 ;
 
 ListAccess infers Expression:

@@ -84,6 +84,7 @@ import {
   isParameterType,
   isTextType,
 } from "./descriptions.js";
+import { getAllPropertiesInModelDeclarationChain } from "./getAllPropertiesInModelDeclarationChain.js";
 
 export function inferType(
   node: AstNode | undefined,
@@ -200,17 +201,20 @@ export function inferTypeReference(
     typeRef.model.ref &&
     isModelDeclaration(typeRef.model.ref)
   ) {
-    const memberTypes = typeRef.model.ref.properties.map((member) =>
-      inferType(member, env)
-    ) as ModelMemberType[];
+    const memberTypes = getAllPropertiesInModelDeclarationChain(
+      typeRef.model.ref
+    ).map((member) => inferType(member, env)) as ModelMemberType[];
     resolvedType = createModelTypeDescription(
       "declaration",
       memberTypes,
       undefined,
-      typeRef.model.ref.name
+      typeRef.model.ref.name,
+      typeRef.model.ref
     );
   } else if (isMeasurementType(typeRef)) {
     resolvedType = inferMeasurement(typeRef, env);
+  } else if (isTypeReference(typeRef.type)) {
+    resolvedType = inferTypeReference(typeRef.type, env);
   } else {
     resolvedType = createErrorType(
       "Could not infer type for this type reference",
@@ -297,6 +301,12 @@ export function inferPropertyDeclaration(
     const propType = env.getRegisteredType(expr.type.model.ref.name);
     if (propType) {
       return createModelMemberType(expr.name, propType, expr.isOptional);
+    } else if (isTypeReference(expr.type)) {
+      return createModelMemberType(
+        expr.name,
+        inferType(expr.type, env),
+        expr.isOptional
+      );
     }
   } else if (isTypeUnion(expr.type)) {
     return createModelMemberType(
@@ -463,7 +473,8 @@ export function inferModelDeclaration(
     "declaration",
     propertyTypes,
     parentTypes,
-    expr.name
+    expr.name,
+    expr
   );
 }
 
