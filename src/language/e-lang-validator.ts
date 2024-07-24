@@ -12,6 +12,22 @@ import {
   ELangProgram,
   Expression,
   FormulaDeclaration,
+  isBinaryExpression,
+  isConstantDeclaration,
+  isExpression,
+  isFormulaDeclaration,
+  isLambdaDeclaration,
+  isListAdd,
+  isListCount,
+  isMatchStatement,
+  isModelDeclaration,
+  isModelMemberAssignment,
+  isModelMemberCall,
+  isModelValue,
+  isMutableDeclaration,
+  isPrintStatement,
+  isReturnStatement,
+  isStatementBlock,
   LambdaDeclaration,
   ModelDeclaration,
   ModelMemberAssignment,
@@ -23,21 +39,6 @@ import {
   StatementBlock,
   TypeReference,
   UnaryExpression,
-  isBinaryExpression,
-  isConstantDeclaration,
-  isExpression,
-  isFormulaDeclaration,
-  isLambdaDeclaration,
-  isListAdd,
-  isListCount,
-  isMatchStatement,
-  isModelDeclaration,
-  isModelMemberCall,
-  isModelValue,
-  isMutableDeclaration,
-  isPrintStatement,
-  isReturnStatement,
-  isStatementBlock,
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import {
@@ -67,6 +68,9 @@ export class ELangValidationRegistry extends ValidationRegistry {
     const checks: ValidationChecks<ELangAstType> = {
       ELangProgram: validator.typecheckProgram,
       PropertyDeclaration: validator.checkModelPropertiesAreNotDuplicated,
+      ModelMemberAssignment: validator.checkAssignmentOperationAllowed,
+      ConstantDeclaration: validator.checkAssignmentOperationAllowed,
+      MutableDeclaration: validator.checkAssignmentOperationAllowed,
     };
     this.register(checks, validator);
   }
@@ -186,38 +190,6 @@ export class ELangValidator {
       }
     } else if (isPrintStatement(stmt)) {
       this.typecheckStatement(env, stmt.value, accept);
-    }
-  }
-
-  checkModelPropertiesAreNotDuplicated(
-    prop: PropertyDeclaration,
-    accept: ValidationAcceptor
-  ): void {
-    if (isModelDeclaration(prop.$container)) {
-      const model = prop.$container;
-      const parentModels = getModelDeclarationParentsChain(model);
-
-      parentModels.forEach((parentModel) => {
-        if (parentModel) {
-          const parentModelPropertiesNames = parentModel.properties.map(
-            (p) => p.name
-          );
-
-          if (
-            parentModelPropertiesNames.includes(prop.name) &&
-            !prop.override
-          ) {
-            accept(
-              "error",
-              `This property already exists in parent model '${parentModel.name}', use the 'override' keyword if this is intentional`,
-              {
-                node: prop,
-                property: "name",
-              }
-            );
-          }
-        }
-      });
     }
   }
 
@@ -378,6 +350,56 @@ export class ELangValidator {
     }
   }
 
+  checkModelPropertiesAreNotDuplicated(
+    prop: PropertyDeclaration,
+    accept: ValidationAcceptor
+  ): void {
+    if (isModelDeclaration(prop.$container)) {
+      const model = prop.$container;
+
+      let count = 0;
+      model.properties.forEach((p) => {
+        if (p.name === prop.name) {
+          count++;
+
+          if (count > 1)
+            accept(
+              "error",
+              `PropertyDeclaration '${prop.name}' already exists in model '${model.name}'`,
+              {
+                node: prop,
+                property: "name",
+              }
+            );
+        }
+      });
+
+      const parentModels = getModelDeclarationParentsChain(model);
+
+      parentModels.forEach((parentModel) => {
+        if (parentModel) {
+          const parentModelPropertiesNames = parentModel.properties.map(
+            (p) => p.name
+          );
+
+          if (
+            parentModelPropertiesNames.includes(prop.name) &&
+            !prop.override
+          ) {
+            accept(
+              "error",
+              `This property already exists in parent model '${parentModel.name}', use the 'override' keyword if this is intentional`,
+              {
+                node: prop,
+                property: "name",
+              }
+            );
+          }
+        }
+      });
+    }
+  }
+
   checkParentModelsForDuplicatedProperties(
     model: ModelDeclaration,
     accept: ValidationAcceptor
@@ -409,6 +431,29 @@ export class ELangValidator {
     }
   }
 
+  checkAllModelPropertiesHaveBeenAssigned(
+    prop: ModelValue,
+    accept: ValidationAcceptor
+  ) {
+    accept("info", "Checking if all properties have been assigned", {
+      node: prop,
+    });
+    // if (isModelValue(prop.$container)) {
+    //   const model = prop.$container;
+    //   const modelProperties = model.properties.map((p) => p.name);
+    //   const modelValueProperties = model.properties.map((p) => p.name);
+
+    //   modelProperties.forEach((p) => {
+    //     if (!modelValueProperties.includes(p)) {
+    //       accept("error", `Property '${p}' must be assigned`, {
+    //         node: prop,
+    //         property: "name",
+    //       });
+    //     }
+    //   });
+    // }
+  }
+
   checkUnitsAreOfCorrectFamily(
     node: ConstantDeclaration | MutableDeclaration,
     accept: ValidationAcceptor
@@ -431,36 +476,6 @@ export class ELangValidator {
     //       `The unit ${unitRef.name} has is not part of the ${unitFamilyRef.name} unit family. Valid unit options for this family are: ${unitFamilyUnits}`,
     //       { node, property: "value" }
     //     );
-    //   }
-    // }
-  }
-
-  checkModelHasBeenAssignedCorrectProperties(
-    node: MutableDeclaration | ConstantDeclaration,
-    accept: ValidationAcceptor
-  ) {
-    // if (
-    //   node.assignment &&
-    //   node.type &&
-    //   node.type.model &&
-    //   isModelValue(node.value) &&
-    //   isModelDeclaration(node.type?.model?.ref)
-    // ) {
-    //   const props = getInheritedModelProperties(node.type.model.ref);
-    //   for (const member of node.value.members) {
-    //     if (isBinaryExpression(member)) {
-    //       const memberName = member;
-    //       if (memberName && !props.map((p) => p.name).includes(memberName)) {
-    //         accept(
-    //           "error",
-    //           `PropertyDeclaration '${memberName}' does not exist in model '${node.type.model.ref.name}'`,
-    //           {
-    //             node: member,
-    //             property: "left",
-    //           }
-    //         );
-    //       }
-    //     }
     //   }
     // }
   }
@@ -556,26 +571,50 @@ export class ELangValidator {
   }
 
   checkAssignmentOperationAllowed(
-    memberAssignment: ModelMemberAssignment,
+    assignment:
+      | ModelMemberAssignment
+      | ConstantDeclaration
+      | MutableDeclaration,
     accept: ValidationAcceptor
   ) {
-    const modelValue = memberAssignment.$container;
-    if (
-      isModelValue(modelValue) &&
-      isConstantDeclaration(modelValue.$container)
+    const map = this.getTypeCache();
+
+    if (isModelMemberAssignment(assignment)) {
+      const modelValue = assignment.$container;
+      if (
+        isModelValue(modelValue) &&
+        isConstantDeclaration(modelValue.$container)
+      ) {
+        const left = inferType(modelValue.$container, map);
+        const right = inferType(modelValue, map);
+        if (!isAssignable(left, right)) {
+          accept(
+            "error",
+            `Type '${typeToString(
+              right
+            )}' is not assignable to type '${typeToString(left)}'.`,
+            {
+              node: left,
+              property: "right",
+            }
+          );
+        }
+      }
+    } else if (
+      isConstantDeclaration(assignment) ||
+      isMutableDeclaration(assignment)
     ) {
-      const map = this.getTypeCache();
-      const left = inferType(modelValue.$container, map);
-      const right = inferType(modelValue, map);
-      if (!isAssignable(left, right)) {
+      const expectedType = inferType(assignment.type, map);
+      const assignedType = inferType(assignment.value, map);
+      if (!isAssignable(assignedType, expectedType)) {
         accept(
           "error",
           `Type '${typeToString(
-            right
-          )}' is not assignable to type '${typeToString(left)}'.`,
+            assignedType
+          )}' is not assignable to type '${typeToString(expectedType)}'.`,
           {
-            node: left,
-            property: "right",
+            node: assignment,
+            property: "value",
           }
         );
       }

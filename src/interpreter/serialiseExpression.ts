@@ -10,7 +10,7 @@ import {
   isNullLiteral,
   isProcedureDeclaration,
   isStatement,
-  isStringLiteral
+  isStringLiteral,
 } from "../language/generated/ast.js";
 import { TypeEnvironment } from "../language/type-system/TypeEnvironment.class.js";
 import { getReturnType } from "../language/type-system/TypeEnvironment.functions.js";
@@ -80,7 +80,7 @@ export async function serialiseExpression(
         items.push(value);
       } else if (isMeasurement(value)) {
         items.push(await serialiseExpression(value, context));
-      } else if (isListValue(value)) {
+      } else if (isListValue(value) || isModelValue(value)) {
         items.push(JSON.parse(await serialiseExpression(value, context)));
       } else {
         items.push(value);

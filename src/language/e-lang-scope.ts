@@ -12,6 +12,7 @@ import {
   PrecomputedScopes,
   ReferenceInfo,
   Scope,
+  stream,
   StreamScope,
   URI,
   UriUtils,
@@ -27,6 +28,7 @@ import {
   isUnitDeclaration,
   isUnitFamilyDeclaration,
   ModelDeclaration,
+  ModelValue
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
 import { isModelMemberType, isModelType } from "./type-system/descriptions.js";
@@ -51,9 +53,19 @@ export class ELangScopeProvider extends DefaultScopeProvider {
       if (!context.container.previous) {
         return super.getScope(context);
       }
+
       const previousType = inferType(context.container.previous, this.types);
+
       if (isModelType(previousType) && previousType.modelDeclaration) {
         return this.scopeModelProperties(previousType.modelDeclaration);
+      } else if (
+        isModelType(previousType) &&
+        previousType.$source === "value" &&
+        isModelMemberCall(context.container.previous)
+      ) {
+        // @ts-expect-error
+        const modelValue = context.container.previous.element.ref.value;
+        return this.scopeModelValueMembers(modelValue);
       } else if (
         isModelMemberType(previousType) &&
         isModelType(previousType.typeDesc) &&
@@ -97,6 +109,18 @@ export class ELangScopeProvider extends DefaultScopeProvider {
       (e) => e.properties
     );
     return this.createScopeForNodes(allMembers);
+  }
+
+  private scopeModelValueMembers(modelValue: ModelValue): Scope {
+    const s = stream(modelValue.members)
+      .map((e) => {
+        if (e.property) {
+          return this.descriptions.createDescription(e, e.property);
+        }
+        return undefined;
+      })
+      .nonNullable();
+    return new StreamScope(s);
   }
 
   private gatherImports(

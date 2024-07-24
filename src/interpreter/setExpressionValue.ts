@@ -9,6 +9,7 @@ import {
   isMutableDeclaration,
   isParameterDeclaration,
   isPropertyDeclaration,
+  ModelMemberAssignment,
 } from "../language/generated/ast.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
@@ -41,7 +42,9 @@ export async function setExpressionValue(
     }
 
     const ref = left.element?.ref;
-    const name = ref?.name;
+    const name = isModelMemberAssignment(ref)
+      ? (ref as ModelMemberAssignment).property
+      : ref?.name;
 
     if (!name) {
       throw new AstNodeError(
@@ -63,12 +66,31 @@ export async function setExpressionValue(
       if (member) {
         member.value = right;
       }
+    } else if (isModelMemberAssignment(ref) && isModelValue(previous)) {
+      const member = previous.members.find(
+        (m) => m.property == (ref as ModelMemberAssignment).property
+      );
+
+      if (member) {
+        member.value = right;
+      }
     } else if (
       isPropertyDeclaration(ref) &&
       isModelMemberAssignment(previous) &&
       isModelValue(previous.value)
     ) {
       const member = previous.value.members.find((m) => m.property == ref.name);
+      if (member) {
+        member.value = right;
+      }
+    } else if (
+      isModelMemberAssignment(ref) &&
+      isModelMemberAssignment(previous) &&
+      isModelValue(previous.value)
+    ) {
+      const member = previous.value.members.find(
+        (m) => m.property == (ref as ModelMemberAssignment).property
+      );
       if (member) {
         member.value = right;
       }

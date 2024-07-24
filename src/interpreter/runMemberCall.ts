@@ -1,5 +1,6 @@
 import { interruptAndCheck } from "langium";
 import {
+  ModelMemberAssignment,
   ModelMemberCall,
   isConstantDeclaration,
   isExpression,
@@ -40,14 +41,27 @@ export async function runMemberCall(
     isMutableDeclaration(ref) ||
     isParameterDeclaration(ref)
   ) {
-    value = context.variables.get(memberCall, ref.name);
+    value = context.variables.get(memberCall, ref.name) ?? null;
   } else if (isModelValue(previous)) {
-    value = previous.members.find((e) => e.property == ref?.name);
+    if (isPropertyDeclaration(ref))
+      value = previous.members.find((e) => e.property == ref.name) ?? null;
+    else if (isModelMemberAssignment(ref))
+      value =
+        previous.members.find(
+          (e) => e.property == (ref as ModelMemberAssignment).property
+        ) ?? null;
   } else if (
     isModelMemberAssignment(previous) &&
     isModelValue(previous.value)
   ) {
-    value = previous.value.members.find((e) => e.property == ref?.name);
+    if (isPropertyDeclaration(ref))
+      value =
+        previous.value.members.find((e) => e.property == ref.name) ?? null;
+    if (isModelMemberAssignment(ref))
+      value =
+        previous.value.members.find(
+          (e) => e.property == (ref as ModelMemberAssignment).property
+        ) ?? null;
   } else {
     value = previous;
   }

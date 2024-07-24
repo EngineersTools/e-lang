@@ -68,14 +68,24 @@ export async function runExpression(
     return await runBinaryExpression(expression, context);
   } else if (isUnaryExpression(expression)) {
     const { operator, value } = expression;
-    const actualValue = await runExpression(value, context);
+
+    let actualValue: unknown = value;
+
+    while (isExpression(actualValue) && !isMeasurement(actualValue)) {
+      if (isModelMemberCall(actualValue)) {
+        actualValue = await runMemberCall(actualValue, context);
+      } else {
+        actualValue = await runExpression(actualValue, context);
+      }
+    }
+
     if (operator === "-") {
       if (typeof actualValue === "number") {
         return -actualValue;
       } else if (isMeasurement(actualValue)) {
         return {
           ...actualValue,
-          numericValue: -actualValue.value,
+          value: -actualValue.value,
         } as MeasurementLiteral;
       } else {
         throw new AstNodeError(
@@ -106,6 +116,18 @@ export async function runExpression(
       const converted = await convertMeasurements(
         leftValue,
         { ...leftValue, unit: expression.unit },
+        context,
+        expression.arguments
+      );
+
+      return converted.left;
+    } else if (
+      isModelMemberAssignment(leftValue) &&
+      isMeasurement(leftValue.value)
+    ) {
+      const converted = await convertMeasurements(
+        leftValue.value,
+        { ...leftValue.value, unit: expression.unit },
         context,
         expression.arguments
       );
