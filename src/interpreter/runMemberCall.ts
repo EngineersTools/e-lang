@@ -1,7 +1,6 @@
-import { interruptAndCheck } from "langium";
+import { AstNode, interruptAndCheck } from "langium";
 import {
-  ModelMemberAssignment,
-  ModelMemberCall,
+  Expression,
   isConstantDeclaration,
   isExpression,
   isFormulaDeclaration,
@@ -13,6 +12,9 @@ import {
   isParameterDeclaration,
   isProcedureDeclaration,
   isPropertyDeclaration,
+  ModelMemberAssignment,
+  ModelMemberCall,
+  NamedElement,
 } from "../language/generated/ast.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
@@ -34,7 +36,11 @@ export async function runMemberCall(
   const ref = memberCall.element?.ref;
   let value: unknown;
 
-  if (isFormulaDeclaration(ref) || isProcedureDeclaration(ref)) {
+  if (
+    isFormulaDeclaration(ref) ||
+    isProcedureDeclaration(ref) ||
+    isLambdaDeclaration(ref)
+  ) {
     value = ref;
   } else if (
     isConstantDeclaration(ref) ||
@@ -72,24 +78,16 @@ export async function runMemberCall(
     memberCall.index !== undefined &&
     ref !== undefined
   ) {
-    let index = 0;
-
-    if (isExpression(memberCall.index)) {
-      index = (await runExpression(memberCall.index, context)) as number;
-    } else {
-      index = memberCall.index;
-    }
-
-    const value = context.variables.get(ref, ref.name);
-    if (isListValue(value) && index < value.items.length && index >= 0) {
-      return await runExpression(value.items[index], context);
-    } else {
-      throw new AstNodeError(
+    if (isModelMemberAssignment(value) && isListValue(value.value)) {
+      return await getListElement(
         memberCall,
-        `Index out of range. The list '${
-          memberCall.element.$refText
-        }' has less than ${index + 1} elements`
+        memberCall.index,
+        context,
+        ref,
+        value.value
       );
+    } else {
+      return await getListElement(memberCall, memberCall.index, context, ref);
     }
   }
 
@@ -131,6 +129,25 @@ export async function runMemberCall(
       await runELangStatement(value.body, context, returnFn);
       context.variables.leave();
       return functionValue;
+    } else if (
+      isModelMemberAssignment(value) &&
+      isLambdaDeclaration(value.value)
+    ) {
+      const args = await Promise.all(
+        memberCall.arguments.map((e) => runExpression(e, context))
+      );
+      context.variables.enter();
+      const names = value.value.parameters.map((e) => e.name);
+      for (let i = 0; i < args.length; i++) {
+        context.variables.push(names[i], args[i]);
+      }
+      let functionValue: unknown;
+      const returnFn: ReturnFunction = (returnValue) => {
+        functionValue = returnValue;
+      };
+      await runELangStatement(value.value.body, context, returnFn);
+      context.variables.leave();
+      return functionValue;
     } else {
       throw new AstNodeError(
         memberCall,
@@ -147,4 +164,33 @@ export async function runMemberCall(
   }
 
   return value;
+}
+
+async function getListElement(
+  memberCall: ModelMemberCall,
+  indexExp: Expression | number,
+  context: RunnerContext,
+  ref: AstNode & NamedElement,
+  val?: AstNode
+) {
+  let index = 0;
+
+  if (isExpression(indexExp)) {
+    index = (await runExpression(indexExp, context)) as number;
+  } else {
+    index = indexExp;
+  }
+
+  const value = val ?? context.variables.get(ref, ref.name);
+
+  if (isListValue(value) && index < value.items.length && index >= 0) {
+    return await runExpression(value.items[index], context);
+  } else {
+    throw new AstNodeError(
+      memberCall,
+      `Index out of range. The list '${
+        memberCall.element.$refText
+      }' has less than ${index + 1} elements`
+    );
+  }
 }

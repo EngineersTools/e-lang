@@ -320,6 +320,12 @@ export function inferPropertyDeclaration(
       inferMeasurement(expr.type, env),
       expr.isOptional
     );
+  } else if (isLambdaType(expr.type)) {
+    return createModelMemberType(
+      expr.name,
+      inferLambda(expr.type, env),
+      expr.isOptional
+    );
   }
 
   return createErrorType("Could not infer property type", expr);
@@ -497,7 +503,8 @@ export function inferModelMemberAssignment(
   expr: ModelMemberAssignment,
   env: TypeEnvironment
 ): TypeDescription {
-  return inferExpression(expr.value, env);
+  if (isExpression(expr.value)) return inferExpression(expr.value, env);
+  else return inferLambda(expr.value, env);
 }
 
 export function inferBinaryExpression(

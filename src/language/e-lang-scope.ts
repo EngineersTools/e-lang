@@ -28,10 +28,14 @@ import {
   isUnitDeclaration,
   isUnitFamilyDeclaration,
   ModelDeclaration,
-  ModelValue
+  ModelValue,
 } from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
-import { isModelMemberType, isModelType } from "./type-system/descriptions.js";
+import {
+  isListType,
+  isModelMemberType,
+  isModelType,
+} from "./type-system/descriptions.js";
 import { getModelDeclarationChain } from "./type-system/getModelDeclarationChain.js";
 import { inferType } from "./type-system/infer.js";
 
@@ -58,6 +62,27 @@ export class ELangScopeProvider extends DefaultScopeProvider {
 
       if (isModelType(previousType) && previousType.modelDeclaration) {
         return this.scopeModelProperties(previousType.modelDeclaration);
+      } else if (isModelMemberType(previousType)) {
+        if (
+          isModelType(previousType.typeDesc) &&
+          previousType.typeDesc.modelDeclaration
+        ) {
+          return this.scopeModelProperties(
+            previousType.typeDesc.modelDeclaration
+          );
+        } else if (
+          isListType(previousType.typeDesc) &&
+          context.container.previous.accessElement
+        ) {
+          if (
+            isModelType(previousType.typeDesc.itemType) &&
+            previousType.typeDesc.itemType.modelDeclaration
+          ) {
+            return this.scopeModelProperties(
+              previousType.typeDesc.itemType.modelDeclaration
+            );
+          }
+        }
       } else if (
         isModelType(previousType) &&
         previousType.$source === "value" &&
@@ -66,14 +91,6 @@ export class ELangScopeProvider extends DefaultScopeProvider {
         // @ts-expect-error
         const modelValue = context.container.previous.element.ref.value;
         return this.scopeModelValueMembers(modelValue);
-      } else if (
-        isModelMemberType(previousType) &&
-        isModelType(previousType.typeDesc) &&
-        previousType.typeDesc.modelDeclaration
-      ) {
-        return this.scopeModelProperties(
-          previousType.typeDesc.modelDeclaration
-        );
       }
 
       return EMPTY_SCOPE;

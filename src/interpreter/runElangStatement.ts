@@ -47,8 +47,6 @@ export async function runELangStatement(
     if (isLambdaDeclaration(statement.$container)) {
       returnFn(result);
     }
-  } else if (isExpression(statement)) {
-    await runExpression(statement, context);
   } else if (isForStatement(statement)) {
     await runForStatement(statement, context, returnFn);
   } else if (isFormulaDeclaration(statement)) {

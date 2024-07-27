@@ -51,18 +51,25 @@ export async function serialiseExpression(
     const entries = [];
 
     for (const member of result.members) {
-      const value = await runExpression(member.value, context);
+      if (isExpression(member.value)) {
+        const value = await runExpression(member.value, context);
 
-      if (isMeasurement(value) || isFormulaDeclaration(value)) {
+        if (isMeasurement(value) || isFormulaDeclaration(value)) {
+          entries.push([
+            member.property,
+            await serialiseExpression(value, context),
+          ]);
+        } else if (isModelValue(value) || isListValue(value)) {
+          const serialisedModel = await serialiseExpression(value, context);
+          entries.push([member.property, JSON.parse(serialisedModel)]);
+        } else {
+          entries.push([member.property, value]);
+        }
+      } else {
         entries.push([
           member.property,
-          await serialiseExpression(value, context),
+          await serialiseExpression(member.value, context),
         ]);
-      } else if (isModelValue(value) || isListValue(value)) {
-        const serialisedModel = await serialiseExpression(value, context);
-        entries.push([member.property, JSON.parse(serialisedModel)]);
-      } else {
-        entries.push([member.property, value]);
       }
     }
 

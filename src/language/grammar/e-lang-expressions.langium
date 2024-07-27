@@ -48,13 +48,25 @@ ModelMemberCall infers Expression:
                 (
                     arguments+=Expression (',' arguments+=Expression)*
                 )?
-            ')')?
+            ')' |
+            accessElement?='[' 
+                (
+                    index=(NUM | Expression)
+                ) 
+            ']'
+            )?
         ) | (
             explicitOperationCall?='('
                 (
                     arguments+=Expression (',' arguments+=Expression)*
                 )?
             ')'
+        ) | (
+            accessElement?='[' 
+                (
+                    index=(NUM | Expression)
+                ) 
+            ']'
         )
     )*
 ;
@@ -70,23 +82,23 @@ PrimaryExpression infers Expression:
     ModelMemberAssignment |
     UnaryExpression |
     ListValue |
-    ListAccess |
     ListCount |
     ListAdd |
     ListRemove |
     MathematicalFunction |
+    ListAccess |
     FeatureCall
 ;
 
 FeatureCall infers Expression:
 	{infer ModelMemberCall}
-	    element=[NamedElement:ID]
-            // Optional function call after referencing an element
-            (explicitOperationCall?='('
-            (
-                arguments+=Expression (',' arguments+=Expression)*
-            )?
-	    ')')?
+    element=[NamedElement:ID]
+    // Optional function call after referencing an element
+    (explicitOperationCall?='('
+        (
+            arguments+=Expression (',' arguments+=Expression)*
+        )?
+    ')')?
 ;
 
 ListAccess infers Expression:
@@ -131,7 +143,7 @@ ModelValue:
 ;
 
 ModelMemberAssignment:
-    property=ID ':' value=Expression
+    property=ID ':' value=(Expression | LambdaDeclaration)
 ;
 
 ListValue:

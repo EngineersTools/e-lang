@@ -61,7 +61,9 @@ export async function runExpression(
   } else if (isListValue(expression)) {
     return expression;
   } else if (isModelMemberAssignment(expression)) {
-    return await runExpression(expression.value, context);
+    if (isExpression(expression.value))
+      return await runExpression(expression.value, context);
+    else return expression.value;
   } else if (isModelMemberCall(expression)) {
     return await runMemberCall(expression, context);
   } else if (isBinaryExpression(expression)) {

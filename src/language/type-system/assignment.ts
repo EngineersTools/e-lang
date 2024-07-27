@@ -121,6 +121,12 @@ export function isAssignable(
     } else {
       return isAssignable(from, to.itemType);
     }
+  } else if (isListType(from)) {
+    if (isEmtpyListType(from)) {
+      return createAssignableResult();
+    } else {
+      return isAssignable(from.itemType, to);
+    }
   } else if (isUnionType(to) && isUnionType(from)) {
     // If both are union types, check that all times in 'from'
     // are contained in 'to'
