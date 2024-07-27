@@ -4,7 +4,7 @@
     {
       "id": "e-lang",
       "grammar": "src/language/grammar/e-lang.langium",
-      "fileExtensions": [".el", ".elnb"],
+      "fileExtensions": [".elng", ".elnb"],
       "textMate": {
         "out": "syntaxes/e-lang.tmLanguage.json"
       },

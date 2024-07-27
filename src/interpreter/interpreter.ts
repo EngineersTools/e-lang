@@ -37,7 +37,7 @@ function addDocumentToServices(
   program: string,
   docUri?: URI
 ) {
-  const uri = docUri ?? URI.parse(`memory:///${v4()}.el`);
+  const uri = docUri ?? URI.parse(`memory:///${v4()}.elng`);
   const document = services.shared.workspace.LangiumDocumentFactory.fromString(
     program,
     uri

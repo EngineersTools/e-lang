@@ -239,8 +239,8 @@ export function resolveImportUri(imp: Import): URI | undefined {
   const dirUri = UriUtils.dirname(getDocument(imp).uri);
   let importPath = imp.importSource;
 
-  if (!importPath.endsWith(".el")) {
-    importPath += ".el";
+  if (!importPath.endsWith(".elng")) {
+    importPath += ".elng";
   }
 
   return URI.file(UriUtils.resolvePath(dirUri, importPath).path);
