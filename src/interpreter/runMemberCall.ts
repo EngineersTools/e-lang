@@ -20,7 +20,6 @@ import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { ReturnFunction, runELangStatement } from "./runELangStatement.js";
 import { runExpression } from "./runExpression.js";
-import { runMathFunction } from "./Math.functions.js";
 
 export async function runMemberCall(
   memberCall: ModelMemberCall,
