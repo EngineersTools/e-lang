@@ -82,6 +82,7 @@ export async function runBinaryExpression(
       (e) => isBoolean(e)
     );
   } else if (["==", "!="].includes(operator)) {
+    
     return await applyOperator(
       expression,
       operator,

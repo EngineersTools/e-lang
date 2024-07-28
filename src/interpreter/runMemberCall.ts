@@ -20,6 +20,7 @@ import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { ReturnFunction, runELangStatement } from "./runELangStatement.js";
 import { runExpression } from "./runExpression.js";
+import { runMathFunction } from "./Math.functions.js";
 
 export async function runMemberCall(
   memberCall: ModelMemberCall,
@@ -78,16 +79,18 @@ export async function runMemberCall(
     memberCall.index !== undefined &&
     ref !== undefined
   ) {
-    if (isModelMemberAssignment(value) && isListValue(value.value)) {
-      return await getListElement(
-        memberCall,
-        memberCall.index,
-        context,
-        ref,
-        value.value
-      );
-    } else {
-      return await getListElement(memberCall, memberCall.index, context, ref);
+    if (isModelMemberAssignment(value)) {
+      if (isListValue(value.value)) {
+        return await getListElement(
+          memberCall,
+          memberCall.index,
+          context,
+          ref,
+          value.value
+        );
+      } else {
+        return await getListElement(memberCall, memberCall.index, context, ref);
+      }
     }
   }
 
@@ -161,6 +164,10 @@ export async function runMemberCall(
       memberCall,
       `Variable '${memberCall.element.$refText}' not found.`
     );
+  }
+
+  if (isModelMemberAssignment(value) && isExpression(value.value)) {
+    value = await runExpression(value.value, context);
   }
 
   return value;
