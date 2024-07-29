@@ -112,6 +112,6 @@
   ],
   "main": "./out/extension/main.cjs",
   "bin": {
-    "e-lang-cli": "./bin/cli.js"
+    "elang": "./bin/cli.js"
   }
 }

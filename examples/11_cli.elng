@@ -1,0 +1,21 @@
+domain CliTests
+
+const x = 10
+const y = 20
+
+formula add(x: number, y: number) returns number {
+    return x + y
+}
+
+model SomeResults {
+    addition: number
+}
+
+const result: SomeResults = {
+    addition: add(x, y)
+}
+
+print "Hello, world!"
+print "result=" + result
+print "The sum of x and y is " + result.addition
+print "The sum is equal to 30: " + (result.addition == 30)
