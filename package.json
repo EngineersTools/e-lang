@@ -12,6 +12,13 @@
   "author": {
     "name": "Carlos Gamez"
   },
+  "keywords": [
+    "e-lang",
+    "elang",
+    "engineering",
+    "programming",
+    "language"
+  ],
   "type": "module",
   "scripts": {
     "build": "tsc -b tsconfig.src.json && node esbuild.mjs",
