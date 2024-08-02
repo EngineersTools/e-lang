@@ -170,9 +170,9 @@ export async function runExpression(
       const newList = { ...list, items: [...list.items] };
       if (isExpression(expression.index)) {
         const evaluatedIndex = await runExpression(expression.index, context);
-        newList.items.splice(evaluatedIndex as number, 1);
+        newList.items.splice((evaluatedIndex as number) - 1, 1);
       } else if (isNumber(expression.index)) {
-        newList.items.splice(expression.index, 1);
+        newList.items.splice(expression.index - 1, 1);
       } else {
         newList.items.pop();
       }

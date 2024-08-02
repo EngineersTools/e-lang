@@ -104,9 +104,17 @@ export async function setExpressionValue(
           ? await runExpression(left.index, context)
           : left.index;
 
-        if (typeof index === "number") {
-          ref.value.items[index] = right;
+        if (
+          typeof index === "number" &&
+          index > 0
+        ) {
+          ref.value.items[index - 1] = right;
           context.variables.set(left, name, ref.value);
+        } else {
+          throw new AstNodeError(
+            left,
+            `Index '${index}' out of range for list '${name}`
+          );
         }
       } else {
         const rightValue = await runExpression(right, context);

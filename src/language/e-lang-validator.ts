@@ -29,6 +29,7 @@ import {
   isReturnStatement,
   isStatementBlock,
   LambdaDeclaration,
+  ListRemove,
   ModelDeclaration,
   ModelMemberAssignment,
   ModelMemberCall,
@@ -72,7 +73,14 @@ export class ELangValidationRegistry extends ValidationRegistry {
       ModelMemberAssignment: validator.checkAssignmentOperationAllowed,
       ConstantDeclaration: validator.checkAssignmentOperationAllowed,
       MutableDeclaration: validator.checkAssignmentOperationAllowed,
-      ModelMemberCall: validator.checkListAccessIsInteger,
+      ModelMemberCall: [
+        validator.checkListAccessIsInteger,
+        validator.checkListAccessIsMoreThanZero,
+      ],
+      ListRemove: [
+        validator.checkListRemoveIsInteger,
+        validator.checkListRemoveIndexIsMoreThanZero,
+      ],
     };
     this.register(checks, validator);
   }
@@ -363,6 +371,51 @@ export class ELangValidator {
           property: "index",
         });
       }
+    }
+  }
+
+  checkListRemoveIsInteger(node: ListRemove, accept: ValidationAcceptor): void {
+    if (node.index) {
+      if (!isExpression(node.index) && !Number.isInteger(node.index)) {
+        accept("error", "Index must be an integer", {
+          node: node,
+          property: "index",
+        });
+      }
+    }
+  }
+
+  checkListAccessIsMoreThanZero(
+    node: ModelMemberCall,
+    accept: ValidationAcceptor
+  ): void {
+    if (node.accessElement) {
+      if (
+        !isExpression(node.index) &&
+        node.index !== undefined &&
+        node.index <= 0
+      ) {
+        accept("error", "Index must be more than 0", {
+          node: node,
+          property: "index",
+        });
+      }
+    }
+  }
+
+  checkListRemoveIndexIsMoreThanZero(
+    node: ListRemove,
+    accept: ValidationAcceptor
+  ): void {
+    if (
+      !isExpression(node.index) &&
+      node.index !== undefined &&
+      node.index <= 0
+    ) {
+      accept("error", "Index must be more than 0", {
+        node: node,
+        property: "index",
+      });
     }
   }
 

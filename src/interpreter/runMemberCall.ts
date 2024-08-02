@@ -195,6 +195,18 @@ async function getListElement(
     index = indexExp;
   }
 
+  // ELang is a 1 based indexing language.
+  // Items in a list are indexed from 1 to the
+  // length of the list
+  index--;
+
+  if(index < 0) {
+    throw new AstNodeError(
+      memberCall,
+      `Index out of range. The index must be greater than 0.`
+    );
+  }
+
   const value = val ?? context.variables.get(ref, ref.name);
 
   if (isListValue(value) && index < value.items.length && index >= 0) {
@@ -204,7 +216,7 @@ async function getListElement(
       memberCall,
       `Index out of range. The list '${
         memberCall.element.$refText
-      }' has less than ${index + 1} elements`
+      }' has less than ${indexExp} elements`
     );
   }
 }
