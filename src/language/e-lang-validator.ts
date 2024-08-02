@@ -31,6 +31,7 @@ import {
   LambdaDeclaration,
   ModelDeclaration,
   ModelMemberAssignment,
+  ModelMemberCall,
   ModelValue,
   MutableDeclaration,
   ProcedureDeclaration,
@@ -71,6 +72,7 @@ export class ELangValidationRegistry extends ValidationRegistry {
       ModelMemberAssignment: validator.checkAssignmentOperationAllowed,
       ConstantDeclaration: validator.checkAssignmentOperationAllowed,
       MutableDeclaration: validator.checkAssignmentOperationAllowed,
+      ModelMemberCall: validator.checkListAccessIsInteger,
     };
     this.register(checks, validator);
   }
@@ -345,6 +347,20 @@ export class ELangValidator {
       if (!isAssignableResult.result) {
         accept("error", `Incorrect return type. ${isAssignableResult.reason}`, {
           node: stmt.body,
+        });
+      }
+    }
+  }
+
+  checkListAccessIsInteger(
+    node: ModelMemberCall,
+    accept: ValidationAcceptor
+  ): void {
+    if (node.accessElement) {
+      if (!isExpression(node.index) && !Number.isInteger(node.index)) {
+        accept("error", "Index must be an integer", {
+          node: node,
+          property: "index",
         });
       }
     }

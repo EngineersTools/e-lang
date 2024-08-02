@@ -90,6 +90,14 @@ export async function runMemberCall(
       } else {
         return await getListElement(memberCall, memberCall.index, context, ref);
       }
+    } else if (isListValue(value)) {
+      return await getListElement(
+        memberCall,
+        memberCall.index,
+        context,
+        ref,
+        value
+      );
     }
   }
 
