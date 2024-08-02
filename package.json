@@ -1,5 +1,5 @@
 {
-  "name": "e-lang",
+  "name": "@eng-tools/e-lang",
   "description": "The engineering programming language",
   "icon": "img/elang-social-card.png",
   "private": false,
