@@ -118,13 +118,6 @@
   "activationEvents": [
     "onLanguage:e-lang"
   ],
-  "files": [
-    "bin",
-    "out",
-    "package.json",
-    "LICENSE.md",
-    "README.md"
-  ],
   "main": "./out/extension/main.cjs",
   "bin": {
     "elang": "./bin/cli.js"

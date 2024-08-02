@@ -8,7 +8,6 @@ docs/
 examples/
 scripts/
 src/
-bin/
 tsconfig.json
 langium-config.json
 bun.lockb
