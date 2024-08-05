@@ -1,0 +1,36 @@
+domain Units
+
+export unit_family Length "This family contains units that represent the physical length of objects" {
+    unit mm:milimetre "Length in the international system"
+    unit m:metre 
+    unit in:inch "Length in the imperial system"
+
+    conversion m->mm: (val: number_[Length]) => val * 1000
+    conversion mm->in: (val: number_[Length]) => val / 2.54
+    conversion in->mm: (val: number_[Length]) => val * 2.54
+}
+
+export unit_family Area {
+    unit m2:square_metre
+    unit ft2:square_foot
+
+    conversion m2->ft2: (val: number_[Area]) => val * 10.7639
+    conversion ft2->m2: (val: number_[Area]) => val / 10.7639
+    conversion m->m2: (val1: number_[Length], val2: number_[Length]) => val1 * val2
+}
+
+export unit_family Mass {
+    unit kg
+    unit lb
+
+    conversion lb->kg: (val) => val * 0.45359237
+    conversion kg->lb: (val) => val / 0.45359237
+}
+
+export unit_family Temperature {
+    unit celsius
+    unit fahrenheit
+
+    conversion celsius->fahrenheit: (val) => val * 9/5 + 32
+    conversion fahrenheit->celsius: (val) => (val - 32) * 5/9
+}

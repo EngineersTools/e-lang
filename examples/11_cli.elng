@@ -1,5 +1,7 @@
 domain CliTests
 
+import 'units'
+
 const x = 10
 const y = 20
 
@@ -12,10 +14,10 @@ model SomeResults {
 }
 
 const result: SomeResults = {
-    addition: add(x, y)
+    addition: add
 }
 
 print "Hello, world!"
 print "result=" + result
-print "The sum of x and y is " + result.addition
-print "The sum is equal to 30: " + (result.addition == 30)
+// print "The sum of x and y is " + result.addition
+// print "The sum is equal to 30: " + (result.addition == 30)
