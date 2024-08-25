@@ -5,7 +5,7 @@ import './e-lang-types'
 import './e-lang-expressions'
 
 entry ELangProgram:
-    Domain
+    (domain=Domain)?
     (imports+=Import (imports+=Import)*)?
     (statements+=Statement (statements+=Statement)*)?
 ;

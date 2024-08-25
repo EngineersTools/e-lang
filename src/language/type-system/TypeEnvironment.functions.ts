@@ -40,7 +40,7 @@ import {
   isUnitDeclaration,
   isUnitFamilyDeclaration,
 } from "../generated/ast.js";
-import { TypeEnvironment } from "./TypeEnvironment.class.js";
+import { TypeEnvironment } from "./TypeEnvironment.js";
 import { ListType, TypeDescription, createUnionType } from "./descriptions.js";
 import { inferModelDeclaration, inferType } from "./infer.js";
 
@@ -113,14 +113,14 @@ export function addConstantDeclaration(
   constant: ConstantDeclaration,
   env: TypeEnvironment
 ): void {
-  env.setVariableType(constant.name, inferType(constant, env));
+  env.setType(constant.name, inferType(constant, env));
 }
 
 export function addMutableDeclaration(
   mutable: MutableDeclaration,
   env: TypeEnvironment
 ): void {
-  env.setVariableType(mutable.name, inferType(mutable, env));
+  env.setType(mutable.name, inferType(mutable, env));
 }
 
 export function addStatementBlock(
@@ -147,7 +147,7 @@ export function addModelMemberAssignment(
   mbmr: ModelMemberAssignment,
   env: TypeEnvironment
 ): void {
-  env.setVariableType(mbmr.property, inferType(mbmr.value, env));
+  env.setType(mbmr.property, inferType(mbmr.value, env));
 }
 
 export function addListType(item: NamedElement, env: TypeEnvironment): void {
@@ -167,11 +167,11 @@ export function addFormulaDeclaration(
   fmr: FormulaDeclaration,
   env: TypeEnvironment
 ): void {
-  env.setVariableType(fmr.name, inferType(fmr, env));
+  env.setType(fmr.name, inferType(fmr, env));
 
   if (fmr.parameters) {
     fmr.parameters.forEach((p) => {
-      env.setVariableType(p.name, inferType(p.type, env));
+      env.setType(p.name, inferType(p.type, env));
     });
   }
 
@@ -230,11 +230,11 @@ export function addProcedureDeclaration(
   prc: ProcedureDeclaration,
   env: TypeEnvironment
 ): void {
-  if (prc.returnType) env.setVariableType(prc.name, inferType(prc, env));
+  if (prc.returnType) env.setType(prc.name, inferType(prc, env));
 
   if (prc.parameters) {
     prc.parameters.forEach((p) => {
-      env.setVariableType(p.name, inferType(p.type, env));
+      env.setType(p.name, inferType(p.type, env));
     });
   }
 
@@ -248,12 +248,12 @@ export function addLambdaDeclaration(
   if (lmb.returnType) {
     const lambdaName = `Lambda_${env.getTypeRegistryVarIndex()}`;
     env.increaseTypeRegistryVarIndex();
-    env.setVariableType(lambdaName, inferType(lmb, env));
+    env.setType(lambdaName, inferType(lmb, env));
   }
 
   if (lmb.parameters) {
     lmb.parameters.forEach((p) => {
-      env.setVariableType(p.name, inferType(p.type, env));
+      env.setType(p.name, inferType(p.type, env));
     });
   }
 
@@ -264,12 +264,12 @@ export function addLambdaType(lmb: LambdaType, env: TypeEnvironment): void {
   if (lmb.returnType) {
     const lambdaName = `Lambda_${env.getTypeRegistryVarIndex()}`;
     env.increaseTypeRegistryVarIndex();
-    env.setVariableType(lambdaName, inferType(lmb, env));
+    env.setType(lambdaName, inferType(lmb, env));
   }
 
   if (lmb.parameters) {
     lmb.parameters.forEach((p) => {
-      env.setVariableType(p.name, inferType(p.type, env));
+      env.setType(p.name, inferType(p.type, env));
     });
   }
 }
@@ -324,7 +324,7 @@ export function addUnitFamilyDeclaration(
             isUnitDeclaration(conv.from) &&
             isUnitDeclaration(conv.to)
           )
-            env.setVariableType(
+            env.setType(
               `${conv.from.ref?.name}->${conv.to.ref?.name}`,
               formulaType
             );

@@ -1,4 +1,4 @@
-import { TypeEnvironment } from "./TypeEnvironment.class.js";
+import { TypeEnvironment } from "./TypeEnvironment.js";
 import { TypeDescription } from "./descriptions.js";
 
 export type Substitution = {

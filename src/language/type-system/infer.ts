@@ -52,7 +52,7 @@ import {
   isUnitDeclaration,
   isUnitFamilyDeclaration,
 } from "../generated/ast.js";
-import { TypeEnvironment } from "./TypeEnvironment.class.js";
+import { TypeEnvironment } from "./TypeEnvironment.js";
 import {
   FormulaType,
   LambdaType as LambdaTypeDescription,

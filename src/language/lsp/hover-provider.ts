@@ -16,7 +16,7 @@ import {
   isUnionType,
 } from "../type-system/descriptions.js";
 import { inferType } from "../type-system/infer.js";
-import { TypeEnvironment } from "../type-system/TypeEnvironment.class.js";
+import { TypeEnvironment } from "../type-system/TypeEnvironment.js";
 
 export class ELangHoverProvider extends AstNodeHoverProvider {
   protected getAstNodeHoverContent(node: AstNode): Hover | undefined {

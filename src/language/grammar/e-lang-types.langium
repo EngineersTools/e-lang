@@ -16,7 +16,7 @@ PropertyDeclaration:
 ;
 
 PrimitiveType infers TypeReference:
-    type=('number' | 'text' | 'boolean')
+    primitive=('number' | 'text' | 'boolean' | 'null')
 ;
 
 ModelType infers TypeReference:

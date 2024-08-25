@@ -42,7 +42,7 @@ import {
   TypeReference,
   UnaryExpression,
 } from "./generated/ast.js";
-import { TypeEnvironment } from "./type-system/TypeEnvironment.class.js";
+import { TypeEnvironment } from "./type-system/TypeEnvironment.js";
 import {
   addFormulaDeclaration,
   addLambdaDeclaration,

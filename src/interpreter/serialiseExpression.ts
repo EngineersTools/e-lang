@@ -12,7 +12,7 @@ import {
   isStatement,
   isStringLiteral,
 } from "../language/generated/ast.js";
-import { TypeEnvironment } from "../language/type-system/TypeEnvironment.class.js";
+import { TypeEnvironment } from "../language/type-system/TypeEnvironment.js";
 import { getReturnType } from "../language/type-system/TypeEnvironment.functions.js";
 import { inferType } from "../language/type-system/infer.js";
 import { typeToString } from "../language/type-system/typeToString.js";
