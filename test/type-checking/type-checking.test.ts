@@ -571,42 +571,77 @@ describe("Type Check Statement Blocks", () => {
 });
 
 describe("Type Check If Statements", () => {
-  test("Check if statement", async () => {
+  test("Check if statement with invalid condition type", async () => {
     document = await parse(`
-            if (true) {
-                42
-            }
-        `);
-
-    expect(
-      typeChecker.tc(document.parseResult.value.statements[0])
-    ).toBeUndefined();
-  });
-
-  test("Check if statement with type mismatch", async () => {
-    document = await parse(`
-            if (true) {
-                true
-            }
-        `);
+        if ("Hello" + "World") {
+            return 42
+        }
+    `);
 
     expect(() =>
       typeChecker.tc(document!.parseResult.value.statements[0])
     ).toThrowError(
-      new ElangTypeError("Invalid types for assignment: 'number' and 'boolean'")
+      new ElangTypeError(
+        "Invalid type for if statement condition: 'text'. Condition must be of type 'boolean'"
+      )
     );
-  });
 
-  test("Check if statement with non-existent variable", async () => {
     document = await parse(`
-            if (true) {
-                x
-            }
-        `);
+        if (10 + 32) {
+            return 42
+        }
+    `);
 
     expect(() =>
       typeChecker.tc(document!.parseResult.value.statements[0])
-    ).toThrowError(new ElangTypeError("Variable 'x' not defined"));
+    ).toThrowError(
+      new ElangTypeError(
+        "Invalid type for if statement condition: 'number'. Condition must be of type 'boolean'"
+      )
+    );
+
+    document = await parse(`
+        if (null) {
+            return 42
+        }
+    `);
+
+    expect(() =>
+      typeChecker.tc(document!.parseResult.value.statements[0])
+    ).toThrowError(
+      new ElangTypeError(
+        "Invalid type for if statement condition: 'null'. Condition must be of type 'boolean'"
+      )
+    );
+  });
+
+  test("Check true path", async () => {
+    document = await parse(`
+        if (true) {
+            const x = 42
+            x
+        }
+    `);
+
+    expect(typeChecker.tc(document.parseResult.value.statements[0])).toBe(
+      ELangType.number
+    );
+  });
+
+  test("Check false path", async () => {
+    document = await parse(`
+        if (false) {
+            const x = 42
+            x
+        } else {
+            const y = "Hello World"
+            return y
+        }
+    `);
+
+    expect(typeChecker.tc(document.parseResult.value.statements[0])).toBe(
+      ELangType.text
+    );
   });
 });
 
