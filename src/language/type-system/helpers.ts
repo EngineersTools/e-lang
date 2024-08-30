@@ -1,15 +1,15 @@
 import { TypeEnvironment } from "./TypeEnvironment.js";
-import { TypeDescription } from "./descriptions.js";
+import { ELangType } from "./descriptions.js";
 
 export type Substitution = {
   $type: "substitution";
-  (t: TypeDescription): TypeDescription;
+  (t: ELangType): ELangType;
   (e: TypeEnvironment): TypeEnvironment;
-  raw: Map<string, TypeDescription>;
+  raw: Map<string, ELangType>;
 };
 
 export const makeSubstitution = (raw: Substitution["raw"]): Substitution => {
-  const fn = ((arg: TypeDescription | TypeEnvironment) => {
+  const fn = ((arg: ELangType | TypeEnvironment) => {
     return apply(fn, arg);
   }) as Substitution;
 
@@ -19,8 +19,8 @@ export const makeSubstitution = (raw: Substitution["raw"]): Substitution => {
   return fn;
 };
 
-function apply<T extends TypeDescription | TypeEnvironment>(substitution: Substitution, arg: T): T;
-function apply(substitution: Substitution, arg: TypeDescription | TypeEnvironment): TypeDescription | TypeEnvironment | undefined {
+function apply<T extends ELangType | TypeEnvironment>(substitution: Substitution, arg: T): T;
+function apply(substitution: Substitution, arg: ELangType | TypeEnvironment): ELangType | TypeEnvironment | undefined {
     if (arg instanceof TypeEnvironment) {
         return applyEnvironment(substitution, arg);
     } else {

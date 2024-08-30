@@ -1,6 +1,6 @@
 import {
   ParameterType,
-  TypeDescription,
+  ELangType,
   isEmtpyListType,
   isFormulaType,
   isListType,
@@ -19,12 +19,12 @@ export type IsAssignableResult =
   | {
       result: false;
       reason: string;
-      typeDesc: TypeDescription;
+      typeDesc: ELangType;
     };
 
 export function isAssignable(
-  from: TypeDescription,
-  to: TypeDescription
+  from: ELangType,
+  to: ELangType
 ): IsAssignableResult {
   if (isModelType(from) && isModelType(to)) {
     if (from.$source === "declaration") {
@@ -199,8 +199,8 @@ function createAssignableResult(): IsAssignableResult {
 }
 
 function createNonAssignableResult(
-  from: TypeDescription,
-  to: TypeDescription,
+  from: ELangType,
+  to: ELangType,
   reason?: string
 ): IsAssignableResult {
   return {

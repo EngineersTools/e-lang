@@ -1,4 +1,4 @@
-import { ELangType } from "./ELangType.js";
+import { ELangType } from "./descriptions.js";
 import { TypeRegistry } from "./TypeRegistry.js";
 
 export class TypeEnvironment {

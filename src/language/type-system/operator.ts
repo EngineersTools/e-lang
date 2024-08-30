@@ -1,9 +1,9 @@
-import { TypeDescription } from "./descriptions.js";
+import { ELangType } from "./descriptions.js";
 
 export function isLegalOperation(
   operator: string,
-  left: TypeDescription,
-  right?: TypeDescription
+  left: ELangType,
+  right?: ELangType
 ): boolean {
   if (operator === "+") {
     if (!right) {

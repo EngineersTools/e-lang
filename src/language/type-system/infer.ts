@@ -17,6 +17,7 @@ import {
   MutableDeclaration,
   ParameterDeclaration,
   PropertyDeclaration,
+  StatementBlock,
   TypeReference,
   UnitConversionExpression,
   UnitDeclaration,
@@ -27,6 +28,7 @@ import {
   isConversionDeclaration,
   isExpression,
   isFormulaDeclaration,
+  isIfStatement,
   isLambdaDeclaration,
   isLambdaType,
   isListAdd,
@@ -42,8 +44,10 @@ import {
   isNullLiteral,
   isNumberLiteral,
   isParameterDeclaration,
+  isProcedureDeclaration,
   isPropertyDeclaration,
   isReturnStatement,
+  isStatementBlock,
   isStringLiteral,
   isTypeReference,
   isTypeUnion,
@@ -54,12 +58,12 @@ import {
 } from "../generated/ast.js";
 import { TypeEnvironment } from "./TypeEnvironment.js";
 import {
+  ELangType,
   FormulaType,
   LambdaType as LambdaTypeDescription,
   ModelMemberType,
   ModelType,
   ParameterType,
-  TypeDescription,
   UnitConversionType,
   UnitFamilyType,
   UnitType,
@@ -80,6 +84,10 @@ import {
   createUnitConversionType,
   createUnitFamilyType,
   createUnitType,
+  equalsType,
+  getTypeName,
+  isBooleanType,
+  isMeasurementType as isMeasurementTypeDescription,
   isNumberType,
   isParameterType,
   isTextType,
@@ -89,8 +97,8 @@ import { getAllPropertiesInModelDeclarationChain } from "./getAllPropertiesInMod
 export function inferType(
   node: AstNode | undefined,
   env: TypeEnvironment
-): TypeDescription {
-  let type: TypeDescription | undefined;
+): ELangType {
+  let type: ELangType | undefined;
 
   if (!node) {
     return createErrorType("Could not infer type for undefined", node);
@@ -98,6 +106,8 @@ export function inferType(
 
   if (isExpression(node)) {
     type = inferExpression(node, env);
+  } else if (isStatementBlock(node)) {
+    type = inferStatementBlock(node, env);
   } else if (isConstantDeclaration(node)) {
     type = inferConstantDeclaration(node, env);
   } else if (isMutableDeclaration(node)) {
@@ -138,7 +148,7 @@ export function inferType(
 export function inferConstantDeclaration(
   node: ConstantDeclaration,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   if (node.type) {
     return inferType(node.type, env);
   } else if (node.value) {
@@ -154,7 +164,7 @@ export function inferConstantDeclaration(
 export function inferMutableDeclaration(
   node: MutableDeclaration,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   if (node.type) {
     return inferType(node.type, env);
   } else if (node.value) {
@@ -170,10 +180,10 @@ export function inferMutableDeclaration(
 export function inferTypeReference(
   typeRef: TypeReference,
   env: TypeEnvironment
-): TypeDescription {
-  let resolvedType!: TypeDescription;
+): ELangType {
+  let resolvedType!: ELangType;
 
-  if (typeRef.type) {
+  if (typeRef.primitive) {
     resolvedType = inferPrimitive(typeRef);
   } else if (isTypeUnion(typeRef)) {
     const leftTypes = [];
@@ -213,8 +223,8 @@ export function inferTypeReference(
     );
   } else if (isMeasurementType(typeRef)) {
     resolvedType = inferMeasurement(typeRef, env);
-  } else if (isTypeReference(typeRef.type)) {
-    resolvedType = inferTypeReference(typeRef.type, env);
+  } else if (isTypeReference(typeRef.primitive)) {
+    resolvedType = inferTypeReference(typeRef.primitive, env);
   } else {
     resolvedType = createErrorType(
       "Could not infer type for this type reference",
@@ -229,13 +239,15 @@ export function inferTypeReference(
   return resolvedType;
 }
 
-export function inferPrimitive(typeRef: TypeReference): TypeDescription {
-  if (typeRef.type === "number") {
+export function inferPrimitive(typeRef: TypeReference): ELangType {
+  if (typeRef.primitive === "number") {
     return createNumberType();
-  } else if (typeRef.type === "text") {
+  } else if (typeRef.primitive === "text") {
     return createTextType();
-  } else if (typeRef.type === "boolean") {
+  } else if (typeRef.primitive === "boolean") {
     return createBooleanType();
+  } else if (typeRef.primitive === "null") {
+    return createNullType();
   } else {
     return createErrorType("Could not infer primitive type", typeRef);
   }
@@ -244,9 +256,24 @@ export function inferPrimitive(typeRef: TypeReference): TypeDescription {
 export function inferLambda(
   expr: LambdaDeclaration | LambdaType,
   env: TypeEnvironment
-): TypeDescription {
-  if (expr.returnType) {
+): ELangType {
+  if (isLambdaDeclaration(expr)) {
+    const returnType = expr.returnType
+      ? inferType(expr.returnType, env)
+      : inferType(expr.body, env);
+
     if (expr.parameters && expr.parameters.length > 0) {
+      return createLambdaType(
+        returnType,
+        expr.parameters.map((param) =>
+          inferParameterDeclaration(param, env)
+        ) as ParameterType[]
+      );
+    } else {
+      return createLambdaType(returnType);
+    }
+  } else if (isLambdaType(expr)) {
+    if (expr.parameters.length > 0) {
       return createLambdaType(
         inferType(expr.returnType, env),
         expr.parameters.map((param) =>
@@ -256,15 +283,15 @@ export function inferLambda(
     } else {
       return createLambdaType(inferType(expr.returnType, env));
     }
-  } else {
-    return createLambdaType();
   }
+
+  return createErrorType("Could not infer lambda type", expr);
 }
 
 export function inferFormula(
   expr: FormulaDeclaration,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   if (expr.returnType) {
     if (expr.parameters && expr.parameters.length > 0) {
       return createFormulaType(
@@ -277,28 +304,28 @@ export function inferFormula(
       return createFormulaType(inferType(expr.returnType, env));
     }
   } else {
-    return createErrorType("Could not infer formula type", expr);
+    return createErrorType("Formula requires a declared return type", expr);
   }
 }
 
 export function inferParameterDeclaration(
   expr: ParameterDeclaration,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   return createParameterType(expr.name, inferType(expr.type, env));
 }
 
 export function inferPropertyDeclaration(
   expr: PropertyDeclaration,
   env: TypeEnvironment
-): TypeDescription {
-  if (expr.type.type) {
-    const propType = env.getRegisteredType(expr.type.type);
+): ELangType {
+  if (expr.type.primitive) {
+    const propType = env.getType(expr.type.primitive);
     if (propType) {
       return createModelMemberType(expr.name, propType, expr.isOptional);
     }
   } else if (expr.type.model && expr.type.model.ref) {
-    const propType = env.getRegisteredType(expr.type.model.ref.name);
+    const propType = env.getType(expr.type.model.ref.name);
     if (propType) {
       return createModelMemberType(expr.name, propType, expr.isOptional);
     } else if (isTypeReference(expr.type)) {
@@ -334,7 +361,7 @@ export function inferPropertyDeclaration(
 export function inferMeasurement(
   expr: MeasurementLiteral | MeasurementType,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   if (
     isMeasurementLiteral(expr) &&
     isUnitDeclaration(expr.unit.ref) &&
@@ -359,7 +386,7 @@ export function inferMeasurement(
 export function inferUnitFamily(
   unitFamily: UnitFamilyDeclaration,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   const unitTypes = unitFamily.units.map((unit) =>
     inferType(unit, env)
   ) as UnitType[];
@@ -376,14 +403,14 @@ export function inferUnitFamily(
   return unitFamilyType;
 }
 
-export function inferUnit(unit: UnitDeclaration): TypeDescription {
+export function inferUnit(unit: UnitDeclaration): ELangType {
   return createUnitType(unit.name, unit.description, unit.longName);
 }
 
 export function inferUnitConversion(
   conv: ConversionDeclaration,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   if (conv.lambda) {
     return createUnitConversionType(
       inferType(conv.from.ref, env) as UnitType,
@@ -404,7 +431,7 @@ export function inferUnitConversion(
 export function inferUnitConversionExpression(
   expr: UnitConversionExpression,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   if (
     expr.unit &&
     expr.unit.ref &&
@@ -423,7 +450,7 @@ export function inferUnitConversionExpression(
 export function inferExpression(
   expr: Expression,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   if (isStringLiteral(expr)) {
     return createTextType();
   } else if (isNumberLiteral(expr)) {
@@ -462,7 +489,7 @@ export function inferExpression(
 export function inferModelDeclaration(
   expr: ModelDeclaration,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   const propertyTypes = expr.properties.map((prop) =>
     inferPropertyDeclaration(prop, env)
   ) as ModelMemberType[];
@@ -487,7 +514,7 @@ export function inferModelDeclaration(
 export function inferModelValue(
   expr: ModelValue,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   const memberTypes = expr.members.map((member) =>
     createModelMemberType(member.property, inferExpression(member, env))
   );
@@ -502,7 +529,7 @@ export function inferModelValue(
 export function inferModelMemberAssignment(
   expr: ModelMemberAssignment,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   if (isExpression(expr.value)) return inferExpression(expr.value, env);
   else return inferLambda(expr.value, env);
 }
@@ -510,12 +537,7 @@ export function inferModelMemberAssignment(
 export function inferBinaryExpression(
   expr: BinaryExpression,
   env: TypeEnvironment
-): TypeDescription {
-  // Operations that should return boolean
-  if (["and", "or", "<", "<=", ">", ">=", "==", "!="].includes(expr.operator)) {
-    return createBooleanType();
-  }
-
+): ELangType {
   const leftExpr = inferType(expr.left, env);
   const rightExpr = inferType(expr.right, env);
 
@@ -524,12 +546,48 @@ export function inferBinaryExpression(
     ? rightExpr.typeDescription
     : rightExpr;
 
+  // Operations that should return boolean
+  if (["and", "or"].includes(expr.operator)) {
+    if (isBooleanType(left) && isBooleanType(right)) {
+      return createBooleanType();
+    } else {
+      return createErrorType(
+        `Invalid boolean expression operands '${getTypeName(
+          left
+        )}' and '${getTypeName(right)}' for operation ${expr.operator}`,
+        expr
+      );
+    }
+  } else if (["<", "<=", ">", ">=", "==", "!="].includes(expr.operator)) {
+    if (isNumberType(left) && isNumberType(right)) {
+      return createBooleanType();
+    } else {
+      return createErrorType(
+        `Invalid comparison expression operands '${getTypeName(
+          left
+        )}' and '${getTypeName(right)}' for operation ${expr.operator}`,
+        expr
+      );
+    }
+  }
   // Operations that should return a number or numberTypeWithUnitFamily
-  if (isMeasurementLiteral(left) || isMeasurementLiteral(right)) {
+  if (
+    isMeasurementTypeDescription(left) ||
+    isMeasurementTypeDescription(right)
+  ) {
     return inferMeasurementBinaryExpression(expr, env);
   } else {
-    if (["-", "*", "/", "%", "^"].includes(expr.operator)) {
-      return createNumberType();
+    if (["-", "*", "/", "^"].includes(expr.operator)) {
+      if (isNumberType(left) && isNumberType(right)) {
+        return createNumberType();
+      } else {
+        return createErrorType(
+          `Invalid binary expression operands '${getTypeName(
+            left
+          )}' and '${getTypeName(right)}' for operation ${expr.operator}`,
+          expr
+        );
+      }
     }
     if (expr.operator === "+") {
       if (isTextType(left) || isTextType(right)) {
@@ -542,15 +600,15 @@ export function inferBinaryExpression(
     }
   }
 
-  return createErrorType("Could not infer type from binary expression", expr);
+  return createErrorType("Could not infer type of binary expression", expr);
 }
 
 export function inferMeasurementBinaryExpression(
   expr: BinaryExpression,
   env: TypeEnvironment
-): TypeDescription {
-  let leftType: TypeDescription;
-  let rightType: TypeDescription;
+): ELangType {
+  let leftType: ELangType;
+  let rightType: ELangType;
 
   if (isMeasurementLiteral(expr.left)) {
     leftType = inferMeasurement(expr.left, env);
@@ -564,29 +622,55 @@ export function inferMeasurementBinaryExpression(
     rightType = inferType(expr.right, env);
   }
 
-  if (["-", "*", "/", "%"].includes(expr.operator)) {
-    if (isMeasurementType(leftType) && isNumberType(rightType)) {
-      return leftType;
-    } else if (isNumberType(leftType) && isMeasurementType(rightType)) {
-      return rightType;
+  if (["-", "*", "/"].includes(expr.operator)) {
+    if (!equalsType(leftType, rightType)) {
+      return createErrorType(
+        `Cannot perform operation ${
+          expr.operator
+        } with different measurement types: '${getTypeName(
+          leftType
+        )}' and '${getTypeName(rightType)}'`,
+        expr
+      );
     }
+    return rightType;
+  } else if (expr.operator === "+") {
+    if (equalsType(leftType, rightType)) {
+      return rightType;
+    } else if (isTextType(leftType) || isTextType(rightType)) {
+      return createTextType();
+    }
+    return createErrorType(
+      `Cannot perform operation ${
+        expr.operator
+      } with different measurement types: '${getTypeName(
+        leftType
+      )}' and '${getTypeName(rightType)}'`,
+      expr
+    );
   } else if (expr.operator === "=") {
     return rightType;
   } else if (expr.operator === "^") {
-    if (isMeasurementType(leftType) && isNumberType(rightType)) {
+    if (isMeasurementTypeDescription(leftType) && isNumberType(rightType)) {
       return leftType;
-    } else if (isNumberType(leftType) && isMeasurementType(rightType)) {
-      return createErrorType("Cannot raise a number to a measurement", expr);
+    } else if (
+      isNumberType(leftType) &&
+      isMeasurementTypeDescription(rightType)
+    ) {
+      return createErrorType(
+        "Cannot raise a number to a measurement type",
+        expr
+      );
     }
   }
 
-  return createErrorType("Could not infer type from binary expression", expr);
+  return createErrorType("Could not infer type of binary expression", expr);
 }
 
 export function inferListValue(
   expr: ListValue,
   env: TypeEnvironment
-): TypeDescription {
+): ELangType {
   if (expr.items.length > 0) {
     const elementTypes = unique(expr.items.map((item) => inferType(item, env)));
     if (elementTypes.length === 1) {
@@ -597,4 +681,32 @@ export function inferListValue(
   } else {
     return createEmptyListType();
   }
+}
+
+export function inferStatementBlock(
+  stmt: StatementBlock,
+  env: TypeEnvironment
+): ELangType {
+  const returnTypes: ELangType[] = [];
+
+  stmt.statements.forEach((stmt) => {
+    if (isReturnStatement(stmt)) {
+      returnTypes.push(inferType(stmt.value, env));
+    } else if (isFormulaDeclaration(stmt) || isProcedureDeclaration(stmt)) {
+      returnTypes.push(inferStatementBlock(stmt.body, env));
+    } else if (isLambdaDeclaration(stmt)) {
+      if (isStatementBlock(stmt.body)) {
+        returnTypes.push(inferStatementBlock(stmt.body, env));
+      } else {
+        returnTypes.push(inferType(stmt.body, env));
+      }
+    } else if (isIfStatement(stmt)) {
+      returnTypes.push(inferStatementBlock(stmt.block, env));
+      if (stmt.elseBlock)
+        returnTypes.push(inferStatementBlock(stmt.elseBlock, env));
+    }
+  });
+
+  if (returnTypes.length === 1) return returnTypes[0];
+  else return createUnionType(...returnTypes);
 }

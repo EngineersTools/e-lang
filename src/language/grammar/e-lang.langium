@@ -85,7 +85,7 @@ StatementBlock:
 ;
 
 ReturnStatement:
-    'return' value=Expression
+    'return' value=(Expression | LambdaDeclaration)
 ;
 
 IfStatement:

@@ -41,7 +41,7 @@ import {
   isUnitFamilyDeclaration,
 } from "../generated/ast.js";
 import { TypeEnvironment } from "./TypeEnvironment.js";
-import { ListType, TypeDescription, createUnionType } from "./descriptions.js";
+import { ListType, ELangType, createUnionType } from "./descriptions.js";
 import { inferModelDeclaration, inferType } from "./infer.js";
 
 export function buildTypeEnvironment(
@@ -176,30 +176,6 @@ export function addFormulaDeclaration(
   }
 
   addStatement(fmr.body, env);
-}
-
-export function getReturnType(prc: StatementBlock, env: TypeEnvironment) {
-  const returnTypes: TypeDescription[] = [];
-
-  prc.statements.forEach((stmt) => {
-    if (isReturnStatement(stmt)) {
-      returnTypes.push(inferType(stmt.value, env));
-    } else if (isFormulaDeclaration(stmt) || isProcedureDeclaration(stmt)) {
-      returnTypes.push(getReturnType(stmt.body, env));
-    } else if (isLambdaDeclaration(stmt)) {
-      if (isStatementBlock(stmt.body)) {
-        returnTypes.push(getReturnType(stmt.body, env));
-      } else {
-        returnTypes.push(inferType(stmt.body, env));
-      }
-    } else if (isIfStatement(stmt)) {
-      returnTypes.push(getReturnType(stmt.block, env));
-      if (stmt.elseBlock) returnTypes.push(getReturnType(stmt.elseBlock, env));
-    }
-  });
-
-  if (returnTypes.length === 1) return returnTypes[0];
-  else return createUnionType(...returnTypes);
 }
 
 export function getReturnStatements(prc: StatementBlock, env: TypeEnvironment) {
