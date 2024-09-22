@@ -10,11 +10,16 @@ import {
   StatementBlock,
 } from "../../src/language/generated/ast.js";
 import {
+  reduceUnitFamilies,
   createBooleanType,
+  createComplexUnitFamilyType,
   createNullType,
   createNumberType,
   createTextType,
+  getComplexUnitFamilyTypeName,
   getTypeName,
+  getUnitFamilyExponent,
+  UnitFamilyType,
 } from "../../src/language/type-system/descriptions.js";
 import { inferType } from "../../src/language/type-system/infer.js";
 import { TypeEnvironment } from "../../src/language/type-system/TypeEnvironment.js";
@@ -75,7 +80,7 @@ describe("Measurements", () => {
     expect(getTypeName(_type)).toBe("() => number_[Length]");
   });
 
-  test("Check measurement addition", async () => {
+  test("Check measurements addition", async () => {
     document = await parse(`{
         unit_family Length {
             unit m:meter
@@ -84,9 +89,251 @@ describe("Measurements", () => {
 
         return 10_[m] + 10_[yd]
     }`);
-    const stmt = document.parseResult.value.statements[0] as BinaryExpression;
+    const stmt = document.parseResult.value.statements[0] as StatementBlock;
     const _type = inferType(stmt, new TypeEnvironment());
     expect(getTypeName(_type)).toBe("number_[Length]");
+  });
+
+  test("Check incompatible measurements addition", async () => {
+    document = await parse(`{
+        unit_family Length {
+          unit m:meter
+          unit yd:yard
+        }
+
+        unit_family Temperature {
+          unit degC:DegreesCentigrade
+          unit degF:DegreesFahrenheit
+        }
+
+        return 10_[m] + 10_[degC]
+    }`);
+    const stmt = document.parseResult.value.statements[0] as StatementBlock;
+    const _type = inferType(stmt, new TypeEnvironment());
+    expect(getTypeName(_type)).toBe("error");
+  });
+
+  test("Check measurement and number addition", async () => {
+    document = await parse(`{
+        unit_family Length {
+            unit m:meter
+            unit yd:yard
+        }
+
+        return 10_[m] + 10
+    }`);
+    const stmt = document.parseResult.value.statements[0] as StatementBlock;
+    const _type = inferType(stmt, new TypeEnvironment());
+    expect(getTypeName(_type)).toBe("error");
+  });
+
+  test("Check number and measurement addition", async () => {
+    document = await parse(`{
+        unit_family Length {
+            unit m:meter
+            unit yd:yard
+        }
+
+        return 10 + 10_[yd]
+    }`);
+    const stmt = document.parseResult.value.statements[0] as StatementBlock;
+    const _type = inferType(stmt, new TypeEnvironment());
+    expect(getTypeName(_type)).toBe("error");
+  });
+
+  test("Check measurement and number multiplication", async () => {
+    document = await parse(`{
+        unit_family Length {
+            unit m:meter
+            unit yd:yard
+        }
+
+        return 10_[m] * 10
+    }`);
+    const stmt = document.parseResult.value.statements[0] as StatementBlock;
+    const _type = inferType(stmt, new TypeEnvironment());
+    expect(getTypeName(_type)).toBe("number_[Length]");
+  });
+
+  test("Check different measurement types multiplication", async () => {
+    document = await parse(`{
+        unit_family Length {
+            unit m:meter
+            unit yd:yard
+        }
+
+        unit_family Temperature {
+          unit degC:DegreesCentigrade
+          unit degF:DegreesFahrenheit
+        }
+
+        return 10_[m] * 5_[m] * 10_[degC]
+    }`);
+    const stmt = document.parseResult.value.statements[0] as StatementBlock;
+    const _type = inferType(stmt, new TypeEnvironment());
+    expect(getTypeName(_type)).toBe("number_[Length^2*Temperature]");
+  });
+});
+
+describe("Unit Families", () => {
+  test("Check unit family expansion", async () => {
+    document = await parse(`{
+        unit_family Length {
+            unit m:meter
+            unit yd:yard
+        }
+
+        unit_family Temperature {
+          unit degC:DegreesCentigrade
+          unit degF:DegreesFahrenheit
+        }
+
+        unit_family Mass {
+          unit kg:kilogram
+          unit lb:pound
+        }
+    }`);
+    const stmt = document.parseResult.value.statements[0] as StatementBlock;
+    const typeEnv = new TypeEnvironment();
+    const lengthUnitFamily = inferType(
+      stmt.statements[0],
+      typeEnv
+    ) as UnitFamilyType;
+    const temperatureUnitFamily = inferType(
+      stmt.statements[1],
+      typeEnv
+    ) as UnitFamilyType;
+    const massUnitFamily = inferType(
+      stmt.statements[2],
+      typeEnv
+    ) as UnitFamilyType;
+
+    /**
+     * Creates Length*Temperature^2
+     */
+    const numeratorComplexUnitFamily = createComplexUnitFamilyType(
+      [lengthUnitFamily, lengthUnitFamily, temperatureUnitFamily],
+      [
+        temperatureUnitFamily,
+        temperatureUnitFamily,
+        temperatureUnitFamily,
+        lengthUnitFamily,
+      ]
+    );
+    console.log('Numerator', numeratorComplexUnitFamily);
+
+    /**
+     * Creates Length^2/Mass*Temperature
+     */
+    const denominatorComplexUnitFamily = createComplexUnitFamilyType(
+      [
+        lengthUnitFamily,
+        lengthUnitFamily,
+        temperatureUnitFamily,
+        massUnitFamily,
+      ],
+      [
+        massUnitFamily,
+        temperatureUnitFamily,
+        temperatureUnitFamily,
+        massUnitFamily,
+      ]
+    );
+    console.log('Denominator', denominatorComplexUnitFamily);
+
+    const complexUnitFamily = createComplexUnitFamilyType(
+      [temperatureUnitFamily, numeratorComplexUnitFamily], // Length*Temperature^3
+      [massUnitFamily, denominatorComplexUnitFamily] // Length^2/Temperature
+    );
+    console.log('Complex', complexUnitFamily); // Temperature^4/Length
+  });
+
+  test("Check unit family exponent calculation", async () => {
+    document = await parse(`{
+        unit_family Length {
+            unit m:meter
+            unit yd:yard
+        }
+
+        unit_family Temperature {
+          unit degC:DegreesCentigrade
+          unit degF:DegreesFahrenheit
+        }
+    }`);
+
+    const stmt = document.parseResult.value.statements[0] as StatementBlock;
+    const typeEnv = new TypeEnvironment();
+    const firstUnitFamily = inferType(
+      stmt.statements[0],
+      typeEnv
+    ) as UnitFamilyType;
+    const secondUnitFamily = inferType(
+      stmt.statements[1],
+      typeEnv
+    ) as UnitFamilyType;
+
+    expect(
+      getUnitFamilyExponent(firstUnitFamily, [
+        firstUnitFamily,
+        firstUnitFamily,
+        secondUnitFamily,
+      ])
+    ).toBe(2);
+
+    expect(getUnitFamilyExponent(firstUnitFamily, [firstUnitFamily])).toBe(1);
+
+    expect(
+      getUnitFamilyExponent(secondUnitFamily, [
+        firstUnitFamily,
+        firstUnitFamily,
+        secondUnitFamily,
+      ])
+    ).toBe(1);
+  });
+
+  test("Check complex unit family computation", async () => {
+    document = await parse(`{
+        unit_family Length {
+            unit m:meter
+            unit yd:yard
+        }
+
+        unit_family Temperature {
+          unit degC:DegreesCentigrade
+          unit degF:DegreesFahrenheit
+        }
+    }`);
+    const stmt = document.parseResult.value.statements[0] as StatementBlock;
+    const typeEnv = new TypeEnvironment();
+    const firstUnitFamily = inferType(
+      stmt.statements[0],
+      typeEnv
+    ) as UnitFamilyType;
+    const secondUnitFamily = inferType(
+      stmt.statements[1],
+      typeEnv
+    ) as UnitFamilyType;
+
+    const numeratorUnitFamilies = [
+      firstUnitFamily,
+      secondUnitFamily,
+      firstUnitFamily,
+      firstUnitFamily,
+    ];
+    const denominatorUnitFamilies = [
+      secondUnitFamily,
+      firstUnitFamily,
+      secondUnitFamily,
+    ];
+
+    const complexUnitFamily = createComplexUnitFamilyType(
+      reduceUnitFamilies(numeratorUnitFamilies),
+      denominatorUnitFamilies
+    );
+
+    expect(getComplexUnitFamilyTypeName(complexUnitFamily)).toBe(
+      "number_[Length^2/Temperature]"
+    );
   });
 });
 

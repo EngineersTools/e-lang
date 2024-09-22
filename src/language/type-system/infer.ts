@@ -68,6 +68,7 @@ import {
   UnitFamilyType,
   UnitType,
   createBooleanType,
+  createComplexUnitFamilyType,
   createEmptyListType,
   createErrorType,
   createFormulaType,
@@ -87,6 +88,7 @@ import {
   equalsType,
   getTypeName,
   isBooleanType,
+  isComplexUnitFamilyType,
   isMeasurementType as isMeasurementTypeDescription,
   isNumberType,
   isParameterType,
@@ -101,7 +103,7 @@ export function inferType(
   let type: ELangType | undefined;
 
   if (!node) {
-    return createErrorType("Could not infer type for undefined", node);
+    return createErrorType("Could not infer type for undefined variable", node);
   }
 
   if (isExpression(node)) {
@@ -149,15 +151,32 @@ export function inferConstantDeclaration(
   node: ConstantDeclaration,
   env: TypeEnvironment
 ): ELangType {
-  if (node.type) {
-    return inferType(node.type, env);
-  } else if (node.value) {
-    return inferType(node.value, env);
+  if (node.assignment) {
+    const constType = inferType(node.type, env);
+    const valueType = inferType(node.value, env);
+
+    if (node.type === undefined) {
+      return valueType;
+    } else if (equalsType(constType, valueType)) {
+      return constType;
+    } else {
+      return createErrorType(
+        `Constant of type '${getTypeName(
+          constType
+        )}' cannot be assigned a value of type '${getTypeName(valueType)}'`
+      );
+    }
   } else {
-    return createErrorType(
-      "The type of this variable cannot be inferred. Assign a type or a value to it.",
-      node
-    );
+    if (node.type) {
+      return inferType(node.type, env);
+    } else if (node.value) {
+      return inferType(node.value, env);
+    } else {
+      return createErrorType(
+        "The type of this constant cannot be inferred. Assign a type or a value to it.",
+        node
+      );
+    }
   }
 }
 
@@ -165,15 +184,32 @@ export function inferMutableDeclaration(
   node: MutableDeclaration,
   env: TypeEnvironment
 ): ELangType {
-  if (node.type) {
-    return inferType(node.type, env);
-  } else if (node.value) {
-    return inferType(node.value, env);
+  if (node.assignment) {
+    const varType = inferType(node.type, env);
+    const valueType = inferType(node.value, env);
+
+    if (node.type === undefined) {
+      return valueType;
+    } else if (equalsType(varType, valueType)) {
+      return varType;
+    } else {
+      return createErrorType(
+        `Variable of type '${getTypeName(
+          varType
+        )}' cannot be assigned a value of type '${getTypeName(valueType)}'`
+      );
+    }
   } else {
-    return createErrorType(
-      "The type of this variable cannot be inferred. Assign a type or a value to it.",
-      node
-    );
+    if (node.type) {
+      return inferType(node.type, env);
+    } else if (node.value) {
+      return inferType(node.value, env);
+    } else {
+      return createErrorType(
+        "The type of this variable cannot be inferred. Assign a type or a value to it.",
+        node
+      );
+    }
   }
 }
 
@@ -596,7 +632,15 @@ export function inferBinaryExpression(
         return createNumberType();
       }
     } else if (expr.operator === "=") {
-      return right;
+      if (equalsType(right, left)) {
+        return right;
+      } else {
+        return createErrorType(
+          `Variable of type '${getTypeName(
+            left
+          )}' cannot be assigned a value of type '${getTypeName(right)}'`
+        );
+      }
     }
   }
 
@@ -622,12 +666,42 @@ export function inferMeasurementBinaryExpression(
     rightType = inferType(expr.right, env);
   }
 
-  if (["-", "*", "/"].includes(expr.operator)) {
+  if (expr.operator === "*") {
+    if (equalsType(leftType, rightType)) {
+      return rightType;
+    } else if (
+      isMeasurementTypeDescription(leftType) &&
+      isNumberType(rightType)
+    ) {
+      return leftType;
+    } else if (
+      isNumberType(leftType) &&
+      isMeasurementTypeDescription(rightType)
+    ) {
+      return rightType;
+    } else if (
+      isMeasurementTypeDescription(leftType) &&
+      isMeasurementTypeDescription(rightType)
+    ) {
+      const left = isComplexUnitFamilyType(leftType.unitFamilyType)
+        ? leftType.unitFamilyType.unitFamilies
+        : [leftType.unitFamilyType];
+      const right = isComplexUnitFamilyType(rightType.unitFamilyType)
+        ? rightType.unitFamilyType.unitFamilies
+        : [rightType.unitFamilyType];
+      const unitFamilyType = createComplexUnitFamilyType([...left, ...right]);
+      return unitFamilyType;
+    }
+  } else if (expr.operator === "/") {
+    if (equalsType(leftType, rightType)) {
+      return rightType;
+    }
+  } else if (expr.operator === "-") {
     if (!equalsType(leftType, rightType)) {
       return createErrorType(
-        `Cannot perform operation ${
+        `Cannot perform operation '${
           expr.operator
-        } with different measurement types: '${getTypeName(
+        }' with different measurement types: '${getTypeName(
           leftType
         )}' and '${getTypeName(rightType)}'`,
         expr
@@ -640,15 +714,24 @@ export function inferMeasurementBinaryExpression(
     } else if (isTextType(leftType) || isTextType(rightType)) {
       return createTextType();
     }
+
     return createErrorType(
-      `Cannot perform operation ${
+      `Cannot perform operation '${
         expr.operator
-      } with different measurement types: '${getTypeName(
+      }' with different measurement unit types: '${getTypeName(
         leftType
       )}' and '${getTypeName(rightType)}'`,
       expr
     );
   } else if (expr.operator === "=") {
+    if (!equalsType(leftType, rightType)) {
+      return createErrorType(
+        `Measurement of type ${getTypeName(
+          leftType
+        )} cannot be assigned a value of type ${getTypeName(rightType)}`
+      );
+    }
+
     return rightType;
   } else if (expr.operator === "^") {
     if (isMeasurementTypeDescription(leftType) && isNumberType(rightType)) {
