@@ -6,6 +6,7 @@ import {
   ConversionDeclaration,
   Expression,
   FormulaDeclaration,
+  IfStatement,
   LambdaDeclaration,
   LambdaType,
   ListValue,
@@ -13,6 +14,7 @@ import {
   MeasurementType,
   ModelDeclaration,
   ModelMemberAssignment,
+  ModelMemberCall,
   ModelValue,
   MutableDeclaration,
   ParameterDeclaration,
@@ -89,7 +91,9 @@ import {
   getTypeName,
   isBooleanType,
   isComplexUnitFamilyType,
+  isLambdaType as isLambdaTypeDescription,
   isMeasurementType as isMeasurementTypeDescription,
+  isModelType,
   isNumberType,
   isParameterType,
   isTextType,
@@ -106,9 +110,7 @@ export function inferType(
     return createErrorType("Could not infer type for undefined variable", node);
   }
 
-  if (isExpression(node)) {
-    type = inferExpression(node, env);
-  } else if (isStatementBlock(node)) {
+  if (isStatementBlock(node)) {
     type = inferStatementBlock(node, env);
   } else if (isConstantDeclaration(node)) {
     type = inferConstantDeclaration(node, env);
@@ -138,6 +140,10 @@ export function inferType(
     type = inferModelDeclaration(node, env);
   } else if (isReturnStatement(node)) {
     type = inferType(node.value, env);
+  } else if (isIfStatement(node)) {
+    type = inferIfStatement(node, env);
+  } else if (isExpression(node)) {
+    type = inferExpression(node, env);
   }
 
   if (!type) {
@@ -151,66 +157,70 @@ export function inferConstantDeclaration(
   node: ConstantDeclaration,
   env: TypeEnvironment
 ): ELangType {
-  if (node.assignment) {
-    const constType = inferType(node.type, env);
-    const valueType = inferType(node.value, env);
+  const constType = node.type ? inferType(node.type, env) : undefined;
+  const valueType = node.value ? inferType(node.value, env) : undefined;
 
-    if (node.type === undefined) {
+  if (node.assignment && valueType) {
+    if (!constType) {
+      env.setType(node.name, valueType);
       return valueType;
-    } else if (equalsType(constType, valueType)) {
+    }
+
+    if (equalsType(constType, valueType)) {
+      env.setType(node.name, constType);
       return constType;
-    } else {
-      return createErrorType(
-        `Constant of type '${getTypeName(
-          constType
-        )}' cannot be assigned a value of type '${getTypeName(valueType)}'`
-      );
     }
-  } else {
-    if (node.type) {
-      return inferType(node.type, env);
-    } else if (node.value) {
-      return inferType(node.value, env);
-    } else {
-      return createErrorType(
-        "The type of this constant cannot be inferred. Assign a type or a value to it.",
-        node
-      );
-    }
+
+    return createErrorType(
+      `Constant of type '${getTypeName(
+        constType
+      )}' cannot be assigned a value of type '${getTypeName(valueType)}'`
+    );
   }
+
+  return (
+    constType ||
+    valueType ||
+    createErrorType(
+      "The type of this constant cannot be inferred. Assign a type or a value to it.",
+      node
+    )
+  );
 }
 
 export function inferMutableDeclaration(
   node: MutableDeclaration,
   env: TypeEnvironment
 ): ELangType {
-  if (node.assignment) {
-    const varType = inferType(node.type, env);
-    const valueType = inferType(node.value, env);
+  const varType = node.type ? inferType(node.type, env) : undefined;
+  const valueType = node.value ? inferType(node.value, env) : undefined;
 
-    if (node.type === undefined) {
+  if (node.assignment && valueType) {
+    if (!varType) {
+      env.setType(node.name, valueType);
       return valueType;
-    } else if (equalsType(varType, valueType)) {
+    }
+
+    if (equalsType(varType, valueType)) {
+      env.setType(node.name, varType);
       return varType;
-    } else {
-      return createErrorType(
-        `Variable of type '${getTypeName(
-          varType
-        )}' cannot be assigned a value of type '${getTypeName(valueType)}'`
-      );
     }
-  } else {
-    if (node.type) {
-      return inferType(node.type, env);
-    } else if (node.value) {
-      return inferType(node.value, env);
-    } else {
-      return createErrorType(
-        "The type of this variable cannot be inferred. Assign a type or a value to it.",
-        node
-      );
-    }
+
+    return createErrorType(
+      `Variable of type '${getTypeName(
+        varType
+      )}' cannot be assigned a value of type '${getTypeName(valueType)}'`
+    );
   }
+
+  return (
+    varType ||
+    valueType ||
+    createErrorType(
+      "The type of this variable cannot be inferred. Assign a type or a value to it.",
+      node
+    )
+  );
 }
 
 export function inferTypeReference(
@@ -298,13 +308,62 @@ export function inferLambda(
       ? inferType(expr.returnType, env)
       : inferType(expr.body, env);
 
-    if (expr.parameters && expr.parameters.length > 0) {
-      return createLambdaType(
-        returnType,
-        expr.parameters.map((param) =>
-          inferParameterDeclaration(param, env)
-        ) as ParameterType[]
-      );
+    const parameterTypes =
+      expr.parameters.length > 0
+        ? (expr.parameters.map((p) =>
+            inferParameterDeclaration(p, env)
+          ) as ParameterType[])
+        : [];
+
+    if (expr.explicitOperationCall) {
+      // Check arguments
+      const argumentTypes =
+        expr.arguments.length > 0
+          ? expr.arguments.map((p) => inferType(p, env))
+          : [];
+
+      if (argumentTypes.length > 0) {
+        for (let i = 0; i < parameterTypes.length; i++) {
+          const p = parameterTypes[i];
+          if (!p.isOptional) {
+            const argumentType = argumentTypes[i];
+
+            if (argumentType === undefined) {
+              return createErrorType(
+                `Parameter '${p.name}: ${getTypeName(
+                  p
+                )}' is missing from the arguments provided`,
+                expr.parameters[i]
+              );
+            }
+
+            if (!equalsType(p, argumentType)) {
+              const argumentText = isExpression(expr.arguments[i])
+                ? (expr.arguments[i] as Expression).$cstNode?.text ?? ""
+                : "";
+
+              return createErrorType(
+                `Argument${
+                  argumentText !== "" ? ` '${argumentText}'` : ""
+                } of type '${getTypeName(
+                  argumentType
+                )}' is not compatible with parameter '${p.name}: ${getTypeName(
+                  p
+                )}'`,
+                expr.arguments[i]
+              );
+            }
+          }
+        }
+      }
+
+      if (isParameterType(returnType)) {
+        return returnType.typeDescription;
+      }
+
+      return returnType;
+    } else if (parameterTypes.length > 0) {
+      return createLambdaType(returnType, parameterTypes as ParameterType[]);
     } else {
       return createLambdaType(returnType);
     }
@@ -348,7 +407,11 @@ export function inferParameterDeclaration(
   expr: ParameterDeclaration,
   env: TypeEnvironment
 ): ELangType {
-  return createParameterType(expr.name, inferType(expr.type, env));
+  return createParameterType(
+    expr.name,
+    expr.isOptional,
+    inferType(expr.type, env)
+  );
 }
 
 export function inferPropertyDeclaration(
@@ -356,7 +419,7 @@ export function inferPropertyDeclaration(
   env: TypeEnvironment
 ): ELangType {
   if (expr.type.primitive) {
-    const propType = env.getType(expr.type.primitive);
+    const propType = inferPrimitive(expr.type);
     if (propType) {
       return createModelMemberType(expr.name, propType, expr.isOptional);
     }
@@ -514,12 +577,76 @@ export function inferExpression(
       return createNumberType();
     }
   } else if (isModelMemberCall(expr)) {
-    return inferType(expr.element.ref, env);
+    return inferModelMemberCall(expr, env);
   } else if (isUnitConversionExpression(expr)) {
     return inferUnitConversionExpression(expr, env);
   } else {
     return createErrorType("Could not infer type for expression", expr);
   }
+}
+
+export function inferModelMemberCall(
+  expr: ModelMemberCall,
+  env: TypeEnvironment
+): ELangType {
+  if (expr.previous === undefined) {
+    if (expr.element.ref !== undefined) {
+      const elementType = inferType(expr.element.ref, env);
+
+      if (
+        expr.explicitOperationCall &&
+        isLambdaTypeDescription(elementType) &&
+        elementType.returnType
+      ) {
+        return elementType.returnType;
+      }
+
+      return elementType;
+    } else {
+      return createErrorType(
+        `Cannot infer type for non-existent variable: '${expr.element.$refText}'`,
+        expr
+      );
+    }
+  } else {
+    const previousType = inferType(expr.previous, env);
+    if (isParameterType(previousType)) {
+      const paramType = previousType.typeDescription;
+      if (isModelType(paramType)) {
+        const member = paramType.memberTypes.find(
+          (m) => m.name === expr.element.$refText
+        );
+        if (member) {
+          return member.typeDesc;
+        } else {
+          return createErrorType(
+            `Model '${paramType.modelName ?? ""}' does not have a member '${
+              expr.element.$refText
+            }'`,
+            expr
+          );
+        }
+      } else {
+        return previousType.typeDescription;
+      }
+    } else if (isModelType(previousType)) {
+      const member = previousType.memberTypes.find(
+        (m) => m.name === expr.element.$refText
+      );
+      if (member) {
+        return member.typeDesc;
+      } else {
+        return createErrorType(
+          `Model '${previousType.modelName ?? ""}' does not have a member '${
+            expr.element.$refText
+          }'`,
+          expr
+        );
+      }
+    }
+  }
+
+  return createErrorType("Could not infer type for model member call", expr);
 }
 
 export function inferModelDeclaration(
@@ -632,7 +759,12 @@ export function inferBinaryExpression(
         return createNumberType();
       }
     } else if (expr.operator === "=") {
-      if (equalsType(right, left)) {
+      if (
+        isModelMemberCall(expr.left) &&
+        isConstantDeclaration(expr.left.element.ref)
+      ) {
+        return createErrorType("Constant value cannot be reassigned");
+      } else if (equalsType(right, left)) {
         return right;
       } else {
         return createErrorType(
@@ -792,4 +924,33 @@ export function inferStatementBlock(
 
   if (returnTypes.length === 1) return returnTypes[0];
   else return createUnionType(...returnTypes);
+}
+
+export function inferIfStatement(
+  stmt: IfStatement,
+  env: TypeEnvironment
+): ELangType {
+  const conditionType = inferType(stmt.condition, env);
+
+  if (!isBooleanType(conditionType)) {
+    return createErrorType(
+      `If condition must be of type 'boolean' but got type '${getTypeName(
+        conditionType
+      )}'`,
+      stmt
+    );
+  }
+
+  if (stmt.elseBlock === undefined) {
+    return inferStatementBlock(stmt.block, env);
+  } else {
+    const blockType = inferStatementBlock(stmt.block, env);
+    const elseBlockType = inferStatementBlock(stmt.elseBlock, env);
+
+    if (equalsType(blockType, elseBlockType)) {
+      return blockType;
+    } else {
+      return createUnionType(blockType, elseBlockType);
+    }
+  }
 }

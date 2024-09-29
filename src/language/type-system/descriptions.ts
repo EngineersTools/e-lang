@@ -3,7 +3,7 @@
  * used in the type system of the e-lang language.
  */
 import { AstNode } from "langium";
-import { sortBy } from "../../utils/array.functions.js";
+import { areEqual, sortBy } from "../../utils/array.functions.js";
 import { ModelDeclaration } from "../generated/ast.js";
 
 export type ELangType =
@@ -29,6 +29,13 @@ export type ELangType =
   | UnitType;
 
 export function equalsType(left: ELangType, right: ELangType): boolean {
+  if (isUnionType(left) && isUnionType(right)) {
+    return areEqual(
+      left.types.map((t) => getTypeName(t)).sort(),
+      right.types.map((t) => getTypeName(t)).sort()
+    );
+  }
+
   return getTypeName(left) === getTypeName(right);
 }
 
@@ -36,13 +43,17 @@ export function getTypeName(
   elangType: ELangType,
   notation: ComplexUnitNameNotation = "NegativeExponent"
 ): string {
-  if (isFormulaType(elangType)) {
+  if (elangType === undefined || isNullType(elangType)) {
+    return "null";
+  } else if (isFormulaType(elangType)) {
     return `(${
       elangType.parameterTypes?.map((p) => getTypeName(p)).join(",") ?? ""
     }) => ${getTypeName(elangType.returnType)}`;
   } else if (isLambdaType(elangType)) {
     return `(${
-      elangType.parameters?.map((p) => getTypeName(p)).join(",") ?? ""
+      elangType.parameters
+        ?.map((p) => `${getTypeName(p)}${p.isOptional ? "?" : ""}`)
+        .join(",") ?? ""
     }) => ${elangType.returnType ? getTypeName(elangType.returnType) : "void"}`;
   } else if (isParameterType(elangType)) {
     return getTypeName(elangType.typeDescription);
@@ -56,6 +67,11 @@ export function getTypeName(
       : `${elangType.name}^${elangType.exponent}`;
   } else if (isComplexUnitFamilyType(elangType)) {
     return getComplexUnitFamilyTypeName(elangType.unitFamilies, notation);
+  } else if (isModelType(elangType)) {
+    return (
+      elangType.modelName ??
+      `{${elangType.memberTypes.map((m) => m.name).join(",")}}`
+    );
   }
 
   return elangType.$type;
@@ -332,7 +348,7 @@ export function createModelMemberType(
   };
 }
 
-export function isModelMemberType(item: ELangType): item is ModelMemberType {
+export function MemberType(item: ELangType): item is ModelMemberType {
   return item.$type === "modelMember";
 }
 
@@ -372,16 +388,19 @@ export function isModelType(item: ELangType): item is ModelType {
 export interface ParameterType {
   readonly $type: "parameter";
   readonly name: string;
+  readonly isOptional: boolean;
   readonly typeDescription: ELangType;
 }
 
 export function createParameterType(
   name: string,
+  isOptional: boolean,
   type: ELangType
 ): ParameterType {
   return {
     $type: "parameter",
     name,
+    isOptional,
     typeDescription: type,
   };
 }
@@ -539,7 +558,7 @@ export function createEmptyListType(): EmptyListType {
   };
 }
 
-export function isEmtpyListType(item: ELangType): item is EmptyListType {
+export function isEmptyListType(item: ELangType): item is EmptyListType {
   return item.$type === "emptyList";
 }
 

@@ -7,12 +7,21 @@ import {
   StatementBlock,
 } from "../../src/language/generated/ast.js";
 import {
+  createNumberType,
+  createTextType,
+  createUnionType,
+  equalsType,
   ErrorType,
+  getTypeName,
   isBooleanType,
   isErrorType,
+  isFormulaType,
+  isLambdaType,
+  isMeasurementType,
   isNullType,
   isNumberType,
   isTextType,
+  isUnionType,
 } from "../../src/language/type-system/descriptions.js";
 import { inferType } from "../../src/language/type-system/infer.js";
 import { TypeEnvironment } from "../../src/language/type-system/TypeEnvironment.js";
@@ -184,8 +193,8 @@ describe("Type Check Variables", () => {
 
   test("Check declared constant assignment with type mismatch", async () => {
     document = await parse(`
-            const x: text = true
-        `);
+      const x: text = true
+    `);
 
     expect(
       isErrorType(inferType(document!.parseResult.value.statements[0], typeEnv))
@@ -232,7 +241,7 @@ describe("Type Check Variables", () => {
           typeEnv
         ) as ErrorType
       ).message
-    ).toBe("Could not infer type for undefined variable");
+    ).toBe("Cannot infer type for non-existent variable: 'x'");
   });
 });
 
@@ -290,30 +299,35 @@ describe("Type Check Statement Blocks", () => {
       typeEnv
     );
 
-    console.log((inferredType as ErrorType).message);
-
     expect(isErrorType(inferredType)).toBe(true);
+    expect((inferredType as ErrorType).message).toBe(
+      "Constant value cannot be reassigned"
+    );
   });
 
-  test.todo("Check statement block with non-existent variable", async () => {
+  test("Check statement block with non-existent variable", async () => {
     document = await parse(`
         {
             x
         }
     `);
 
-    expect(() =>
-      typeChecker.tc(
-        (document!.parseResult.value.statements[0] as StatementBlock)
-          .statements[0]
-      )
-    ).toThrowError(new ElangTypeError("Variable 'x' not defined"));
+    typeEnv.resetScope();
+
+    const inferredType = inferType(
+      (document!.parseResult.value.statements[0] as StatementBlock)
+        .statements[0],
+      typeEnv
+    );
+
+    expect(isErrorType(inferredType)).toBe(true);
+    expect((inferredType as ErrorType).message).toBe(
+      "Cannot infer type for non-existent variable: 'x'"
+    );
   });
 
-  test.todo(
-    "Check statement block with external scope and non-existent variable",
-    async () => {
-      document = await parse(`
+  test("Check statement block with external scope and non-existent variable", async () => {
+    document = await parse(`
         const y = 42
 
         {
@@ -321,17 +335,22 @@ describe("Type Check Statement Blocks", () => {
         }
     `);
 
-      expect(() =>
-        typeChecker.tc(
-          (document!.parseResult.value.statements[1] as StatementBlock)
-            .statements[0]
-        )
-      ).toThrowError(new ElangTypeError("Variable 'x' not defined"));
-    }
-  );
+    typeEnv.resetScope();
+
+    const inferredType = inferType(
+      (document!.parseResult.value.statements[1] as StatementBlock)
+        .statements[0],
+      typeEnv
+    );
+
+    expect(isErrorType(inferredType)).toBe(true);
+    expect((inferredType as ErrorType).message).toBe(
+      "Cannot infer type for non-existent variable: 'x'"
+    );
+  });
 });
 
-describe.todo("Type Check If Statements", () => {
+describe("Type Check If Statements", () => {
   test("Check if statement with invalid condition type", async () => {
     document = await parse(`
         if ("Hello" + "World") {
@@ -339,13 +358,18 @@ describe.todo("Type Check If Statements", () => {
         }
     `);
 
-    expect(() =>
-      typeChecker.tc(document!.parseResult.value.statements[0])
-    ).toThrowError(
-      new ElangTypeError(
-        "Invalid type for if statement condition: 'text'. Condition must be of type 'boolean'"
-      )
-    );
+    expect(
+      isErrorType(inferType(document!.parseResult.value.statements[0], typeEnv))
+    ).toBe(true);
+
+    expect(
+      (
+        inferType(
+          document!.parseResult.value.statements[0],
+          typeEnv
+        ) as ErrorType
+      ).message
+    ).toBe("If condition must be of type 'boolean' but got type 'text'");
 
     document = await parse(`
         if (10 + 32) {
@@ -353,13 +377,18 @@ describe.todo("Type Check If Statements", () => {
         }
     `);
 
-    expect(() =>
-      typeChecker.tc(document!.parseResult.value.statements[0])
-    ).toThrowError(
-      new ElangTypeError(
-        "Invalid type for if statement condition: 'number'. Condition must be of type 'boolean'"
-      )
-    );
+    expect(
+      isErrorType(inferType(document!.parseResult.value.statements[0], typeEnv))
+    ).toBe(true);
+
+    expect(
+      (
+        inferType(
+          document!.parseResult.value.statements[0],
+          typeEnv
+        ) as ErrorType
+      ).message
+    ).toBe("If condition must be of type 'boolean' but got type 'number'");
 
     document = await parse(`
         if (null) {
@@ -367,90 +396,438 @@ describe.todo("Type Check If Statements", () => {
         }
     `);
 
-    expect(() =>
-      typeChecker.tc(document!.parseResult.value.statements[0])
-    ).toThrowError(
-      new ElangTypeError(
-        "Invalid type for if statement condition: 'null'. Condition must be of type 'boolean'"
-      )
-    );
+    expect(
+      isErrorType(inferType(document!.parseResult.value.statements[0], typeEnv))
+    ).toBe(true);
+
+    expect(
+      (
+        inferType(
+          document!.parseResult.value.statements[0],
+          typeEnv
+        ) as ErrorType
+      ).message
+    ).toBe("If condition must be of type 'boolean' but got type 'null'");
   });
 
   test("Check true path", async () => {
     document = await parse(`
         if (true) {
             const x = 42
-            x
+            return x
         }
     `);
 
-    expect(typeChecker.tc(document.parseResult.value.statements[0])).toBe(
-      ELangType.number
-    );
+    expect(
+      isNumberType(inferType(document.parseResult.value.statements[0], typeEnv))
+    ).toBe(true);
   });
 
   test("Check false path", async () => {
     document = await parse(`
         if (false) {
             const x = 42
-            x
+            return x + "Hello"
         } else {
             const y = "Hello World"
             return y
         }
     `);
 
-    expect(typeChecker.tc(document.parseResult.value.statements[0])).toBe(
-      ELangType.text
-    );
+    expect(
+      isTextType(inferType(document.parseResult.value.statements[0], typeEnv))
+    ).toBe(true);
+  });
+
+  test("Check both paths returning different types", async () => {
+    document = await parse(`
+      if (false) {
+          const x = 42
+          return x
+      } else {
+          const y = "Hello World"
+          return y
+      }
+  `);
+
+    const unionType = createUnionType(createTextType(), createNumberType());
+
+    expect(
+      isUnionType(inferType(document.parseResult.value.statements[0], typeEnv))
+    ).toBe(true);
+
+    expect(
+      equalsType(
+        inferType(document.parseResult.value.statements[0], typeEnv),
+        unionType
+      )
+    ).toBe(true);
   });
 });
 
-describe.todo("Type Check Lambdas", () => {
-  test("Check lambda", async () => {
+describe("Type Check Lambdas", () => {
+  test("Check lambda with no parameters and text return", async () => {
+    document = await parse(`
+            () => "Hello World"
+        `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("() => text");
+  });
+
+  test("Check lambda with untyped parameter and text return", async () => {
+    document = await parse(`
+            (x) => "Hello World"
+        `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(error) => text");
+  });
+
+  test("Check lambda with mandatory one parameter and expression return", async () => {
     document = await parse(`
             (x: number) => x
         `);
 
-    expect(typeChecker.tc(document.parseResult.value.statements[0])).toBe(
-      ELangType.lambda
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(number) => number");
+  });
+
+  test("Check lambda with optional parameters and return expression", async () => {
+    document = await parse(`
+            (x: number, y?: text) => x
+        `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(number,text?) => number");
+  });
+
+  test("Check lambda with union return expression", async () => {
+    document = await parse(`
+            (x: boolean) => {
+              if(x) {
+                return "True"
+              } else {
+                return 0 
+              }
+            }
+        `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(boolean) => text or number");
+  });
+
+  test("Check lambda with union return expression", async () => {
+    document = await parse(`
+            (x: boolean) => {
+              if(x) {
+                return "True"
+              } else {
+                return 0 
+              }
+            }
+        `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(boolean) => text or number");
+  });
+
+  test("Check lambda assigned to constant", async () => {
+    document = await parse(`
+            unit_family Length {
+              unit m:meter
+              unit ft:foot
+            }
+
+            const unitResult: (x: number_[Length]  => number_[Length] = (x: number_[Length]) => x->ft
+        `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[1],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe(
+      "(number_[Length]) => number_[Length]"
     );
   });
 
-  test("Check lambda application", async () => {
+  test("Check lambda assigned to constant and evaluated", async () => {
     document = await parse(`
-            ((x: number) => x)(42)
+        unit_family Length {
+          unit m:meter
+          unit ft:foot
+        }
+
+        const unitResult = (x: number_[Length]) => x->ft
+
+        const result = unitResult(42)
+    `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[2],
+      typeEnv
+    );
+
+    expect(isMeasurementType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("number_[Length]");
+  });
+
+  test("Check lambda with model parameter type and return model member", async () => {
+    document = await parse(`
+        model thing {
+          a: text
+        }
+
+        (x: thing) => x.a
+    `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[1],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(thing) => text");
+  });
+
+  test("Check lambda with model parameter type and return model parent member", async () => {
+    document = await parse(`
+            model parent {
+              b: number
+            }
+
+            model thing extends parent {
+              a: text
+            }
+
+            (x: thing) => x.b
         `);
 
-    expect(typeChecker.tc(document.parseResult.value.statements[0])).toBe(
-      ELangType.number
+    const inferredType = inferType(
+      document.parseResult.value.statements[2],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(thing) => number");
+  });
+
+  test("Check lambda with model parameter type and return model sub-model", async () => {
+    document = await parse(`
+            model parent {
+              b: number
+            }
+
+            model subModel {
+              c: boolean
+            }
+
+            model thing extends parent {
+              a: text
+              s: subModel
+            }
+
+            (x: thing) => x.s
+        `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[3],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(thing) => subModel");
+  });
+
+  test("Check lambda with model parameter type and return model sub-model member", async () => {
+    document = await parse(`
+            model parent {
+              b: number
+            }
+
+            model subModel {
+              c: boolean
+            }
+
+            model thing extends parent {
+              a: text
+              s: subModel
+            }
+
+            (x: thing) => x.s.c
+        `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[3],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(thing) => boolean");
+  });
+
+  test("Check lambda with model parameter type and return parent model sub-model", async () => {
+    document = await parse(`
+            model parent {
+              b: number
+              s: subModel
+            }
+
+            model subModel {
+              c: boolean
+            }
+
+            model thing extends parent {
+              a: text
+            }
+
+            (x: thing) => x.s
+        `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[3],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(thing) => subModel");
+  });
+
+  test("Check lambda with model parameter type and return parent model sub-model member", async () => {
+    document = await parse(`
+            model parent {
+              b: number
+              s: subModel
+            }
+
+            model subModel {
+              c: () => text
+            }
+
+            model thing extends parent {
+              a: text
+            }
+
+            (x: thing) => x.s.c
+        `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[3],
+      typeEnv
+    );
+
+    expect(isLambdaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(thing) => () => text");
+  });
+
+  test("Check lambda evaluation", async () => {
+    document = await parse(`      
+      ((x: number, y: text) => x)(42, "Hello")
+    `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isNumberType(inferredType)).toBe(true);
+  });
+
+  test("Check lambda evaluation with incorrect argument type", async () => {
+    document = await parse(`      
+      ((x: number, y: text) => x)('42', "Hello")
+    `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isErrorType(inferredType)).toBe(true);
+    expect((inferredType as ErrorType).message).toBe(
+      "Argument ''42'' of type 'text' is not compatible with parameter 'x: number'"
     );
   });
 
-  test("Check lambda application with type mismatch", async () => {
-    document = await parse(`
-            ((x: number) => x)(true)
-        `);
+  test("Check lambda evaluation with optional parameter", async () => {
+    document = await parse(`      
+      ((x: number, y?: text, z: boolean) => z)(42,null,true)
+    `);
 
-    expect(() =>
-      typeChecker.tc(document!.parseResult.value.statements[0])
-    ).toThrowError(
-      new ElangTypeError("Invalid types for assignment: 'number' and 'boolean'")
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isBooleanType(inferredType)).toBe(true);
+  });
+
+  test("Check lambda evaluation with missing argument", async () => {
+    document = await parse(`      
+      ((x: number, y: text) => x)(42)
+    `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isErrorType(inferredType)).toBe(true);
+    expect((inferredType as ErrorType).message).toBe(
+      "Parameter 'y: text' is missing from the arguments provided"
     );
   });
 
-  test("Check lambda application with non-existent variable", async () => {
+  test("Check lambda evaluation with non-existent variable", async () => {
     document = await parse(`
-            ((x: number) => x)(y)
+            ((x: number) => y)(7)
         `);
 
-    expect(() =>
-      typeChecker.tc(document!.parseResult.value.statements[0])
-    ).toThrowError(new ElangTypeError("Variable 'y' not defined"));
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isErrorType(inferredType)).toBe(true);
+    expect((inferredType as ErrorType).message).toBe(
+      "Cannot infer type for non-existent variable: 'y'"
+    );
   });
 });
 
-describe.todo("Type Check Formulas", () => {
+describe("Type Check Formulas", () => {
   test("Check formula", async () => {
     document = await parse(`
         formula add(x: number, y: number) returns number {
@@ -458,9 +835,13 @@ describe.todo("Type Check Formulas", () => {
         }
     `);
 
-    expect(typeChecker.tc(document.parseResult.value.statements[0])).toBe(
-      ELangType.number
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
     );
+
+    expect(isFormulaType(inferredType)).toBe(true);
+    expect(getTypeName(inferredType)).toBe("(number,number) => number");
   });
 
   test("Check formula without a return type", async () => {
@@ -470,12 +851,16 @@ describe.todo("Type Check Formulas", () => {
         }
     `);
 
-    expect(() =>
-      typeChecker.tc(document!.parseResult.value.statements[0])
-    ).toThrowError(
-      new ElangTypeError(
-        "Formula 'add' must declare a return type. Use the keyword 'returns' to declare the return type"
-      )
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
+
+    expect(isErrorType(inferredType)).toBe(true);
+    expect((inferredType as ErrorType).message).toBe(
+      "Formula requires a declared return type"
     );
   });
 });
+
+describe.todo("Type Check Models", () => {});

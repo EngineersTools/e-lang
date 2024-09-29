@@ -92,7 +92,7 @@ PrimaryExpression infers Expression:
 
 FeatureCall infers Expression:
 	{infer ModelMemberCall}
-    element=[NamedElement:ID]
+    element=[NamedElement:ID] | LambdaDeclaration
     // Optional function call after referencing an element
     (explicitOperationCall?='('
         (

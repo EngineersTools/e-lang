@@ -53,7 +53,7 @@ import {
 } from "./type-system/TypeEnvironment.functions.js";
 import { isAssignable } from "./type-system/assignment.js";
 import {
-  isEmtpyListType,
+  isEmptyListType,
   isFormulaType,
   isListType,
   isModelType,
@@ -163,7 +163,7 @@ export class ELangValidator {
       }
     } else if (isListCount(stmt)) {
       const inferredType = inferType(stmt.list, env);
-      if (!isListType(inferredType) && !isEmtpyListType(inferredType))
+      if (!isListType(inferredType) && !isEmptyListType(inferredType))
         accept(
           "error",
           `Element '${stmt.list.$cstNode?.text}' is not a valid list type`,
@@ -176,7 +176,7 @@ export class ELangValidator {
       const listInferredType = inferType(stmt.list, env);
       const addedElementInferredType = inferType(stmt.item, env);
 
-      if (!isListType(listInferredType) && !isEmtpyListType(listInferredType)) {
+      if (!isListType(listInferredType) && !isEmptyListType(listInferredType)) {
         accept(
           "error",
           `Element '${stmt.list.$cstNode?.text}' is not a valid list type`,

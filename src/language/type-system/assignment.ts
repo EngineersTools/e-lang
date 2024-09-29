@@ -1,7 +1,7 @@
 import {
   ParameterType,
   ELangType,
-  isEmtpyListType,
+  isEmptyListType,
   isFormulaType,
   isListType,
   isMeasurementType,
@@ -116,13 +116,13 @@ export function isAssignable(
   } else if (isListType(to)) {
     if (isListType(from)) {
       return isAssignable(from.itemType, to.itemType);
-    } else if (isEmtpyListType(from)) {
+    } else if (isEmptyListType(from)) {
       return createAssignableResult();
     } else {
       return isAssignable(from, to.itemType);
     }
   } else if (isListType(from)) {
-    if (isEmtpyListType(from)) {
+    if (isEmptyListType(from)) {
       return createAssignableResult();
     } else {
       return isAssignable(from.itemType, to);

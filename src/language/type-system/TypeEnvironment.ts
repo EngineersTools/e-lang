@@ -4,9 +4,15 @@ import { TypeRegistry } from "./TypeRegistry.js";
 export class TypeEnvironment {
   constructor() {
     this.stack = new Array<TypeRegistry>();
+    // Create the global scope
+    this.enterScope();
   }
 
   private stack: TypeRegistry[];
+
+  getState(): TypeRegistry[] {
+    return this.stack;
+  }
 
   numberOfScopes(): number {
     return this.stack.length;
@@ -18,6 +24,11 @@ export class TypeEnvironment {
 
   leaveScope(): void {
     this.stack.pop();
+  }
+
+  resetScope(): void {
+    this.stack.pop();
+    this.stack.push(new TypeRegistry());
   }
 
   setType(name: string, type: ELangType): ELangType {
