@@ -546,7 +546,7 @@ export function createModelMemberType(
   };
 }
 
-export function MemberType(item: ELangType): item is ModelMemberType {
+export function isModelMemberType(item: ELangType): item is ModelMemberType {
   return item.$type === "modelMember";
 }
 

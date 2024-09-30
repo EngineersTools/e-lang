@@ -60,27 +60,27 @@ export async function runELangStatement(
     } else if (statement.elseBlock) {
       await runELangStatement(statement.elseBlock, context, returnFn);
     }
-  } else if (isLambdaDeclaration(statement)) {
-    // This caters for the case where the lambda is
-    // immediately invoked
-    if (statement.explicitOperationCall) {
-      const args = await Promise.all(
-        statement.arguments.map((e) => runExpression(e, context))
-      );
+    // } else if (isLambdaDeclaration(statement)) {
+    //   // This caters for the case where the lambda is
+    //   // immediately invoked
+    //   if (statement.explicitOperationCall) {
+    //     const args = await Promise.all(
+    //       statement.arguments.map((e) => runExpression(e, context))
+    //     );
 
-      context.variables.enter();
+    //     context.variables.enter();
 
-      const names = statement.parameters.map((e) => e.name);
+    //     const names = statement.parameters.map((e) => e.name);
 
-      for (let i = 0; i < statement.parameters.length; i++) {
-        const argValue = args[i] ?? null;
-        context.variables.push(names[i], argValue);
-      }
+    //     for (let i = 0; i < statement.parameters.length; i++) {
+    //       const argValue = args[i] ?? null;
+    //       context.variables.push(names[i], argValue);
+    //     }
 
-      await runELangStatement(statement.body, context, returnFn);
+    //     await runELangStatement(statement.body, context, returnFn);
 
-      context.variables.leave();
-    }
+    //     context.variables.leave();
+    //   }
   } else if (isMatchStatement(statement)) {
     const condition = await runExpression(statement.condition, context);
     let matched = false;

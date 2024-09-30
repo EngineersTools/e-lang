@@ -46,6 +46,7 @@ import {
   isNullLiteral,
   isNumberLiteral,
   isParameterDeclaration,
+  isPrintStatement,
   isProcedureDeclaration,
   isPropertyDeclaration,
   isReturnStatement,
@@ -146,6 +147,8 @@ export function inferType(
     type = inferIfStatement(node, env);
   } else if (isExpression(node)) {
     type = inferExpression(node, env);
+  } else if (isPrintStatement(node)) {
+    type = inferType(node.value, env);
   }
 
   if (!type) {
@@ -412,14 +415,22 @@ export function inferFormula(
 ): ELangType {
   if (expr.returnType) {
     if (expr.parameters && expr.parameters.length > 0) {
-      return createFormulaType(
+      const formulaType = createFormulaType(
         inferType(expr.returnType, env),
         expr.parameters.map((param) =>
           inferParameterDeclaration(param, env)
         ) as ParameterType[]
       );
+
+      env.setType(expr.name, formulaType);
+
+      return formulaType;
     } else {
-      return createFormulaType(inferType(expr.returnType, env));
+      const formulaType = createFormulaType(inferType(expr.returnType, env));
+
+      env.setType(expr.name, formulaType);
+
+      return formulaType;
     }
   } else {
     return createErrorType("Formula requires a declared return type", expr);

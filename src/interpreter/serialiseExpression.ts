@@ -13,7 +13,7 @@ import {
   isStringLiteral,
 } from "../language/generated/ast.js";
 import { TypeEnvironment } from "../language/type-system/TypeEnvironment.js";
-import { getReturnType } from "../language/type-system/TypeEnvironment.functions.js";
+import { getTypeName } from "../language/type-system/descriptions.js";
 import { inferType } from "../language/type-system/infer.js";
 import { typeToString } from "../language/type-system/typeToString.js";
 import { AstNodeError } from "./AstNodeError.js";
@@ -121,8 +121,7 @@ export async function serialiseExpression(
         inferType(result.body, new TypeEnvironment()).$type
       }`;
     } else if (isStatement(result.body)) {
-      const returnType = getReturnType(result.body, new TypeEnvironment());
-      return `(${params}) => ${returnType.$type}`;
+      return getTypeName(inferType(result.body, new TypeEnvironment()));
     }
     return `(${params})`;
   } else if (isStatement(result)) {
