@@ -200,7 +200,7 @@ async function getListElement(
   // length of the list
   index--;
 
-  if(index < 0) {
+  if (index < 0) {
     throw new AstNodeError(
       memberCall,
       `Index out of range. The index must be greater than 0.`
@@ -214,9 +214,7 @@ async function getListElement(
   } else {
     throw new AstNodeError(
       memberCall,
-      `Index out of range. The list '${
-        memberCall.element.$refText
-      }' has less than ${indexExp} elements`
+      `Index out of range. The list '${memberCall.element.$refText}' has less than ${indexExp} elements`
     );
   }
 }

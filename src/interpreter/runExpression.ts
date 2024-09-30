@@ -5,6 +5,7 @@ import {
   isBinaryExpression,
   isBooleanLiteral,
   isExpression,
+  isLambdaDeclaration,
   isListAdd,
   isListCount,
   isListRemove,
@@ -183,6 +184,8 @@ export async function runExpression(
         `Cannot remove element from list '${expression.list.$cstNode?.text}'`
       );
     }
+  } else if (isLambdaDeclaration(expression)) {
+    return expression;
   }
 
   // If the expression hasn't been captured by now, it is an

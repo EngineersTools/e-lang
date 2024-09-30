@@ -1,20 +1,22 @@
 import { ModelDeclaration, PropertyDeclaration } from "../generated/ast.js";
-import { getModelDeclarationChain } from "./getModelDeclarationChain.js";
+import { getModelDeclarationParentsChain } from "./getModelDeclarationChain.js";
 
 export function getAllPropertiesInModelDeclarationChain(
   modelDeclaration: ModelDeclaration
 ): PropertyDeclaration[] {
-  return getModelDeclarationChain(modelDeclaration).flatMap(
-    (m) => m.properties
+  const parentProperties = getModelDeclarationParentsChain(
+    modelDeclaration
+  ).flatMap((m) => m.properties);
+
+  return modelDeclaration.properties.concat(
+    parentProperties.filter((p) => {
+      const modelPropertyContainedInParentChain =
+        modelDeclaration.properties.find((mp) => mp.name === p.name);
+
+      return (
+        modelPropertyContainedInParentChain === undefined ||
+        modelPropertyContainedInParentChain.override === false
+      );
+    })
   );
-}
-
-export function getParentPropertiesInModelDeclarationChain(
-  modelDeclaration: ModelDeclaration
-): PropertyDeclaration[] {
-  const chain = getModelDeclarationChain(modelDeclaration);
-
-  return chain.length > 1
-    ? chain.slice(1, chain.length).flatMap((m) => m.properties)
-    : [];
 }

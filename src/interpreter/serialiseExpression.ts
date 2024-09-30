@@ -11,6 +11,7 @@ import {
   isProcedureDeclaration,
   isStatement,
   isStringLiteral,
+  isTypeReference,
 } from "../language/generated/ast.js";
 import { TypeEnvironment } from "../language/type-system/TypeEnvironment.js";
 import { getTypeName } from "../language/type-system/descriptions.js";
@@ -32,6 +33,10 @@ export async function serialiseExpression(
   statement: Statement,
   context: RunnerContext
 ): Promise<string> {
+  if (isTypeReference(statement)) {
+    return typeToString(statement);
+  }
+
   const result = isExpression(statement)
     ? await runExpression(statement, context)
     : isModelMemberCall(statement)
@@ -96,34 +101,9 @@ export async function serialiseExpression(
 
     return JSON.stringify(items);
   } else if (isFormulaDeclaration(result) || isProcedureDeclaration(result)) {
-    const params = result.parameters
-      .map((e) => {
-        if (e.type) return `${e.name}: ${typeToString(e.type)}`;
-        else return `${e.name}`;
-      })
-      .join(", ");
-
-    if (result.returnType)
-      return `${result.name}(${params}) => ${typeToString(result.returnType)}`;
-    else return `${result.name}(${params})`;
+    return typeToString(result);
   } else if (isLambdaDeclaration(result)) {
-    const params = result.parameters
-      .map((e) => {
-        if (e.type) return `${e.name}: ${typeToString(e.type)}`;
-        else return `${e.name}`;
-      })
-      .join(", ");
-
-    if (result.returnType) {
-      return `(${params}) => ${typeToString(result.returnType)}`;
-    } else if (isExpression(result.body)) {
-      return `(${params}) => ${
-        inferType(result.body, new TypeEnvironment()).$type
-      }`;
-    } else if (isStatement(result.body)) {
-      return getTypeName(inferType(result.body, new TypeEnvironment()));
-    }
-    return `(${params})`;
+    return getTypeName(inferType(result, new TypeEnvironment()));
   } else if (isStatement(result)) {
     return serialiseExpression(result, context);
   } else if (isNullLiteral(result) || isNull(result) || result === undefined) {

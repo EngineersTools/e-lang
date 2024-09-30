@@ -34,6 +34,14 @@ export function equalsType(left: ELangType, right: ELangType): boolean {
       left.types.map((t) => getTypeName(t)).sort(),
       right.types.map((t) => getTypeName(t)).sort()
     );
+  } else if (isUnionType(left) || isUnionType(right)) {
+    if (isUnionType(left)) {
+      return left.types.map((t) => getTypeName(t)).includes(getTypeName(right));
+    } else if (isUnionType(right)) {
+      return right.types.map((t) => getTypeName(t)).includes(getTypeName(left));
+    } else {
+      return false;
+    }
   } else if (isModelType(left) && isModelType(right)) {
     return modelTypesAreEqual(left, right) === true;
   }

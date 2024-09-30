@@ -4,10 +4,17 @@ import {
   ValidationRegistry,
 } from "langium";
 import { ELangServices } from "./e-lang-module.js";
-import { ELangAstType, ELangProgram } from "./generated/ast.js";
+import {
+  ELangAstType,
+  ELangProgram,
+  isModelDeclaration,
+  ModelDeclaration,
+  PropertyDeclaration,
+} from "./generated/ast.js";
 import { TypeEnvironment } from "./type-system/TypeEnvironment.js";
 import { isErrorType } from "./type-system/descriptions.js";
 import { inferType } from "./type-system/infer.js";
+import { getModelDeclarationParentsChain } from "./type-system/getModelDeclarationChain.js";
 
 export class ELangValidationRegistry extends ValidationRegistry {
   constructor(services: ELangServices) {
@@ -15,7 +22,7 @@ export class ELangValidationRegistry extends ValidationRegistry {
     const validator = services.validation.ELangValidator;
     const checks: ValidationChecks<ELangAstType> = {
       ELangProgram: validator.typecheckProgram,
-      // PropertyDeclaration: validator.checkModelPropertiesAreNotDuplicated,
+      PropertyDeclaration: validator.checkModelPropertiesAreNotDuplicated,
       // ModelMemberAssignment: validator.checkAssignmentOperationAllowed,
       // ConstantDeclaration: validator.checkAssignmentOperationAllowed,
       // MutableDeclaration: validator.checkAssignmentOperationAllowed,
@@ -370,86 +377,86 @@ export class ELangValidator {
   //   }
   // }
 
-  // checkModelPropertiesAreNotDuplicated(
-  //   prop: PropertyDeclaration,
-  //   accept: ValidationAcceptor
-  // ): void {
-  //   if (isModelDeclaration(prop.$container)) {
-  //     const model = prop.$container;
+  checkModelPropertiesAreNotDuplicated(
+    prop: PropertyDeclaration,
+    accept: ValidationAcceptor
+  ): void {
+    if (isModelDeclaration(prop.$container)) {
+      const model = prop.$container;
 
-  //     let count = 0;
-  //     model.properties.forEach((p) => {
-  //       if (p.name === prop.name) {
-  //         count++;
+      let count = 0;
+      model.properties.forEach((p) => {
+        if (p.name === prop.name) {
+          count++;
 
-  //         if (count > 1)
-  //           accept(
-  //             "error",
-  //             `PropertyDeclaration '${prop.name}' already exists in model '${model.name}'`,
-  //             {
-  //               node: prop,
-  //               property: "name",
-  //             }
-  //           );
-  //       }
-  //     });
+          if (count > 1)
+            accept(
+              "error",
+              `PropertyDeclaration '${prop.name}' already exists in model '${model.name}'`,
+              {
+                node: prop,
+                property: "name",
+              }
+            );
+        }
+      });
 
-  //     const parentModels = getModelDeclarationParentsChain(model);
+      const parentModels = getModelDeclarationParentsChain(model);
 
-  //     parentModels.forEach((parentModel) => {
-  //       if (parentModel) {
-  //         const parentModelPropertiesNames = parentModel.properties.map(
-  //           (p) => p.name
-  //         );
+      parentModels.forEach((parentModel) => {
+        if (parentModel) {
+          const parentModelPropertiesNames = parentModel.properties.map(
+            (p) => p.name
+          );
 
-  //         if (
-  //           parentModelPropertiesNames.includes(prop.name) &&
-  //           !prop.override
-  //         ) {
-  //           accept(
-  //             "error",
-  //             `This property already exists in parent model '${parentModel.name}', use the 'override' keyword if this is intentional`,
-  //             {
-  //               node: prop,
-  //               property: "name",
-  //             }
-  //           );
-  //         }
-  //       }
-  //     });
-  //   }
-  // }
+          if (
+            parentModelPropertiesNames.includes(prop.name) &&
+            !prop.override
+          ) {
+            accept(
+              "error",
+              `This property already exists in parent model '${parentModel.name}', use the 'override' keyword if this is intentional`,
+              {
+                node: prop,
+                property: "name",
+              }
+            );
+          }
+        }
+      });
+    }
+  }
 
-  // checkParentModelsForDuplicatedProperties(
-  //   model: ModelDeclaration,
-  //   accept: ValidationAcceptor
-  // ): void {
-  //   if (model.parentTypes.length > 1) {
-  //     for (let i = 1; i < model.parentTypes.length; i++) {
-  //       const currentModel = model.parentTypes[i];
-  //       const currentModelPropsNames = currentModel.ref?.properties.map(
-  //         (p) => p.name
-  //       );
+  checkParentModelsForDuplicatedProperties(
+    model: ModelDeclaration,
+    accept: ValidationAcceptor
+  ): void {
+    if (model.parentTypes.length > 1) {
+      for (let i = 1; i < model.parentTypes.length; i++) {
+        const currentModel = model.parentTypes[i];
+        const currentModelPropsNames = currentModel.ref?.properties.map(
+          (p) => p.name
+        );
 
-  //       // Check against all previous models
-  //       for (let j = 0; j < i; j++) {
-  //         model.parentTypes[j].ref?.properties.forEach((p) => {
-  //           if (currentModelPropsNames?.includes(p.name)) {
-  //             accept(
-  //               "error",
-  //               `PropertyDeclaration '${p.name}' already exists in model '${model.parentTypes[j].ref?.name}'`,
-  //               {
-  //                 node: model,
-  //                 property: "parentTypes",
-  //                 index: i,
-  //               }
-  //             );
-  //           }
-  //         });
-  //       }
-  //     }
-  //   }
-  // }
+        // Check against all previous models
+        for (let j = 0; j < i; j++) {
+          model.parentTypes[j].ref?.properties.forEach((p) => {
+            if (currentModelPropsNames?.includes(p.name)) {
+              accept(
+                "error",
+                `PropertyDeclaration '${p.name}' already exists in model '${model.parentTypes[j].ref?.name}'`,
+                {
+                  node: model,
+                  property: "parentTypes",
+                  index: i,
+                }
+              );
+            }
+          });
+        }
+      }
+    }
+  }
 
   // checkAllModelPropertiesHaveBeenAssigned(
   //   prop: ModelValue,

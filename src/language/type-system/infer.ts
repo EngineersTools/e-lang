@@ -286,10 +286,13 @@ export function inferTypeReference(
     const memberTypes = getAllPropertiesInModelDeclarationChain(
       typeRef.model.ref
     ).map((member) => inferType(member, env)) as ModelMemberType[];
+
     resolvedType = createModelTypeDescription(
       "declaration",
       memberTypes,
-      undefined,
+      typeRef.model.ref.parentTypes.map((p) =>
+        inferType(p.ref, env)
+      ) as ModelType[],
       typeRef.model.ref.name,
       typeRef.model.ref
     );
@@ -687,17 +690,13 @@ export function inferModelDeclaration(
   expr: ModelDeclaration,
   env: TypeEnvironment
 ): ELangType {
-  const propertyTypes = expr.properties.map((prop) =>
-    inferPropertyDeclaration(prop, env)
-  ) as ModelMemberType[];
-
   const parentTypes = expr.parentTypes
     .filter((p) => p.ref && isModelDeclaration(p.ref))
     .map((m) => inferType(m.ref, env) as ModelType);
 
-  const parentTypesProperties = parentTypes.map((p) => p.memberTypes).flat();
-
-  propertyTypes.push(...parentTypesProperties);
+  const propertyTypes = getAllPropertiesInModelDeclarationChain(expr).map((p) =>
+    inferType(p, env)
+  ) as ModelMemberType[];
 
   return createModelTypeDescription(
     "declaration",
@@ -713,7 +712,7 @@ export function inferModelValue(
   env: TypeEnvironment
 ): ELangType {
   const memberTypes = expr.members.map((member) =>
-    createModelMemberType(member.property, inferExpression(member, env))
+    createModelMemberType(member.property, inferType(member, env))
   );
   return createModelTypeDescription(
     "value",
@@ -727,8 +726,7 @@ export function inferModelMemberAssignment(
   expr: ModelMemberAssignment,
   env: TypeEnvironment
 ): ELangType {
-  if (isExpression(expr.value)) return inferExpression(expr.value, env);
-  else return inferLambda(expr.value, env);
+  return inferType(expr.value, env);
 }
 
 export function inferBinaryExpression(

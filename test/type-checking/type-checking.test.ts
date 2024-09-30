@@ -923,6 +923,38 @@ describe("Type Check Models", () => {
     ).toBe(true);
   });
 
+  test("Check model with lambda property", async () => {
+    document = await parse(`
+        model myModel {
+          lambdaProp: (x: number) => number
+        }
+
+        const modelInstance: myModel = {
+          lambdaProp: (x: number) => x
+        }
+
+        modelInstance
+    `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[2],
+      typeEnv
+    );
+
+    console.log(inferType(document.parseResult.value.statements[0], typeEnv));
+    console.log(inferType(document.parseResult.value.statements[1], typeEnv));
+    console.log(inferredType);
+
+    expect(isModelType(inferredType)).toBe(true);
+    expect(
+      isLambdaType(
+        (inferredType as ModelType).memberTypes.find(
+          (m) => m.name === "lambdaProp"
+        )!.typeDesc
+      )
+    ).toBe(true);
+  });
+
   test("Check model with incorrect primitive properties assignment", async () => {
     document = await parse(`
         model myModel {
