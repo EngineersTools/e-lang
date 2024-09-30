@@ -91,12 +91,14 @@ import {
   getTypeName,
   isBooleanType,
   isComplexUnitFamilyType,
+  isErrorType,
   isLambdaType as isLambdaTypeDescription,
   isMeasurementType as isMeasurementTypeDescription,
   isModelType,
   isNumberType,
   isParameterType,
   isTextType,
+  modelTypesAreEqual,
 } from "./descriptions.js";
 import { getAllPropertiesInModelDeclarationChain } from "./getAllPropertiesInModelDeclarationChain.js";
 
@@ -171,10 +173,21 @@ export function inferConstantDeclaration(
       return constType;
     }
 
+    if (isModelType(constType) && isModelType(valueType)) {
+      const modelsAreEqualOrError = modelTypesAreEqual(constType, valueType);
+      if (
+        typeof modelsAreEqualOrError !== "boolean" &&
+        isErrorType(modelsAreEqualOrError)
+      ) {
+        return modelsAreEqualOrError;
+      }
+    }
+
     return createErrorType(
       `Constant of type '${getTypeName(
         constType
-      )}' cannot be assigned a value of type '${getTypeName(valueType)}'`
+      )}' cannot be assigned a value of type '${getTypeName(valueType)}'`,
+      node.value
     );
   }
 
@@ -204,6 +217,16 @@ export function inferMutableDeclaration(
     if (equalsType(varType, valueType)) {
       env.setType(node.name, varType);
       return varType;
+    }
+
+    if (isModelType(varType) && isModelType(valueType)) {
+      const modelsAreEqualOrError = modelTypesAreEqual(varType, valueType);
+      if (
+        typeof modelsAreEqualOrError !== "boolean" &&
+        isErrorType(modelsAreEqualOrError)
+      ) {
+        return modelsAreEqualOrError;
+      }
     }
 
     return createErrorType(

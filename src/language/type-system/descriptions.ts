@@ -34,9 +34,207 @@ export function equalsType(left: ELangType, right: ELangType): boolean {
       left.types.map((t) => getTypeName(t)).sort(),
       right.types.map((t) => getTypeName(t)).sort()
     );
+  } else if (isModelType(left) && isModelType(right)) {
+    return modelTypesAreEqual(left, right) === true;
   }
 
   return getTypeName(left) === getTypeName(right);
+}
+
+export function modelTypesAreEqual(
+  left: ModelType,
+  right: ModelType
+): boolean | ErrorType {
+  const errors: ErrorType[] = [];
+
+  if (left.$source === "declaration" && right.$source === "declaration") {
+    return left.modelName === right.modelName;
+  } else if (left.$source === "value" && right.$source === "value") {
+    const haveSameNumberOfMembers =
+      left.memberTypes.length === right.memberTypes.length;
+
+    if (!haveSameNumberOfMembers)
+      errors.push(
+        createErrorType(
+          "Model types do not have the same number of members",
+          right.modelDeclaration
+        )
+      );
+
+    const allLeftMembersIncludedInRightMembers = left.memberTypes.map((m) =>
+      right.memberTypes.map((n) => n.name).includes(m.name)
+    );
+
+    if (!allLeftMembersIncludedInRightMembers.reduce((p, c) => p && c, true))
+      errors.push(
+        createErrorType(
+          `Model '${getTypeName(
+            left
+          )}' does not include all the members in '${getTypeName(right)}'`,
+          right.modelDeclaration
+        )
+      );
+
+    const allLeftMembersAreOfSameTypeAsRightMembers = left.memberTypes.map(
+      (lm) => {
+        const rightMemberType = right.memberTypes.find(
+          (rm) => rm.name === lm.name
+        );
+
+        if (rightMemberType) {
+          const membersAreEqual = equalsType(
+            lm.typeDesc,
+            rightMemberType.typeDesc
+          );
+          if (!membersAreEqual)
+            errors.push(
+              createErrorType(
+                `Member '${rightMemberType.name}' is not of the same type as '${lm.name}'`,
+                right.modelDeclaration
+              )
+            );
+          return membersAreEqual;
+        } else {
+          return false;
+        }
+      }
+    );
+
+    if (
+      !allLeftMembersAreOfSameTypeAsRightMembers.reduce((p, c) => p && c, true)
+    )
+      errors.push(
+        createErrorType(
+          `Model '${getTypeName(
+            left
+          )}' does not have the same type as '${getTypeName(right)}'`,
+          right.modelDeclaration
+        )
+      );
+
+    if (
+      haveSameNumberOfMembers &&
+      allLeftMembersIncludedInRightMembers.reduce((p, c) => p && c, true) &&
+      allLeftMembersAreOfSameTypeAsRightMembers.reduce((p, c) => p && c, true)
+    ) {
+      return true;
+    } else {
+      return createErrorType(
+        errors.map((e) => e.message).join(" ,"),
+        right.modelDeclaration
+      );
+    }
+  } else if (
+    (left.$source === "declaration" && right.$source === "value") ||
+    (left.$source === "value" && right.$source === "declaration")
+  ) {
+    const declaration = left.$source === "declaration" ? left : right;
+    const value = left.$source === "value" ? left : right;
+
+    const mandatoryMembers = declaration.memberTypes.filter((m) => !m.optional);
+    const optionalMembers = declaration.memberTypes.filter((m) => m.optional);
+
+    const allMandatoryMembersIncludedInValueMembers = mandatoryMembers.map(
+      (m) => value.memberTypes.map((n) => n.name).includes(m.name)
+    );
+
+    if (
+      !allMandatoryMembersIncludedInValueMembers.reduce((p, c) => p && c, true)
+    )
+      errors.push(
+        createErrorType(
+          `Model '${getTypeName(
+            value
+          )}' does not include all the mandatory members in '${getTypeName(
+            declaration
+          )}'`,
+          value.modelDeclaration
+        )
+      );
+
+    const allMandatoryMembersAreOfSameTypeAsValueMembers = mandatoryMembers.map(
+      (m) => {
+        const valueMemberType = value.memberTypes.find(
+          (rm) => rm.name === m.name
+        );
+
+        if (valueMemberType) {
+          const membersAreEqual = equalsType(
+            m.typeDesc,
+            valueMemberType.typeDesc
+          );
+          if (!membersAreEqual)
+            errors.push(
+              createErrorType(
+                `Member '${valueMemberType.name}: ${getTypeName(
+                  valueMemberType.typeDesc
+                )}' is not of the same type as '${m.name}: ${getTypeName(
+                  m.typeDesc
+                )}'`,
+                value.modelDeclaration
+              )
+            );
+          return membersAreEqual;
+        } else {
+          return false;
+        }
+      }
+    );
+
+    const allOptionalMembersAreOfSameTypeAsValueMembers = optionalMembers.map(
+      (m) => {
+        const valueMemberType = value.memberTypes.find(
+          (rm) => rm.name === m.name
+        );
+
+        if (valueMemberType) {
+          const membersAreEqual = equalsType(
+            m.typeDesc,
+            valueMemberType.typeDesc
+          );
+
+          errors.push(
+            createErrorType(
+              `Member '${valueMemberType.name}: ${getTypeName(
+                valueMemberType.typeDesc
+              )}' is not of the same type as '${m.name}: ${getTypeName(
+                m.typeDesc
+              )}'`,
+              value.modelDeclaration
+            )
+          );
+
+          return membersAreEqual;
+        } else {
+          return true;
+        }
+      }
+    );
+
+    if (
+      allMandatoryMembersIncludedInValueMembers.reduce(
+        (p, c) => p && c,
+        true
+      ) &&
+      allMandatoryMembersAreOfSameTypeAsValueMembers.reduce(
+        (p, c) => p && c,
+        true
+      ) &&
+      allOptionalMembersAreOfSameTypeAsValueMembers.reduce(
+        (p, c) => p && c,
+        true
+      )
+    ) {
+      return true;
+    } else {
+      return createErrorType(
+        errors.map((e) => e.message).join(", "),
+        right.modelDeclaration
+      );
+    }
+  }
+
+  return false;
 }
 
 export function getTypeName(

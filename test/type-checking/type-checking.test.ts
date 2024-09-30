@@ -18,10 +18,12 @@ import {
   isFormulaType,
   isLambdaType,
   isMeasurementType,
+  isModelType,
   isNullType,
   isNumberType,
   isTextType,
   isUnionType,
+  ModelType,
 } from "../../src/language/type-system/descriptions.js";
 import { inferType } from "../../src/language/type-system/infer.js";
 import { TypeEnvironment } from "../../src/language/type-system/TypeEnvironment.js";
@@ -863,4 +865,96 @@ describe("Type Check Formulas", () => {
   });
 });
 
-describe.todo("Type Check Models", () => {});
+describe("Type Check Models", () => {
+  test("Check model with primitive properties", async () => {
+    document = await parse(`
+        model myModel {
+          textProp: text
+          numberProp: number
+          boolProp: boolean
+          nullProp: null
+          optionalProp?: text
+
+        }
+
+        const modelInstance: myModel = {
+          textProp: "Hello World",
+          numberProp: 42,
+          boolProp: true,
+          nullProp: null
+        }
+
+        modelInstance
+    `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[2],
+      typeEnv
+    );
+
+    expect(isModelType(inferredType)).toBe(true);
+    expect(
+      isTextType(
+        (inferredType as ModelType).memberTypes.find(
+          (m) => m.name === "textProp"
+        )!.typeDesc
+      )
+    ).toBe(true);
+    expect(
+      isNumberType(
+        (inferredType as ModelType).memberTypes.find(
+          (m) => m.name === "numberProp"
+        )!.typeDesc
+      )
+    ).toBe(true);
+    expect(
+      isBooleanType(
+        (inferredType as ModelType).memberTypes.find(
+          (m) => m.name === "boolProp"
+        )!.typeDesc
+      )
+    ).toBe(true);
+    expect(
+      isNullType(
+        (inferredType as ModelType).memberTypes.find(
+          (m) => m.name === "nullProp"
+        )!.typeDesc
+      )
+    ).toBe(true);
+  });
+
+  test("Check model with incorrect primitive properties assignment", async () => {
+    document = await parse(`
+        model myModel {
+          textProp: text
+          numberProp: number
+          boolProp: boolean
+          nullProp: null
+          optionalProp?: text
+
+        }
+
+        const modelInstance: myModel = {
+          textProp: 42,
+          numberProp: "Hello World",
+          boolProp: null,
+          nullProp: true,
+          optionalProp: 42
+        }
+
+        modelInstance
+    `);
+
+    const inferredType = inferType(
+      document.parseResult.value.statements[2],
+      typeEnv
+    );
+
+    expect(isErrorType(inferredType)).toBe(true);
+    expect((inferredType as ErrorType).message).toBe(
+      "Member 'textProp: number' is not of the same type as 'textProp: text', Member 'numberProp: text' is not of the same type as 'numberProp: number', Member 'boolProp: null' is not of the same type as 'boolProp: boolean', Member 'nullProp: boolean' is not of the same type as 'nullProp: null', Member 'optionalProp: number' is not of the same type as 'optionalProp: text'"
+    );
+  });
+});
+
+describe.todo("Type Check Print Statement");
