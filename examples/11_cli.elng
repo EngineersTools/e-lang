@@ -10,7 +10,7 @@ formula add(x: number, y: number) returns number {
 }
 
 model SomeResults {
-    addition: number
+    addition: (x: number, y: number) => number
 }
 
 const result: SomeResults = {

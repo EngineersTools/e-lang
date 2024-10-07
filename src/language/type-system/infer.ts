@@ -18,6 +18,7 @@ import {
   ModelValue,
   MutableDeclaration,
   ParameterDeclaration,
+  ProcedureDeclaration,
   PropertyDeclaration,
   StatementBlock,
   TypeReference,
@@ -29,6 +30,7 @@ import {
   isConstantDeclaration,
   isConversionDeclaration,
   isExpression,
+  isForStatement,
   isFormulaDeclaration,
   isIfStatement,
   isLambdaDeclaration,
@@ -83,6 +85,7 @@ import {
   createNullType,
   createNumberType,
   createParameterType,
+  createProcedureType,
   createTextType,
   createUnionType,
   createUnitConversionType,
@@ -139,6 +142,8 @@ export function inferType(
     type = inferLambda(node, env);
   } else if (isFormulaDeclaration(node)) {
     type = inferFormula(node, env);
+  } else if (isProcedureDeclaration(node)) {
+    type = inferProcedure(node, env);
   } else if (isModelDeclaration(node)) {
     type = inferModelDeclaration(node, env);
   } else if (isReturnStatement(node)) {
@@ -149,6 +154,8 @@ export function inferType(
     type = inferExpression(node, env);
   } else if (isPrintStatement(node)) {
     type = inferType(node.value, env);
+  } else if (isForStatement(node)) {
+    type = createNullType();
   }
 
   if (!type) {
@@ -418,8 +425,10 @@ export function inferFormula(
 ): ELangType {
   if (expr.returnType) {
     if (expr.parameters && expr.parameters.length > 0) {
+      const returnType = inferType(expr.returnType, env);
+
       const formulaType = createFormulaType(
-        inferType(expr.returnType, env),
+        returnType,
         expr.parameters.map((param) =>
           inferParameterDeclaration(param, env)
         ) as ParameterType[]
@@ -427,9 +436,32 @@ export function inferFormula(
 
       env.setType(expr.name, formulaType);
 
+      const bodyType = inferType(expr.body, env);
+
+      if (!equalsType(formulaType.returnType, bodyType)) {
+        return createErrorType(
+          `The declared return type '${getTypeName(returnType)}' of formula '${
+            expr.name
+          }' does not match the body return type '${getTypeName(bodyType)}'`,
+          expr.returnType
+        );
+      }
+
       return formulaType;
     } else {
-      const formulaType = createFormulaType(inferType(expr.returnType, env));
+      const returnType = inferType(expr.returnType, env);
+      const bodyType = inferType(expr.body, env);
+
+      if (!equalsType(returnType, bodyType)) {
+        return createErrorType(
+          `The declared return type '${getTypeName(returnType)}' of formula '${
+            expr.name
+          }' does not match the body return type '${getTypeName(bodyType)}'`,
+          expr.returnType
+        );
+      }
+
+      const formulaType = createFormulaType(returnType);
 
       env.setType(expr.name, formulaType);
 
@@ -437,6 +469,73 @@ export function inferFormula(
     }
   } else {
     return createErrorType("Formula requires a declared return type", expr);
+  }
+}
+
+export function inferProcedure(
+  expr: ProcedureDeclaration,
+  env: TypeEnvironment
+): ELangType {
+  if (expr.returnType) {
+    if (expr.parameters && expr.parameters.length > 0) {
+      const returnType = inferType(expr.returnType, env);
+      const bodyType = inferType(expr.body, env);
+
+      if (!equalsType(returnType, bodyType)) {
+        return createErrorType(
+          `The declared return type '${getTypeName(
+            returnType
+          )}' of procedure '${
+            expr.name
+          }' does not match the body return type '${getTypeName(bodyType)}'`,
+          expr.returnType
+        );
+      }
+
+      const procedureType = createProcedureType(
+        returnType,
+        expr.parameters.map((param) =>
+          inferParameterDeclaration(param, env)
+        ) as ParameterType[]
+      );
+
+      env.setType(expr.name, procedureType);
+
+      return procedureType;
+    } else {
+      const returnType = inferType(expr.returnType, env);
+      const bodyType = inferType(expr.body, env);
+
+      if (!equalsType(returnType, bodyType)) {
+        return createErrorType(
+          `The declared return type '${getTypeName(
+            returnType
+          )}' of procedure '${
+            expr.name
+          }' does not match the body return type '${getTypeName(bodyType)}'`,
+          expr.returnType
+        );
+      }
+
+      const procedureType = createProcedureType(returnType);
+
+      env.setType(expr.name, procedureType);
+
+      return procedureType;
+    }
+  } else if (expr.parameters && expr.parameters.length > 0) {
+    const procedureType = createProcedureType(
+      createNullType(),
+      expr.parameters.map((param) =>
+        inferParameterDeclaration(param, env)
+      ) as ParameterType[]
+    );
+
+    env.setType(expr.name, procedureType);
+
+    return procedureType;
+  } else {
+    return createProcedureType(createNullType());
   }
 }
 
