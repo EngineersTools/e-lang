@@ -278,6 +278,8 @@ export function getTypeName(
       elangType.modelName ??
       `{${elangType.memberTypes.map((m) => m.name).join(",")}}`
     );
+  } else if (isUnitConversionType(elangType)) {
+    return `${getTypeName(elangType.from)} -> ${getTypeName(elangType.to)}`;
   }
 
   return elangType.$type;

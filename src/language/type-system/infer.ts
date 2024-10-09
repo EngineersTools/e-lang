@@ -45,6 +45,7 @@ import {
   isModelMemberCall,
   isModelValue,
   isMutableDeclaration,
+  isNamedElement,
   isNullLiteral,
   isNumberLiteral,
   isParameterDeclaration,
@@ -116,7 +117,9 @@ export function inferType(
     return createErrorType("Could not infer type for undefined variable", node);
   }
 
-  if (isStatementBlock(node)) {
+  if (isNamedElement(node) && env.getType(node.name) !== undefined) {
+    type = env.getType(node.name);
+  } else if (isStatementBlock(node)) {
     type = inferStatementBlock(node, env);
   } else if (isConstantDeclaration(node)) {
     type = inferConstantDeclaration(node, env);
@@ -602,16 +605,13 @@ export function inferMeasurement(
     isUnitDeclaration(expr.unit.ref) &&
     isUnitFamilyDeclaration(expr.unit.ref.$container)
   ) {
-    const unitFamily = inferUnitFamily(
+    const unitFamily = inferType(
       expr.unit.ref.$container,
       env
     ) as UnitFamilyType;
     return createMeasurementType(unitFamily);
   } else if (isMeasurementType(expr) && expr.unitFamily.ref) {
-    const unitFamily = inferUnitFamily(
-      expr.unitFamily.ref,
-      env
-    ) as UnitFamilyType;
+    const unitFamily = inferType(expr.unitFamily.ref, env) as UnitFamilyType;
     return createMeasurementType(unitFamily);
   } else {
     return createErrorType("Could not infer measurement", expr);
@@ -625,15 +625,16 @@ export function inferUnitFamily(
   const unitTypes = unitFamily.units.map((unit) =>
     inferType(unit, env)
   ) as UnitType[];
+
+  const unitFamilyType = createUnitFamilyType(unitFamily.name, unitTypes, []);
+
+  env.setType(unitFamily.name, unitFamilyType);
+
   const unitConversions = unitFamily.conversions.map((conv) =>
     inferType(conv, env)
   ) as UnitConversionType[];
 
-  const unitFamilyType = createUnitFamilyType(
-    unitFamily.name,
-    unitTypes,
-    unitConversions
-  );
+  unitFamilyType.conversionTypes?.push(...unitConversions);
 
   return unitFamilyType;
 }
@@ -647,17 +648,25 @@ export function inferUnitConversion(
   env: TypeEnvironment
 ): ELangType {
   if (conv.lambda) {
-    return createUnitConversionType(
+    const unitConversionType = createUnitConversionType(
       inferType(conv.from.ref, env) as UnitType,
       inferType(conv.to.ref, env) as UnitType,
       inferType(conv.lambda, env) as LambdaTypeDescription
     );
+
+    env.setType(getTypeName(unitConversionType), unitConversionType);
+
+    return unitConversionType;
   } else if (conv.formula && conv.formula.ref) {
-    return createUnitConversionType(
+    const unitConversionType = createUnitConversionType(
       inferType(conv.from.ref, env) as UnitType,
       inferType(conv.to.ref, env) as UnitType,
       inferType(conv.formula.ref, env) as FormulaType
     );
+
+    env.setType(getTypeName(unitConversionType), unitConversionType);
+
+    return unitConversionType;
   } else {
     return createErrorType("Could not infer unit conversion", conv);
   }
