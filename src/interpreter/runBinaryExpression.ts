@@ -11,11 +11,11 @@ import { checkUnitCompatibility } from "./checkUnitCompatibility.js";
 import { getBinaryQuadrant } from "./getBinaryQuadrant.js";
 import { runExpression } from "./runExpression.js";
 import {
-  isBoolean,
+  isTypeScriptBoolean,
   isMeasurement,
-  isNull,
-  isNumber,
-  isString,
+  isTypeScriptNull,
+  isTypeScriptNumber,
+  isTypeScriptString,
 } from "./runProgram.js";
 import { setExpressionValue } from "./setExpressionValue.js";
 
@@ -55,10 +55,10 @@ export async function runBinaryExpression(
       rightValue,
       context,
       (e) =>
-        isString(e) ||
-        isNumber(e) ||
-        isNull(e) ||
-        isBoolean(e) ||
+        isTypeScriptString(e) ||
+        isTypeScriptNumber(e) ||
+        isTypeScriptNull(e) ||
+        isTypeScriptBoolean(e) ||
         isMeasurement(e) ||
         isListValue(e) ||
         isModelValue(e)
@@ -70,7 +70,7 @@ export async function runBinaryExpression(
       leftValue,
       rightValue,
       context,
-      (e) => isNumber(e) || isMeasurement(e)
+      (e) => isTypeScriptNumber(e) || isMeasurement(e)
     );
   } else if (["and", "or"].includes(operator)) {
     return await applyOperator(
@@ -79,7 +79,7 @@ export async function runBinaryExpression(
       leftValue,
       rightValue,
       context,
-      (e) => isBoolean(e)
+      (e) => isTypeScriptBoolean(e)
     );
   } else if (["==", "!="].includes(operator)) {
     

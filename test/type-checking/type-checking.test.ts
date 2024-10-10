@@ -1,5 +1,6 @@
 import { EmptyFileSystem, LangiumDocument } from "langium";
 import { parseHelper } from "langium/test";
+import { beforeEach } from "node:test";
 import { beforeAll, describe, expect, test } from "vitest";
 import { createELangServices } from "../../src/language/e-lang-module.js";
 import {
@@ -37,6 +38,10 @@ beforeAll(async () => {
   services = createELangServices(EmptyFileSystem);
   parse = parseHelper<ELangProgram>(services.ELang);
   typeEnv = new TypeEnvironment();
+});
+
+beforeEach(() => {
+  typeEnv.resetScope();
 });
 
 describe("Type Check Primitives", () => {
@@ -194,22 +199,19 @@ describe("Type Check Variables", () => {
   });
 
   test("Check declared constant assignment with type mismatch", async () => {
+    typeEnv.resetScope();
+
     document = await parse(`
       const x: text = true
     `);
 
-    expect(
-      isErrorType(inferType(document!.parseResult.value.statements[0], typeEnv))
-    ).toBe(true);
+    const inferredType = inferType(
+      document.parseResult.value.statements[0],
+      typeEnv
+    );
 
-    expect(
-      (
-        inferType(
-          document!.parseResult.value.statements[0],
-          typeEnv
-        ) as ErrorType
-      ).message
-    ).toBe(
+    expect(isErrorType(inferredType)).toBe(true);
+    expect((inferredType as ErrorType).message).toBe(
       "Constant of type 'text' cannot be assigned a value of type 'boolean'"
     );
   });
@@ -607,6 +609,8 @@ describe("Type Check Lambdas", () => {
   });
 
   test("Check lambda with model parameter type and return model member", async () => {
+    typeEnv.resetScope();
+
     document = await parse(`
         model thing {
           a: text
@@ -847,6 +851,8 @@ describe("Type Check Formulas", () => {
   });
 
   test("Check formula without a return type", async () => {
+    typeEnv.resetScope();
+
     document = await parse(`
         formula add(x: number, y: number) {
             return x + y
@@ -924,6 +930,8 @@ describe("Type Check Models", () => {
   });
 
   test("Check model with lambda property", async () => {
+    typeEnv.resetScope();
+
     document = await parse(`
         model myModel {
           lambdaProp: (x: number) => number
@@ -941,10 +949,6 @@ describe("Type Check Models", () => {
       typeEnv
     );
 
-    console.log(inferType(document.parseResult.value.statements[0], typeEnv));
-    console.log(inferType(document.parseResult.value.statements[1], typeEnv));
-    console.log(inferredType);
-
     expect(isModelType(inferredType)).toBe(true);
     expect(
       isLambdaType(
@@ -956,6 +960,8 @@ describe("Type Check Models", () => {
   });
 
   test("Check model with incorrect primitive properties assignment", async () => {
+    typeEnv.resetScope();
+
     document = await parse(`
         model myModel {
           textProp: text

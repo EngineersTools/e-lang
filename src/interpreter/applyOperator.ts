@@ -7,7 +7,7 @@ import { AstNodeError } from "./AstNodeError.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { convertMeasurements } from "./convertMeasurements.js";
 import { getBinaryQuadrant } from "./getBinaryQuadrant.js";
-import { isString } from "./runProgram.js";
+import { isTypeScriptString } from "./runProgram.js";
 import { serialiseExpression } from "./serialiseExpression.js";
 
 /**
@@ -240,9 +240,9 @@ export async function evaluatePlusOperator(
 
   if (
     isStringLiteral(anyLeft) ||
-    isString(anyLeft) ||
+    isTypeScriptString(anyLeft) ||
     isStringLiteral(anyRight) ||
-    isString(anyRight)
+    isTypeScriptString(anyRight)
   ) {
     const serialisedLeft = await serialiseExpression(anyLeft, context);
     const serialisedRight = await serialiseExpression(anyRight, context);

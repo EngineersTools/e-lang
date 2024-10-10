@@ -939,12 +939,7 @@ export function inferMeasurementBinaryExpression(
   }
 
   if (expr.operator === "*") {
-    if (equalsType(leftType, rightType)) {
-      return rightType;
-    } else if (
-      isMeasurementTypeDescription(leftType) &&
-      isNumberType(rightType)
-    ) {
+    if (isMeasurementTypeDescription(leftType) && isNumberType(rightType)) {
       return leftType;
     } else if (
       isNumberType(leftType) &&
@@ -958,11 +953,18 @@ export function inferMeasurementBinaryExpression(
       const left = isComplexUnitFamilyType(leftType.unitFamilyType)
         ? leftType.unitFamilyType.unitFamilies
         : [leftType.unitFamilyType];
+
       const right = isComplexUnitFamilyType(rightType.unitFamilyType)
         ? rightType.unitFamilyType.unitFamilies
         : [rightType.unitFamilyType];
+
       const unitFamilyType = createComplexUnitFamilyType([...left, ...right]);
-      return unitFamilyType;
+
+      const newMeasurementType = createMeasurementType(unitFamilyType);
+
+      return newMeasurementType;
+    } else if (equalsType(leftType, rightType)) {
+      return rightType;
     }
   } else if (expr.operator === "/") {
     if (equalsType(leftType, rightType)) {

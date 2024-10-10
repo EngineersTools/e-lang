@@ -1,52 +1,52 @@
 import { BinaryExpressionQuadrant } from "./BinaryExpressionQuadrant.js";
 import {
-  isBoolean,
+  isTypeScriptBoolean,
   isMeasurement,
-  isNull,
-  isNumber,
-  isString,
+  isTypeScriptNull,
+  isTypeScriptNumber,
+  isTypeScriptString,
 } from "./runProgram.js";
 
 export function getBinaryQuadrant(
   left: unknown,
   right: unknown
 ): BinaryExpressionQuadrant {
-  if (isNumber(left) && isNumber(right)) return "LeftNumberRightNumber";
-  if (isNumber(left) && isString(right)) return "LeftNumberRightString";
-  if (isNumber(left) && isBoolean(right)) return "LeftNumberRightBoolean";
-  if (isNumber(left) && isMeasurement(right))
+  if (isTypeScriptNumber(left) && isTypeScriptNumber(right)) return "LeftNumberRightNumber";
+  if (isTypeScriptNumber(left) && isTypeScriptString(right)) return "LeftNumberRightString";
+  if (isTypeScriptNumber(left) && isTypeScriptBoolean(right)) return "LeftNumberRightBoolean";
+  if (isTypeScriptNumber(left) && isMeasurement(right))
     return "LeftNumberRightMeasurement";
-  if (isNumber(left) && isNull(right)) return "LeftNumberRightNull";
+  if (isTypeScriptNumber(left) && isTypeScriptNull(right)) return "LeftNumberRightNull";
 
-  if (isString(left) && isNumber(right)) return "LeftStringRightNumber";
-  if (isString(left) && isString(right)) return "LeftStringRightString";
-  if (isString(left) && isBoolean(right)) return "LeftStringRightBoolean";
-  if (isString(left) && isMeasurement(right))
+  if (isTypeScriptString(left) && isTypeScriptNumber(right)) return "LeftStringRightNumber";
+  if (isTypeScriptString(left) && isTypeScriptString(right)) return "LeftStringRightString";
+  if (isTypeScriptString(left) && isTypeScriptBoolean(right)) return "LeftStringRightBoolean";
+  if (isTypeScriptString(left) && isMeasurement(right))
     return "LeftStringRightMeasurement";
-  if (isString(left) && isNull(right)) return "LeftStringRightNull";
+  if (isTypeScriptString(left) && isTypeScriptNull(right)) return "LeftStringRightNull";
 
-  if (isBoolean(left) && isNumber(right)) return "LeftBooleanRightNumber";
-  if (isBoolean(left) && isString(right)) return "LeftBooleanRightString";
-  if (isBoolean(left) && isBoolean(right)) return "LeftBooleanRightBoolean";
-  if (isBoolean(left) && isMeasurement(right))
+  if (isTypeScriptBoolean(left) && isTypeScriptNumber(right)) return "LeftBooleanRightNumber";
+  if (isTypeScriptBoolean(left) && isTypeScriptString(right)) return "LeftBooleanRightString";
+  if (isTypeScriptBoolean(left) && isTypeScriptBoolean(right)) return "LeftBooleanRightBoolean";
+  if (isTypeScriptBoolean(left) && isMeasurement(right))
     return "LeftBooleanRightMeasurement";
-  if (isBoolean(left) && isNull(right)) return "LeftBooleanRightNull";
+  if (isTypeScriptBoolean(left) && isTypeScriptNull(right)) return "LeftBooleanRightNull";
 
-  if (isMeasurement(left) && isNumber(right))
+  if (isMeasurement(left) && isTypeScriptNumber(right))
     return "LeftMeasurementRightNumber";
-  if (isMeasurement(left) && isString(right))
+  if (isMeasurement(left) && isTypeScriptString(right))
     return "LeftMeasurementRightString";
-  if (isMeasurement(left) && isBoolean(right))
+  if (isMeasurement(left) && isTypeScriptBoolean(right))
     return "LeftMeasurementRightBoolean";
   if (isMeasurement(left) && isMeasurement(right))
     return "LeftMeasurementRightMeasurement";
-  if (isMeasurement(left) && isNull(right)) return "LeftMeasurementRightNull";
+  if (isMeasurement(left) && isTypeScriptNull(right)) return "LeftMeasurementRightNull";
 
-  if (isNull(left) && isNumber(right)) return "LeftNullRightNumber";
-  if (isNull(left) && isString(right)) return "LeftNullRightString";
-  if (isNull(left) && isBoolean(right)) return "LeftNullRightBoolean";
-  if (isNull(left) && isMeasurement(right)) return "LeftNullRightMeasurement";
-  if (isNull(left) && isNull(right)) return "LeftNullRightNull";
+  if (isTypeScriptNull(left) && isTypeScriptNumber(right)) return "LeftNullRightNumber";
+  if (isTypeScriptNull(left) && isTypeScriptString(right)) return "LeftNullRightString";
+  if (isTypeScriptNull(left) && isTypeScriptBoolean(right)) return "LeftNullRightBoolean";
+  if (isTypeScriptNull(left) && isMeasurement(right)) return "LeftNullRightMeasurement";
+  if (isTypeScriptNull(left) && isTypeScriptNull(right)) return "LeftNullRightNull";
 
   return "UnrecognisedBinaryCombination";
 }

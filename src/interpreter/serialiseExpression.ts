@@ -22,11 +22,11 @@ import { RunnerContext } from "./RunnerContext.js";
 import { runExpression } from "./runExpression.js";
 import { runMemberCall } from "./runMemberCall.js";
 import {
-  isBoolean,
+  isTypeScriptBoolean,
   isMeasurement,
-  isNull,
-  isNumber,
-  isString,
+  isTypeScriptNull,
+  isTypeScriptNumber,
+  isTypeScriptString,
 } from "./runProgram.js";
 
 export async function serialiseExpression(
@@ -45,7 +45,7 @@ export async function serialiseExpression(
 
   if (isStringLiteral(result)) {
     return result.value;
-  } else if (isString(result)) {
+  } else if (isTypeScriptString(result)) {
     return result;
   } else if (isMeasurementLiteral(result)) {
     if (result.unit.error)
@@ -88,7 +88,7 @@ export async function serialiseExpression(
       const value =
         item === undefined ? null : await runExpression(item, context);
 
-      if (isNumber(value) || isBoolean(value) || isNull(value)) {
+      if (isTypeScriptNumber(value) || isTypeScriptBoolean(value) || isTypeScriptNull(value)) {
         items.push(value);
       } else if (isMeasurement(value)) {
         items.push(await serialiseExpression(value, context));
@@ -106,7 +106,7 @@ export async function serialiseExpression(
     return getTypeName(inferType(result, new TypeEnvironment()));
   } else if (isStatement(result)) {
     return serialiseExpression(result, context);
-  } else if (isNullLiteral(result) || isNull(result) || result === undefined) {
+  } else if (isNullLiteral(result) || isTypeScriptNull(result) || result === undefined) {
     return "null";
   } else {
     return JSON.stringify(result);

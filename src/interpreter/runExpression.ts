@@ -27,7 +27,7 @@ import { RunnerContext } from "./RunnerContext.js";
 import { convertMeasurements } from "./convertMeasurements.js";
 import { runBinaryExpression } from "./runBinaryExpression.js";
 import { runMemberCall } from "./runMemberCall.js";
-import { isMeasurement, isNumber } from "./runProgram.js";
+import { isMeasurement, isTypeScriptNumber } from "./runProgram.js";
 
 /**
  * Runs an individual ELang expression returning the evaluated value
@@ -172,7 +172,7 @@ export async function runExpression(
       if (isExpression(expression.index)) {
         const evaluatedIndex = await runExpression(expression.index, context);
         newList.items.splice((evaluatedIndex as number) - 1, 1);
-      } else if (isNumber(expression.index)) {
+      } else if (isTypeScriptNumber(expression.index)) {
         newList.items.splice(expression.index - 1, 1);
       } else {
         newList.items.pop();

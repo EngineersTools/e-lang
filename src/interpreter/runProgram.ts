@@ -96,19 +96,19 @@ export async function runProgram(
   context.variables.leave();
 }
 
-export function isNumber(value: unknown): value is number {
+export function isTypeScriptNumber(value: unknown): value is number {
   return typeof value === "number";
 }
 
-export function isString(value: unknown): value is string {
+export function isTypeScriptString(value: unknown): value is string {
   return typeof value === "string";
 }
 
-export function isBoolean(value: unknown): value is boolean {
+export function isTypeScriptBoolean(value: unknown): value is boolean {
   return typeof value === "boolean";
 }
 
-export function isNull(value: unknown): value is null {
+export function isTypeScriptNull(value: unknown): value is null {
   return value === null;
 }
 

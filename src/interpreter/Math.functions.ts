@@ -14,14 +14,13 @@ import {
   isRoot,
   isRound,
   isSine,
-  isSuqareRoot,
-  isTangent,
+  isSqisTangent,
   MathematicalFunction,
 } from "../language/generated/ast.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { runExpression } from "./runExpression.js";
 import { RunnerContext } from "./RunnerContext.js";
-import { isNumber } from "./runProgram.js";
+import { isTypeScriptNumber } from "./runProgram.js";
 
 export function abs(value: number): number {
   return Math.abs(value);
@@ -111,10 +110,10 @@ export async function runMathFunction(
     }
   }
 
-  if (!isNumber(actualValue)) {
+  if (!isTypeScriptNumber(actualValue)) {
     throw new AstNodeError(
       exp,
-      `Cannot apply math function ${exp.$type} to value '${actualValue}'`
+      `Cannot apply math function '${exp.$type}' to value '${actualValue}'`
     );
   }
 
