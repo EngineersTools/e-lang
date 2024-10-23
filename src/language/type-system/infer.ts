@@ -64,6 +64,7 @@ import {
 } from "../generated/ast.js";
 import { TypeEnvironment } from "./TypeEnvironment.js";
 import {
+  ComplexUnitFamilyType,
   ELangType,
   FormulaType,
   LambdaType as LambdaTypeDescription,
@@ -94,6 +95,8 @@ import {
   createUnitType,
   equalsType,
   getTypeName,
+  invertMeasurementType,
+  invertUnitFamily,
   isBooleanType,
   isComplexUnitFamilyType,
   isErrorType,
@@ -104,6 +107,7 @@ import {
   isParameterType,
   isTextType,
   modelTypesAreEqual,
+  reduceUnitFamilies
 } from "./descriptions.js";
 import { getAllPropertiesInModelDeclarationChain } from "./getAllPropertiesInModelDeclarationChain.js";
 
@@ -967,7 +971,49 @@ export function inferMeasurementBinaryExpression(
       return rightType;
     }
   } else if (expr.operator === "/") {
-    if (equalsType(leftType, rightType)) {
+    if (isMeasurementTypeDescription(leftType) && isNumberType(rightType)) {
+      return leftType;
+    } else if (
+      isNumberType(leftType) &&
+      isMeasurementTypeDescription(rightType)
+    ) {
+      let invertedUnitFamily: UnitFamilyType | ComplexUnitFamilyType;
+
+      if (isComplexUnitFamilyType(rightType.unitFamilyType)) {
+        invertedUnitFamily = createComplexUnitFamilyType(
+          reduceUnitFamilies(
+            rightType.unitFamilyType.unitFamilies.map((uf) =>
+              invertUnitFamily(uf)
+            )
+          )
+        );
+      } else {
+        invertedUnitFamily = invertUnitFamily(rightType.unitFamilyType);
+      }
+
+      return createMeasurementType(invertedUnitFamily);
+    } else if (
+      isMeasurementTypeDescription(leftType) &&
+      isMeasurementTypeDescription(rightType)
+    ) {
+      const left = isComplexUnitFamilyType(leftType.unitFamilyType)
+        ? leftType.unitFamilyType.unitFamilies
+        : [leftType.unitFamilyType];
+
+      const invertedRightMeasurementType = invertMeasurementType(rightType);
+
+      const right = isComplexUnitFamilyType(
+        invertedRightMeasurementType.unitFamilyType
+      )
+        ? invertedRightMeasurementType.unitFamilyType.unitFamilies
+        : [invertedRightMeasurementType.unitFamilyType];
+
+      const unitFamilyType = createComplexUnitFamilyType([...left, ...right]);
+
+      const newMeasurementType = createMeasurementType(unitFamilyType);
+
+      return newMeasurementType;
+    } else if (equalsType(leftType, rightType)) {
       return rightType;
     }
   } else if (expr.operator === "-") {

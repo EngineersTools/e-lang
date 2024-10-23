@@ -1,4 +1,5 @@
 import { CancellationToken } from "vscode-languageserver";
+import { TypeEnvironment } from "../language/type-system/TypeEnvironment.js";
 import { InterpreterContext } from "./interpreter.js";
 import { Variables } from "./Variables.js";
 
@@ -16,6 +17,7 @@ import { Variables } from "./Variables.js";
 
 export interface RunnerContext extends InterpreterContext {
   variables: Variables;
+  typeEnvironment: TypeEnvironment;
   cancellationToken: CancellationToken;
   timeout: NodeJS.Timeout;
 }

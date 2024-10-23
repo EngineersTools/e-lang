@@ -13,9 +13,10 @@ import {
   isNaturalLogarithm,
   isRoot,
   isRound,
+  isSquareRoot,
   isSine,
-  isSqisTangent,
-  MathematicalFunction,
+  isTangent,
+  MathematicalFunction
 } from "../language/generated/ast.js";
 import { AstNodeError } from "./AstNodeError.js";
 import { runExpression } from "./runExpression.js";
@@ -136,7 +137,7 @@ export async function runMathFunction(
     } else {
       throw new AstNodeError(exp, "Expected root value in root function");
     }
-  else if (isSuqareRoot(exp)) return sqrt(actualValue);
+  else if (isSquareRoot(exp)) return sqrt(actualValue);
   else if (isLogarithmBaseTen(exp)) return log10(actualValue);
   else if (isNaturalLogarithm(exp)) return ln(actualValue);
   else {

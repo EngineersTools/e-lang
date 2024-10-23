@@ -11,6 +11,8 @@ import {
   isUnitFamilyDeclaration,
 } from "../generated/ast.js";
 import {
+  getTypeName,
+  isErrorType,
   isListType,
   isModelType,
   isUnionType,
@@ -19,89 +21,28 @@ import { inferType } from "../type-system/infer.js";
 import { TypeEnvironment } from "../type-system/TypeEnvironment.js";
 
 export class ELangHoverProvider extends AstNodeHoverProvider {
-  protected getAstNodeHoverContent(node: AstNode): Hover | undefined {
-    if (isConstantDeclaration(node)) {
-      const type = inferType(node.type, new TypeEnvironment());
-      let hoverText = "";
+  protected override getAstNodeHoverContent(node: AstNode): Hover | undefined {
+    const typeEnv = new TypeEnvironment();
+    const type = inferType(node, typeEnv);
+    let hoverText = "";
 
-      if (isModelType(type)) {
-        hoverText = `(Constant) ${node.name}: model ${type.modelName}`;
-      } else if (isUnionType(type)) {
-        hoverText = `(Constant) ${node.name}: ${type.types
-          .map((t) => t.$type)
-          .join(" or ")}`;
-      } else if (isListType(type)) {
-        hoverText = `(Constant) ${node.name}: ${type.itemType.$type} list`;
-      } else if (isTypeReference(type.$type)) {
-        hoverText = `(Constant) ${node.name}: ${type.$type.$type}`;
-      } else {
-        hoverText = `(Constant) ${node.name}: ${type.$type}`;
-      }
-
-      return {
-        contents: {
-          kind: "markdown",
-          language: "e-lang",
-          value: hoverText,
-        },
-      };
+    if (isErrorType(type)) {
+      hoverText = `Error: ${type.message}`;
+    } else if (isConstantDeclaration(node)) {
+      hoverText = `(Constant) ${node.name}: ${getTypeName(type)}`;
     } else if (isMutableDeclaration(node)) {
-      const type = inferType(node.type, new TypeEnvironment());
-      let hoverText = "";
-
-      if (isModelType(type)) {
-        hoverText = `(Variable) ${node.name}: model ${type.modelName}`;
-      } else if (isUnionType(type)) {
-        hoverText = `(Variable) ${node.name}: ${type.types
-          .map((t) => t.$type)
-          .join(" or ")}`;
-      } else if (isListType(type)) {
-        hoverText = `(Variable) ${node.name}: ${type.itemType.$type} list`;
-      } else if (isTypeReference(type.$type)) {
-        hoverText = `(Variable) ${node.name}: ${type.$type.$type}`;
-      } else {
-        hoverText = `(Variable) ${node.name}: ${type.$type}`;
-      }
-
-      return {
-        contents: {
-          kind: "markdown",
-          language: "e-lang",
-          value: hoverText,
-        },
-      };
+      hoverText = `(Variable) ${node.name}: ${getTypeName(type)}`;
     } else if (isUnitDeclaration(node)) {
-      return {
-        contents: {
-          kind: "markdown",
-          language: "e-lang",
-          value: `(Unit) [${node.name}]: ${node.longName ?? ""}\n ${
-            node.description ?? ""
-          }`,
-        },
-      };
+      hoverText = `(Unit) [${node.name}]: ${node.longName ?? ""}\n ${
+        node.description ?? ""
+      }`;
     } else if (isUnitFamilyDeclaration(node)) {
-      return {
-        contents: {
-          kind: "markdown",
-          language: "e-lang",
-          value: `(Unit Family) ${node.name} \n ${node.description ?? ""}`,
-        },
-      };
+      hoverText = `(Unit Family) ${node.name}\n${node.description ?? ""}`;
     } else if (isModelDeclaration(node)) {
-      return {
-        contents: {
-          kind: "markdown",
-          language: "e-lang",
-          value: `(Model) ${node.name} { ${node.properties.map(
-            (p) => `\n\t${p.name}: ${p.type.$type}`
-          )} \n}`,
-        },
-      };
+      hoverText = `(Model) ${node.name} { ${node.properties.map(
+        (p) => `\n\t${p.name}: ${p.type.$type}`
+      )} \n}`;
     } else if (isPropertyDeclaration(node)) {
-      const type = inferType(node.type, new TypeEnvironment());
-      let hoverText = "";
-
       if (isModelType(type)) {
         hoverText = `(Model Property) ${node.name}: model ${type.modelName}`;
       } else if (isUnionType(type)) {
@@ -115,16 +56,14 @@ export class ELangHoverProvider extends AstNodeHoverProvider {
       } else {
         hoverText = `(Model Property) ${node.name}: ${type.$type}`;
       }
-
-      return {
-        contents: {
-          kind: "markdown",
-          language: "e-lang",
-          value: hoverText,
-        },
-      };
     }
 
-    return undefined;
+    return {
+      contents: {
+        kind: "markdown",
+        language: "e-lang",
+        value: hoverText,
+      },
+    };
   }
 }

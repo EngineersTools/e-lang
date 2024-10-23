@@ -179,7 +179,7 @@ MathematicalFunction:
     Ceiling |
     Floor |
     Root |
-    SuqareRoot |
+    SquareRoot |
     LogarithmBaseTen |
     NaturalLogarithm |
     Minimum |
@@ -230,7 +230,7 @@ Root:
     'root' '(' root=Expression ',' value=Expression ')'
 ;
 
-SuqareRoot:
+SquareRoot:
     'sqrt' '(' value=Expression')'
 ;
 

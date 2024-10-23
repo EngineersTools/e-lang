@@ -1,19 +1,19 @@
-import { interruptAndCheck, ValidationAcceptor } from "langium";
+import { interruptAndCheck } from "langium";
 import { CancellationTokenSource } from "vscode-languageserver";
 import {
   ELangProgram,
   isMeasurementLiteral,
   MeasurementLiteral,
 } from "../language/generated/ast.js";
-import { AstNodeError } from "./AstNodeError.js";
+import { TypeEnvironment } from "../language/type-system/TypeEnvironment.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { Variables } from "./Variables.js";
-import { InterpreterContext, services } from "./interpreter.js";
+import { InterpreterContext } from "./interpreter.js";
 import { runELangStatement } from "./runELangStatement.js";
 
 // A constant used to determine if the program has been running for
 // too long and execution needs to be cancelled
-export const TIMEOUT_MS = 1000000 * 5;
+export const TIMEOUT_MS = 1000 * 5;
 
 /**
  * Main function that runs an ELang program. This is called by the interpreter
@@ -42,6 +42,7 @@ export async function runProgram(
   // Create a context for the run of this program
   const context: RunnerContext = outerRunnerContext ?? {
     variables: new Variables(),
+    typeEnvironment: new TypeEnvironment(),
     cancellationToken,
     timeout,
     // Pass the context and onStart function
@@ -58,19 +59,19 @@ export async function runProgram(
     context.onStart();
   }
 
-  // Typecheck the program
-  const validator: ValidationAcceptor = (severity, message, info) => {
-    const range = info.node.$cstNode?.range;
-    const messageWithLine = `${message}@${range?.end.line}:${range?.end.character}`;
+  // Type check the program
+  // const validator: ValidationAcceptor = (severity, message, info) => {
+  //   const range = info.node.$cstNode?.range;
+  //   const messageWithLine = `${message}@${range?.end.line}:${range?.end.character}`;
 
-    if (severity === "error") {
-      throw new AstNodeError(info.node, message);
-    } else {
-      context.log(`${severity}: ${messageWithLine}`);
-    }
-  };
+  //   if (severity === "error") {
+  //     throw new AstNodeError(info.node, message);
+  //   } else {
+  //     context.log(`${severity}: ${messageWithLine}`);
+  //   }
+  // };
 
-  services.ELang.validation.ELangValidator.typecheckProgram(program, validator);
+  // services.ELang.validation.ELangValidator.typecheckProgram(program, validator);
 
   // If the program contains statements, run through
   // them in sequence
@@ -94,6 +95,7 @@ export async function runProgram(
 
   // Close and finalise the Variables and Types objects for this run
   context.variables.leave();
+  context.typeEnvironment.leaveScope();
 }
 
 export function isTypeScriptNumber(value: unknown): value is number {

@@ -9,6 +9,7 @@ import {
 import {
   ComplexUnitFamilyType,
   createComplexUnitFamilyType,
+  createMeasurementType,
   getTypeName,
   invertUnitFamily,
   reduceUnitFamilies,
@@ -33,24 +34,28 @@ beforeAll(async () => {
 
   // Setup up some base unit families
   document = await parse(`{
-        unit_family Length {
-            unit m:meter
-            unit yd:yard
-        }
+    unit_family Length {
+      unit m:meter
+      unit yd:yard
 
-        unit_family Temperature {
-          unit degC:DegreesCentigrade
-          unit degF:DegreesFahrenheit
-        }
+      conversion m->yd: (val: number_[Length]) => val * 1.09361
+      conversion yd->m: (val: number_[Length]) => val / 1.09361
+    }
 
-        unit_family Mass {
-          unit kg:kilogram
-          unit lb:pound
-        }
-    }`);
+    unit_family Temperature {
+      unit degC:DegreesCentigrade
+      unit degF:DegreesFahrenheit
+    }
+
+    unit_family Mass {
+      unit kg:kilogram
+      unit lb:pound
+    }
+  }`);
 
   const block = document.parseResult.value.statements[0] as StatementBlock;
   const typeEnv = new TypeEnvironment();
+
   lengthUF = inferType(block.statements[0], typeEnv) as UnitFamilyType;
   temperatureUF = inferType(block.statements[1], typeEnv) as UnitFamilyType;
   massUF = inferType(block.statements[2], typeEnv) as UnitFamilyType;

@@ -418,6 +418,16 @@ export function isMeasurementType(item: ELangType): item is MeasurementType {
   return item.$type === "measurement";
 }
 
+export function invertMeasurementType(item: MeasurementType): MeasurementType {
+  return createMeasurementType(
+    isUnitFamilyType(item.unitFamilyType)
+      ? invertUnitFamily(item.unitFamilyType)
+      : createComplexUnitFamilyType(
+          item.unitFamilyType.unitFamilies.map((uf) => invertUnitFamily(uf))
+        )
+  );
+}
+
 // UNIT CONVERSION
 export interface UnitConversionType {
   readonly $type: "unitConversion";
