@@ -8,12 +8,9 @@ import {
 import { TypeEnvironment } from "../language/type-system/TypeEnvironment.js";
 import { RunnerContext } from "./RunnerContext.js";
 import { Variables } from "./Variables.js";
+import { config } from "./config.js";
 import { InterpreterContext } from "./interpreter.js";
 import { runELangStatement } from "./runELangStatement.js";
-
-// A constant used to determine if the program has been running for
-// too long and execution needs to be cancelled
-export const TIMEOUT_MS = 1000 * 5;
 
 /**
  * Main function that runs an ELang program. This is called by the interpreter
@@ -37,7 +34,7 @@ export async function runProgram(
   // cancel() request to stop the execution
   const timeout = setTimeout(async () => {
     cancellationTokenSource.cancel();
-  }, TIMEOUT_MS);
+  }, config.timeOutMs);
 
   // Create a context for the run of this program
   const context: RunnerContext = outerRunnerContext ?? {

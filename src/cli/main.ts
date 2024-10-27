@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import fs from "node:fs";
 import { runInterpreter } from "../interpreter/interpreter.js";
+import pkg from "../../package.json";
 
 async function runCommand(file: string): Promise<void> {
   const now = Date.now();
@@ -14,7 +15,7 @@ async function runCommand(file: string): Promise<void> {
 export default function (): void {
   const program = new Command();
 
-  program.version("0.0.6");
+  program.version(pkg.version);
 
   program.command("run").argument("<file>").action(runCommand);
 

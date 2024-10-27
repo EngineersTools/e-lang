@@ -56,7 +56,48 @@ PrimaryTypeReference infers TypeReference:
  * convertible to one another.
  */
 UnitFamilyDeclaration:
-    (export?='export')? 'unit_family' name=ID description=STRING? '{' (units+=UnitDeclaration | conversions+=ConversionDeclaration)* '}'
+    (export?='export')? 'unit_family' name=ID description=STRING? '{' (units+=UnitDeclaration | conversions+=ConversionDeclaration)* '}' |
+    (export?='export')? 'unit_family' name=ID description=STRING? '=' complexDefinition=UnitFamilyExpression
+;
+
+UnitFamilyExpression:
+    UnitFamilyMultiplication
+;
+
+UnitFamilyMultiplication infers UnitFamilyExpression:
+    UnitFamilyDivision
+    (
+        {infer BinaryUnitFamilyExpression.left=current}
+        operator="*"
+        right=UnitFamilyDivision
+    )*
+;
+
+UnitFamilyDivision infers UnitFamilyExpression:
+    UnitFamilyExponentiation
+    (
+        {infer BinaryUnitFamilyExpression.left=current}
+        operator="/"
+        right=UnitFamilyExponentiation
+    )*
+;
+
+UnitFamilyExponentiation infers UnitFamilyExpression:
+    UnitFamilyCall
+    (
+        {infer BinaryUnitFamilyExpression.base=current}
+        operator="^"
+        exponent=NUM
+    )*
+;
+
+UnitFamilyCall infers UnitFamilyExpression:
+    '(' UnitFamilyExpression ')' |
+    UnitFamily
+;
+
+UnitFamily:
+    unitFamily=[UnitFamilyDeclaration:ID]
 ;
 
 /**

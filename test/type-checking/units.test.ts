@@ -9,11 +9,10 @@ import {
 import {
   ComplexUnitFamilyType,
   createComplexUnitFamilyType,
-  createMeasurementType,
   getTypeName,
   invertUnitFamily,
   reduceUnitFamilies,
-  UnitFamilyType,
+  UnitFamilyType
 } from "../../src/language/type-system/descriptions.js";
 import { inferType } from "../../src/language/type-system/infer.js";
 import { TypeEnvironment } from "../../src/language/type-system/TypeEnvironment.js";

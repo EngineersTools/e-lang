@@ -1,5 +1,7 @@
 domain Units
 
+// import "constants.elng"
+
 export unit_family Length "This family contains units that represent the physical length of objects" {
     unit mm:milimetre "Length in the international system"
     unit m:metre 
@@ -33,4 +35,15 @@ export unit_family Temperature {
 
     conversion celsius->fahrenheit: (val) => val * 9/5 + 32
     conversion fahrenheit->celsius: (val) => (val - 32) * 5/9
+}
+
+print "Units module loaded"
+print "Length unit family: " + (1_[m] + 200_[mm])->in
+
+print 10_[m] * 10_[m]
+
+// print TWOPI
+
+for (var i from 1_[m] to 10_[m]) {
+    print i
 }

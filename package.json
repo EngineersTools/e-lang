@@ -33,7 +33,8 @@
     "dev": "vite",
     "dev:debug": "vite --debug --force",
     "serve": "npm run dev",
-    "test": "vitest"
+    "test": "vitest",
+    "cli": "node ./bin/cli.js"
   },
   "dependencies": {
     "@codingame/monaco-vscode-editor-service-override": "~3.2.3",
