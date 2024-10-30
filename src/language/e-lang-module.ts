@@ -7,6 +7,7 @@ import {
   type LangiumSharedServices,
   type PartialLangiumServices,
 } from "langium/lsp";
+import { ELangParser } from "./e-lang-parser.js";
 import { ELangScopeComputation, ELangScopeProvider } from "./e-lang-scope.js";
 import { ELangValidationRegistry, ELangValidator } from "./e-lang-validator.js";
 import {
@@ -37,6 +38,9 @@ export const ELangModule: Module<
   },
   lsp: {
     HoverProvider: (services) => new ELangHoverProvider(services),
+  },
+  parser: {
+    AsyncParser: (services) => new ELangParser(services),
   },
 };
 
