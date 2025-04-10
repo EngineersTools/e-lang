@@ -6,15 +6,6 @@ entry ELangProgram:
     (statements+=Statement (statements+=Statement)*)?
 ;
 
-/* 
-    Defines the engineering domain to which
-    this document applies. The domain acts effectively
-    as a namespace for all the code defined in this document.
-    One document can only have one domain definition.
-    If multiple files define the same domain and the documents
-    are imported, all their statements will be merged onto
-    the same domain.
-*/
 Domain:
     'domain' name=ID
 ;
