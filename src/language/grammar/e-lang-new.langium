@@ -36,26 +36,26 @@ ParameterDeclaration:
     name=ID (isOptional?='?')? ':' type=TypeReference
 ;
 
+FormulaDeclaration:
+    (export?='export')? 'formula' name=ID '(' (parameters+=ParameterDeclaration (',' parameters+=ParameterDeclaration)*)? ')' (':' returnType=TypeReference)? body=StatementBlock
+;
+
 fragment ParameterBlock:
     '{'
         (properties+=ParameterDeclaration)*
     '}'
 ;
 
-ModelDeclaration:
-    (export?='export')? 'model' name=ID ('extends' parentTypes+=[ModelDeclaration:ID] (',' parentTypes+=[ModelDeclaration:ID])*)? ParameterBlock
+ModelDeclaration infers TypeReference:
+    {infer ModelDeclaration} (export?='export')? 'model' name=ID ('extends' parentTypes+=[ModelDeclaration:ID] (',' parentTypes+=[ModelDeclaration:ID])*)? ParameterBlock
 ;
 
-FormulaDeclaration:
-    (export?='export')? 'formula' name=ID '(' (parameters+=ParameterDeclaration (',' parameters+=ParameterDeclaration)*)? ')' (':' returnType=TypeReference)? body=StatementBlock
+DimensionDeclaration infers TypeReference:
+    {infer DimensionDeclaration} (export?='export')? 'dimension' name=ID ('{' (units+=UnitDeclaration | conversions+=ConversionDeclaration)* '}')?
 ;
 
-DimensionDeclaration:
-    (export?='export')? 'dimension' name=ID ('{' (units+=UnitDeclaration | conversions+=ConversionDeclaration)* '}')?
-;
-
-UnitDeclaration:
-    'unit' name=ID (':' longName=ID)? description=STRING?
+UnitDeclaration infers TypeReference:
+    {infer UnitDeclaration} 'unit' name=ID (':' longName=ID)? description=STRING?
 ;
 
 ConversionDeclaration:
@@ -133,23 +133,23 @@ DivisionExpression infers Expression:
 ;
 
 ExponentiationExpression infers Expression:
-    UnaryPrefixExpression
-    ({infer BinaryExpression.left=current} operator='^' right=UnaryPrefixExpression)*
+    EvaluationExpression
+    ({infer BinaryExpression.left=current} operator='^' right=EvaluationExpression)*
 ;
 
-UnaryPrefixExpression infers Expression:
-    operator=('-' | '!' | 'not') value=UnaryPostfixExpression
-    | UnaryPostfixExpression
-;
-
-UnaryPostfixExpression infers Expression:
-    value=PrimitiveExpression operator=('++' | '--')
-    | PrimitiveExpression
+EvaluationExpression infers Expression:
+    PrimitiveExpression
+    ( // These can chain: obj.member[index](arg)
+        {infer MemberAccess.receiver=current} '.' member=[NamedElement:ID] |
+        {infer IndexedAccess.receiver=current} '[' index=Expression ']' |
+        {infer CallExpression.callee=current} '(' (arguments+=Expression (',' arguments+=Expression)*)? ')'
+    )*
 ;
 
 PrimitiveExpression infers Expression:
     '(' Expression ')'
     | ReferenceExpression
+    | UnaryExpression
     | StringLiteral
     | NumberLiteral
     | BooleanLiteral
@@ -161,6 +161,10 @@ PrimitiveExpression infers Expression:
 
 ReferenceExpression:
     element=[NamedElement:ID]
+;
+
+UnaryExpression:
+    prefixOperator=('-' | '!' | 'not') value=Expression (postfixOperator+=('++' | '--'))?
 ;
 
 StringLiteral:
@@ -214,23 +218,21 @@ TypeUnion infers TypeReference:
 TypeIntersection infers TypeReference:
     PrimaryTypeReference ({infer TypeIntersection.left=current} operator=('and') right=PrimaryTypeReference)*;
 
-
 PrimaryTypeReference infers TypeReference:
-    ('(' TypeReference ')'
-    | primitive=('number' | 'text' | 'boolean')
-    | dimension=[DimensionDeclaration:ID]
-    | unit=[UnitDeclaration:ID]
-    | model=[ModelDeclaration:ID]
-    | LambdaType)
+    (
+        '(' TypeReference ')'
+        | primitive=('number' | 'text' | 'boolean')
+        | declaredType=[TypeReference:ID]
+        | LambdaType
+    )
     (array?='list')?
 ;
 
-type NamedElement = 
+type NamedElement =
     ConstantDeclaration
     | MutableDeclaration
     | ParameterDeclaration
-    | FormulaDeclaration
-;
+    | FormulaDeclaration;
 
 hidden terminal WS: /\s+/;
 terminal ID: /[_a-zA-Z][\w_]*/;

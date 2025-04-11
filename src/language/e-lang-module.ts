@@ -7,19 +7,15 @@ import {
   type LangiumSharedServices,
   type PartialLangiumServices,
 } from "langium/lsp";
-import { ELangParser } from "./e-lang-parser.js";
-import { ELangScopeComputation, ELangScopeProvider } from "./e-lang-scope.js";
-import { ELangValidationRegistry, ELangValidator } from "./e-lang-validator.js";
 import {
   ELangGeneratedModule,
   ELangGeneratedSharedModule,
 } from "./generated/module.js";
-import { ELangHoverProvider } from "./lsp/hover-provider.js";
 
 export type ELangAddedServices = {
-  validation: {
-    ELangValidator: ELangValidator;
-  };
+  // validation: {
+  //   ELangValidator: ELangValidator;
+  // };
 };
 
 export type ELangServices = LangiumServices & ELangAddedServices;
@@ -28,20 +24,20 @@ export const ELangModule: Module<
   ELangServices,
   PartialLangiumServices & ELangAddedServices
 > = {
-  validation: {
-    ValidationRegistry: (services) => new ELangValidationRegistry(services),
-    ELangValidator: () => new ELangValidator(),
-  },
-  references: {
-    ScopeComputation: (services) => new ELangScopeComputation(services),
-    ScopeProvider: (services) => new ELangScopeProvider(services),
-  },
-  lsp: {
-    HoverProvider: (services) => new ELangHoverProvider(services),
-  },
-  parser: {
-    AsyncParser: (services) => new ELangParser(services),
-  },
+  // validation: {
+  //   ValidationRegistry: (services) => new ELangValidationRegistry(services),
+  //   ELangValidator: () => new ELangValidator(),
+  // },
+  // references: {
+  //   ScopeComputation: (services) => new ELangScopeComputation(services),
+  //   ScopeProvider: (services) => new ELangScopeProvider(services),
+  // },
+  // lsp: {
+  //   HoverProvider: (services) => new ELangHoverProvider(services),
+  // },
+  // parser: {
+  //   AsyncParser: (services) => new ELangParser(services),
+  // },
 };
 
 export function createELangServices(context: DefaultSharedModuleContext): {
