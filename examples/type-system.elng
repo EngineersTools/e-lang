@@ -1,0 +1,22 @@
+10++;
+10--;
+
+-10;
+-10++;
+-10++;
+
+!true;
+!false;
+
+const x = 10;
+
+// print x equals 10;
+
+
+const sum = 10 + 20;
+
+// print sum == 30;
+
+formula add(a: number, b: number) {
+    return a + b
+}

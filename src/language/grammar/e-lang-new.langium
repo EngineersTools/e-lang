@@ -120,7 +120,7 @@ LogicalAndExpression infers Expression:
 ;
 
 ComparisonExpression infers Expression:
-    AdditionExpression ({infer BinaryExpression.left=current} operator=('<' | '<=' | '>' | '>=' | '==' | 'equal' | '!=' | 'not_equal') right=AdditionExpression)*
+    AdditionExpression ({infer BinaryExpression.left=current} operator=('<' | '<=' | '>' | '>=' | '==' | 'equals' | '!=' | 'not_equals') right=AdditionExpression)*
 ;
 
 AdditionExpression infers Expression:
