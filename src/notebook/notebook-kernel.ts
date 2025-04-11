@@ -1,6 +1,6 @@
 import { URI, UriUtils } from "langium";
 import * as vscode from "vscode";
-import { runInterpreter } from "../interpreter/interpreter.js";
+// import { runInterpreter } from "../interpreter/interpreter.js";
 
 export class ELangNotebookKernel {
   readonly id = "e-lang-kernel";
@@ -71,7 +71,10 @@ export class ELangNotebookKernel {
         containerDocumentUri.path
       );
       const uri = URI.file(notebookUri.path);
-      await runInterpreter(text, { log, uri: uri });
+
+      console.log(log, uri, text)
+
+      // await runInterpreter(text, { log, uri: uri });
       execution.end(true, Date.now());
     } catch (err) {
       const errString = err instanceof Error ? err.message : String(err);

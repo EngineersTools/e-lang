@@ -1,7 +1,12 @@
 grammar ELang
 
 entry ELangProgram:
-    (statements+=Statement (statements+=Statement)*)?
+    (imports+=Import (imports+=Import)*)?
+    (statements+=Statement ';'?)*
+;
+
+Import:
+    'import' importSource=STRING
 ;
 
 Statement:
@@ -12,6 +17,8 @@ Statement:
     | FormulaDeclaration
     | ConversionDeclaration
     | ModelDeclaration
+    | ParameterDeclaration
+    | OptionsDeclaration
     | StatementBlock
     | PrintStatement
     | IfStatement
@@ -56,6 +63,10 @@ DimensionDeclaration infers TypeReference:
 
 UnitDeclaration infers TypeReference:
     {infer UnitDeclaration} 'unit' name=ID (':' longName=ID)? description=STRING?
+;
+
+OptionsDeclaration infers TypeReference:
+    {infer OptionsDeclaration} 'options' name=ID ('[' (options+=Expression (',' options+=Expression)*)? ','? ']')?
 ;
 
 ConversionDeclaration:
@@ -147,24 +158,26 @@ EvaluationExpression infers Expression:
 ;
 
 PrimitiveExpression infers Expression:
-    '(' Expression ')'
-    | ReferenceExpression
-    | UnaryExpression
-    | StringLiteral
-    | NumberLiteral
-    | BooleanLiteral
-    | NullLiteral
-    | MeasurementLiteral
-    | ListExpression
-    | LambdaExpression
+    prefixOperator=('-' | '!' | 'not')?
+    
+    (
+        '(' Expression ')'
+        | ReferenceExpression
+        | StringLiteral
+        | NumberLiteral
+        | BooleanLiteral
+        | NullLiteral
+        | MeasurementLiteral
+        | ModelExpression
+        | ListExpression
+        | LambdaExpression
+    )
+
+    postfixOperator=('++' | '--')?
 ;
 
 ReferenceExpression:
     element=[NamedElement:ID]
-;
-
-UnaryExpression:
-    prefixOperator=('-' | '!' | 'not') value=Expression (postfixOperator+=('++' | '--'))?
 ;
 
 StringLiteral:
@@ -196,8 +209,18 @@ MeasurementLiteral:
     value=NumberLiteral unit=[UnitDeclaration:ID]
 ;
 
+ModelMemberAssignment:
+    property=[ParameterDeclaration:ID] ':' value=Expression
+;
+
+ModelExpression:
+    '{'
+        (members+=ModelMemberAssignment (',' members+=ModelMemberAssignment)*)?
+    '}'
+;
+
 ListExpression:
-    '[' (elements+=Expression (',' elements+=Expression)*)? ']'
+    '[' (elements+=Expression (',' elements+=Expression)*)? ','? ']'
 ;
 
 LambdaExpression:

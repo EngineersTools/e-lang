@@ -1,14 +1,15 @@
 import { Command } from "commander";
 import fs from "node:fs";
-import { runInterpreter } from "../interpreter/interpreter.js";
+// import { runInterpreter } from "../interpreter/interpreter.js";
 import pkg from "../../package.json";
 
 async function runCommand(file: string): Promise<void> {
   const now = Date.now();
   const content = await fs.promises.readFile(file, "utf-8");
-  await runInterpreter(content, {
-    log: (value) => console.log(`${value}`),
-  });
+  console.log(content)
+  // await runInterpreter(content, {
+  //   log: (value) => console.log(`${value}`),
+  // });
   console.log(`ELang program finished running in ${Date.now() - now}ms`);
 }
 

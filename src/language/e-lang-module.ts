@@ -1,44 +1,30 @@
-import { Module, inject } from "langium";
+import { inject, LangiumSharedCoreServices, Module, PartialLangiumCoreServices } from "langium";
 import {
   createDefaultModule,
   createDefaultSharedModule,
   type DefaultSharedModuleContext,
   type LangiumServices,
-  type LangiumSharedServices,
-  type PartialLangiumServices,
+  type LangiumSharedServices
 } from "langium/lsp";
+import { createTypirLangiumServices, initializeLangiumTypirServices, TypirLangiumServices } from "typir-langium";
+import { ELangTypeSystem } from "./e-lang-type-checking.js";
+import { ELangAstType, reflection } from "./generated/ast.js";
 import {
   ELangGeneratedModule,
   ELangGeneratedSharedModule,
 } from "./generated/module.js";
 
 export type ELangAddedServices = {
-  // validation: {
-  //   ELangValidator: ELangValidator;
-  // };
+  typir: TypirLangiumServices<ELangAstType>,
 };
 
 export type ELangServices = LangiumServices & ELangAddedServices;
 
-export const ELangModule: Module<
-  ELangServices,
-  PartialLangiumServices & ELangAddedServices
-> = {
-  // validation: {
-  //   ValidationRegistry: (services) => new ELangValidationRegistry(services),
-  //   ELangValidator: () => new ELangValidator(),
-  // },
-  // references: {
-  //   ScopeComputation: (services) => new ELangScopeComputation(services),
-  //   ScopeProvider: (services) => new ELangScopeProvider(services),
-  // },
-  // lsp: {
-  //   HoverProvider: (services) => new ELangHoverProvider(services),
-  // },
-  // parser: {
-  //   AsyncParser: (services) => new ELangParser(services),
-  // },
-};
+export function createELangModule(shared: LangiumSharedCoreServices): Module<ELangServices, PartialLangiumCoreServices & ELangAddedServices> {
+  return {
+    typir: () => createTypirLangiumServices(shared, reflection, new ELangTypeSystem(), { /* customize Typir services here */ }),
+  }
+}
 
 export function createELangServices(context: DefaultSharedModuleContext): {
   shared: LangiumSharedServices;
@@ -48,13 +34,16 @@ export function createELangServices(context: DefaultSharedModuleContext): {
     createDefaultSharedModule(context),
     ELangGeneratedSharedModule
   );
+
   const ELang = inject(
     createDefaultModule({ shared }),
     ELangGeneratedModule,
-    ELangModule
+    createELangModule(shared)
   );
 
   shared.ServiceRegistry.register(ELang);
+
+  initializeLangiumTypirServices(ELang, ELang.typir);
 
   return { shared, ELang };
 }
