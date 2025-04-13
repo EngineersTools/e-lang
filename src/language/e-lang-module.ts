@@ -17,6 +17,7 @@ import {
   TypirLangiumServices,
 } from "typir-langium";
 import { ELangTypeSystem } from "./e-lang-type-checking.js";
+import { ELangValidationRegistry, ELangValidator } from "./e-lang-validator.js";
 import { ELangAstType, reflection } from "./generated/ast.js";
 import {
   ELangGeneratedModule,
@@ -24,6 +25,9 @@ import {
 } from "./generated/module.js";
 
 export type ELangAddedServices = {
+  validation: {
+    ELangValidator: ELangValidator;
+  };
   typir: TypirLangiumServices<ELangAstType>;
 };
 
@@ -33,6 +37,10 @@ export function createELangModule(
   shared: LangiumSharedCoreServices
 ): Module<ELangServices, PartialLangiumCoreServices & ELangAddedServices> {
   return {
+    validation: {
+      ValidationRegistry: (services) => new ELangValidationRegistry(services),
+      ELangValidator: () => new ELangValidator(),
+    },
     typir: () =>
       createTypirLangiumServices(shared, reflection, new ELangTypeSystem(), {
         /* customize Typir services here */
@@ -44,15 +52,10 @@ export function createELangServices(context: DefaultSharedModuleContext): {
   shared: LangiumSharedServices;
   ELang: ELangServices;
 } {
-
-  console.log("Creating ELang shared services");
-
   const shared = inject(
     createDefaultSharedModule(context),
     ELangGeneratedSharedModule
   );
-
-  console.log("Creating ELang services");
 
   const ELang = inject(
     createDefaultModule({ shared }),
@@ -60,11 +63,7 @@ export function createELangServices(context: DefaultSharedModuleContext): {
     createELangModule(shared)
   );
 
-  console.log("Registering ELang services");
-
   shared.ServiceRegistry.register(ELang);
-
-  console.log("Registering ELang language services");
 
   initializeLangiumTypirServices(ELang, ELang.typir);
 

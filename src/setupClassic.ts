@@ -1,29 +1,33 @@
 import {
-    MonacoEditorLanguageClientWrapper,
-    WrapperConfig,
+  MonacoEditorLanguageClientWrapper,
+  UserConfig,
 } from "monaco-editor-wrapper";
+import { configureWorker, defineUserServices } from "./setupCommon.js";
+import monarchSyntax from "./syntaxes/e-lang.monarch.js";
 
-export const setupConfigClassic = (): WrapperConfig => {
+export const setupConfigClassic = (): UserConfig => {
   return {
-    $type: "classic",
-    // serviceConfig: defineUserServices(),
-    editorAppConfig: {
-      //   languageId: "e-lang",
-      //   code: `// e-lang is running in the web!`,
-      useDiffEditor: false,
-      //   languageExtensionConfig: { id: "langium" },
-      //   languageDef: monarchSyntax,
-      editorOptions: {
-        "semanticHighlighting.enabled": true,
-        theme: "vs-dark",
+    wrapperConfig: {
+      serviceConfig: defineUserServices(),
+      editorAppConfig: {
+        $type: "classic",
+        languageId: "e-lang",
+        code: `// ELang is running in the web!`,
+        useDiffEditor: false,
+        languageExtensionConfig: { id: "langium" },
+        languageDef: monarchSyntax,
+        editorOptions: {
+          "semanticHighlighting.enabled": true,
+          theme: "vs-dark",
+        },
       },
     },
-    // languageClientConfig: configureWorker(),
+    languageClientConfig: configureWorker(),
   };
 };
 
 export const executeClassic = async (htmlElement: HTMLElement) => {
   const userConfig = setupConfigClassic();
   const wrapper = new MonacoEditorLanguageClientWrapper();
-  await wrapper.initAndStart(userConfig);
+  await wrapper.initAndStart(userConfig, htmlElement);
 };

@@ -1,22 +1,24 @@
-10++;
-10--;
+// 10++;
+// 10--;
 
--10;
--10++;
--10++;
+// -10;
+// -10++;
+// -10++;
 
-!true;
-!false;
+// !true;
+// !false;
 
 const x = 10;
 
-print x equals 10;
+print x equals 12;
 
 
 const sum = 10 + 20;
 
 print sum == 30;
 
-formula add(a: number, b: number): number {
+formula add(a: number, b: number) {
     return a + b
 }
+
+print add(10, 20) equals 30;

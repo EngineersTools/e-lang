@@ -29,6 +29,7 @@ import {
   isMutableDeclaration,
   isNamedElement,
   isParameterDeclaration,
+  isReferenceExpression,
   MatchStatement,
   ModelDeclaration,
   MutableDeclaration,
@@ -65,7 +66,7 @@ export class ELangTypeSystem
       .finish();
 
     const typeString = typir.factory.Primitives.create({
-      primitiveName: "string",
+      primitiveName: "text",
     })
       .inferenceRule({ languageKey: StringLiteral })
       .inferenceRule({
@@ -244,7 +245,9 @@ export class ELangTypeSystem
       MemberAccess: (node) => {
         const ref = node.member.ref;
 
-        if (isModelDeclaration(ref)) {
+        if (isReferenceExpression(ref)) {
+          return ref;
+        } else if (isModelDeclaration(ref)) {
           return InferenceRuleNotApplicable;
         } else if (isNamedElement(ref)) {
           return InferenceRuleNotApplicable;
@@ -262,13 +265,16 @@ export class ELangTypeSystem
           assertUnreachable(ref);
         }
       },
+      ReferenceExpression: (node) => {
+        return node.element.ref ?? InferenceRuleNotApplicable;
+      },
       ConstantDeclaration: (node) => {
         if (node.type) {
           return node.type;
         } else if (node.value) {
           return node.value;
         } else {
-          return InferenceRuleNotApplicable; // this case is impossible, there is a validation in the Langium LOX validator for this case
+          return InferenceRuleNotApplicable;
         }
       },
       MutableDeclaration: (node) => {
@@ -277,7 +283,7 @@ export class ELangTypeSystem
         } else if (node.value) {
           return node.value;
         } else {
-          return InferenceRuleNotApplicable; // this case is impossible, there is a validation in the Langium LOX validator for this case
+          return InferenceRuleNotApplicable;
         }
       },
       ParameterDeclaration: (node) => node.type,
@@ -313,7 +319,8 @@ export class ELangTypeSystem
       // ForStatement: this.validateCondition,
       // IfStatement: this.validateCondition,
       ReturnStatement: this.validateReturnStatement,
-      // VariableDeclaration: this.validateVariableDeclaration,
+      ConstantDeclaration: this.validateVariableDeclaration,
+      MutableDeclaration: this.validateVariableDeclaration,
       // WhileStatement: this.validateCondition,
     });
   }
