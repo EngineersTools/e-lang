@@ -42,9 +42,11 @@ import {
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export class ELangTypeSystem
-  implements LangiumTypeSystemDefinition<ELangAstType>
-{
+  implements LangiumTypeSystemDefinition<ELangAstType> {
   onInitialize(typir: TypirLangiumServices<ELangAstType>): void {
+    /**
+     * Primitive types
+     */
     const typeBool = typir.factory.Primitives.create({
       primitiveName: "boolean",
     })
@@ -75,11 +77,65 @@ export class ELangTypeSystem
       })
       .finish();
 
-    // const typeNull = typir.factory.Primitives.create({ primitiveName: "null" })
-    //   .inferenceRule({ languageKey: NullLiteral })
-    //   .finish();
+    const typeNull = typir.factory.Primitives.create({ primitiveName: "null" })
+      .inferenceRule({ languageKey: NullLiteral })
+      .finish();
 
     const typeAny = typir.factory.Top.create({}).finish();
+
+    typir.Inference.addInferenceRulesForAstNodes({
+      MemberAccess: (node) => {
+        const ref = node.member.ref;
+
+        if (isReferenceExpression(ref)) {
+          return ref;
+        } else if (isModelDeclaration(ref)) {
+          return InferenceRuleNotApplicable;
+        } else if (isNamedElement(ref)) {
+          return InferenceRuleNotApplicable;
+        } else if (isConstantDeclaration(ref)) {
+          return ref;
+        } else if (isMutableDeclaration(ref)) {
+          return ref;
+        } else if (isParameterDeclaration(ref)) {
+          return ref;
+        } else if (isFormulaDeclaration(ref)) {
+          return InferenceRuleNotApplicable;
+        } else if (ref === undefined) {
+          return InferenceRuleNotApplicable;
+        } else {
+          assertUnreachable(ref);
+        }
+      },
+      ReferenceExpression: (node) => {
+        return node.element.ref ?? InferenceRuleNotApplicable;
+      },
+      ConstantDeclaration: (node) => {
+        if (node.type) {
+          return node.type;
+        } else if (node.value) {
+          return node.value;
+        } else {
+          return InferenceRuleNotApplicable;
+        }
+      },
+      MutableDeclaration: (node) => {
+        if (node.type) {
+          return node.type;
+        } else if (node.value) {
+          return node.value;
+        } else {
+          return InferenceRuleNotApplicable;
+        }
+      },
+      ParameterDeclaration: (node) => node.type,
+    });
+
+    // Null can be assigned to any type
+    typir.Subtype.markAsSubType(typeNull, typeBool);
+    typir.Subtype.markAsSubType(typeNull, typeNumber);
+    typir.Subtype.markAsSubType(typeNull, typeString);
+    typir.Subtype.markAsSubType(typeNull, typeAny);
 
     const prefixUnaryInferenceRule: InferOperatorWithSingleOperand<
       AstNode,
@@ -204,15 +260,12 @@ export class ELangTypeSystem
               node.right,
               accept,
               (actual, expected) => ({
-                message: `This comparison will always return '${
-                  node.operator === "==" || node.operator === "equals"
-                    ? "false"
-                    : "true"
-                }' as '${node.left.$cstNode?.text}' and '${
-                  node.right.$cstNode?.text
-                }' have the different types '${actual.name}' and '${
-                  expected.name
-                }'.`,
+                message: `This comparison will always return '${node.operator === "==" || node.operator === "equals"
+                  ? "false"
+                  : "true"
+                  }' as '${node.left.$cstNode?.text}' and '${node.right.$cstNode?.text
+                  }' have the different types '${actual.name}' and '${expected.name
+                  }'.`,
                 languageNode: node,
                 languageProperty: "operator",
                 severity: "warning",
@@ -240,54 +293,6 @@ export class ELangTypeSystem
           ),
       })
       .finish();
-
-    typir.Inference.addInferenceRulesForAstNodes({
-      MemberAccess: (node) => {
-        const ref = node.member.ref;
-
-        if (isReferenceExpression(ref)) {
-          return ref;
-        } else if (isModelDeclaration(ref)) {
-          return InferenceRuleNotApplicable;
-        } else if (isNamedElement(ref)) {
-          return InferenceRuleNotApplicable;
-        } else if (isConstantDeclaration(ref)) {
-          return ref;
-        } else if (isMutableDeclaration(ref)) {
-          return ref;
-        } else if (isParameterDeclaration(ref)) {
-          return ref;
-        } else if (isFormulaDeclaration(ref)) {
-          return InferenceRuleNotApplicable;
-        } else if (ref === undefined) {
-          return InferenceRuleNotApplicable;
-        } else {
-          assertUnreachable(ref);
-        }
-      },
-      ReferenceExpression: (node) => {
-        return node.element.ref ?? InferenceRuleNotApplicable;
-      },
-      ConstantDeclaration: (node) => {
-        if (node.type) {
-          return node.type;
-        } else if (node.value) {
-          return node.value;
-        } else {
-          return InferenceRuleNotApplicable;
-        }
-      },
-      MutableDeclaration: (node) => {
-        if (node.type) {
-          return node.type;
-        } else if (node.value) {
-          return node.value;
-        } else {
-          return InferenceRuleNotApplicable;
-        }
-      },
-      ParameterDeclaration: (node) => node.type,
-    });
 
     typir.factory.Functions.createUniqueFunctionValidation({
       registration: { languageKey: FormulaDeclaration },

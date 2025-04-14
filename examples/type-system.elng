@@ -8,17 +8,29 @@
 // !true;
 // !false;
 
-const x = 10;
+// const x: number = null;
 
-print x equals 12;
+// print x equals 12; // should print false
+
+// x = 12
+
+// print x equals 12; // should print true
+
+// x = true
+
+// const sum = 10 + 20;
+
+// print sum == 30;
+
+// formula add(a: number, b: number) {
+//     return a + b
+// }
+
+// print add(10, 20) equals 30;
 
 
-const sum = 10 + 20;
-
-print sum == 30;
-
-formula add(a: number, b: number) {
-    return a + b
+model Transformer {
+    id: text or number
 }
 
-print add(10, 20) equals 30;
+const tx1: Transformer = null
