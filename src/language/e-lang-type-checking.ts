@@ -136,6 +136,13 @@ export class ELangTypeSystem
     typir.Subtype.markAsSubType(typeNull, typeNumber);
     typir.Subtype.markAsSubType(typeNull, typeString);
     typir.Subtype.markAsSubType(typeNull, typeAny);
+    // typir.Conversion.markAsConvertible(typeNull, typeNumber, 'EXPLICIT');
+    // typir.Conversion.markAsConvertible(typeNull, typeString, 'EXPLICIT');
+    // typir.Conversion.markAsConvertible(typeNull, typeBool, 'EXPLICIT');
+
+    // typir.Conversion.markAsConvertible(typeNumber, typeNull, 'EXPLICIT');
+    // typir.Conversion.markAsConvertible(typeString, typeNull, 'EXPLICIT');
+    // typir.Conversion.markAsConvertible(typeBool, typeNull, 'EXPLICIT');
 
     const prefixUnaryInferenceRule: InferOperatorWithSingleOperand<
       AstNode,
@@ -331,9 +338,47 @@ export class ELangTypeSystem
   }
 
   onNewAstNode(node: AstNode, typir: TypirLangiumServices<ELangAstType>): void {
-    // if (isFormulaDeclaration(node)) {
-    //   this.createFormulaDetails(node, typir);
-    // }
+    // const typeBool = typir.factory.Primitives.create({
+    //   primitiveName: "boolean",
+    // })
+    //   .inferenceRule({ languageKey: BooleanLiteral })
+    //   .inferenceRule({
+    //     languageKey: TypeReference,
+    //     matching: (node: TypeReference) => node.primitive === "boolean",
+    //   })
+    //   .finish();
+
+    // const typeNumber = typir.factory.Primitives.create({
+    //   primitiveName: "number",
+    // })
+    //   .inferenceRule({ languageKey: NumberLiteral })
+    //   .inferenceRule({
+    //     languageKey: TypeReference,
+    //     matching: (node: TypeReference) => node.primitive === "number",
+    //   })
+    //   .finish();
+
+    // const typeString = typir.factory.Primitives.create({
+    //   primitiveName: "text",
+    // })
+    //   .inferenceRule({ languageKey: StringLiteral })
+    //   .inferenceRule({
+    //     languageKey: TypeReference,
+    //     matching: (node: TypeReference) => node.primitive === "text",
+    //   })
+    //   .finish();
+
+    // const typeNull = typir.factory.Primitives.create({ primitiveName: "null" })
+    //   .inferenceRule({ languageKey: NullLiteral })
+    //   .finish();
+
+    // typir.Conversion.markAsConvertible(typeNull, typeNumber, 'IMPLICIT_EXPLICIT');
+    // typir.Conversion.markAsConvertible(typeNull, typeString, 'IMPLICIT_EXPLICIT');
+    // typir.Conversion.markAsConvertible(typeNull, typeBool, 'IMPLICIT_EXPLICIT');
+
+    // typir.Conversion.markAsConvertible(typeNumber, typeNull, 'IMPLICIT_EXPLICIT');
+    // typir.Conversion.markAsConvertible(typeString, typeNull, 'IMPLICIT_EXPLICIT');
+    // typir.Conversion.markAsConvertible(typeBool, typeNull, 'IMPLICIT_EXPLICIT');
   }
 
   protected createFormulaDetails(

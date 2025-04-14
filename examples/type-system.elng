@@ -8,9 +8,9 @@
 // !true;
 // !false;
 
-// const x: number = null;
+const x: number = null;
 
-// print x equals 12; // should print false
+print x equals 12; // should print false
 
 // x = 12
 
