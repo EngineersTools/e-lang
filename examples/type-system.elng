@@ -8,29 +8,39 @@
 // !true;
 // !false;
 
-const x: number = null;
+// const x: number = null;
 
-print x equals 12; // should print false
+// x = 10
 
-// x = 12
+// print x equals 12; // should print false
 
-// print x equals 12; // should print true
+// // x = 12
 
-// x = true
+// // print x equals 12; // should print true
 
-// const sum = 10 + 20;
+// // x = true
 
-// print sum == 30;
+// // const sum = 10 + 20;
 
-// formula add(a: number, b: number) {
-//     return a + b
+// // print sum == 30;
+
+// // formula add(a: number, b: number) {
+// //     return a + b
+// // }
+
+// // print add(10, 20) equals 30;
+
+
+// model Transformer {
+//     id: text or number
 // }
 
-// print add(10, 20) equals 30;
 
-
+// print tx1 equals null; // should print true
 model Transformer {
-    id: text or number
+    otherProp: boolean
 }
 
 const tx1: Transformer = null
+
+print tx1 equals null; // should print true

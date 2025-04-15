@@ -1,23 +1,23 @@
-domain CliTests
+// domain CliTests
 
-import 'units'
+// import 'units'
 
-const x = 10
-const y = 20
+// const x = 10
+// const y = 20
 
-formula add(x: number, y: number) returns number {
-    return x + y
-}
+// formula add(x: number, y: number) returns number {
+//     return x + y
+// }
 
-model SomeResults {
-    addition: (x: number, y: number) => number
-}
+// model SomeResults {
+//     addition: (x: number, y: number) => number
+// }
 
-const result: SomeResults = {
-    addition: add
-}
+// const result: SomeResults = {
+//     addition: add
+// }
 
-print "Hello, world!"
-print "result=" + result
-// print "The sum of x and y is " + result.addition
-// print "The sum is equal to 30: " + (result.addition == 30)
+// print "Hello, world!"
+// print "result=" + result
+// // print "The sum of x and y is " + result.addition
+// // print "The sum is equal to 30: " + (result.addition == 30)
