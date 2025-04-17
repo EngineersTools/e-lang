@@ -32,20 +32,18 @@ import {
   isParameterDeclaration,
   isReferenceExpression,
   MatchStatement,
-  MemberAccess,
   ModelDeclaration,
   MutableDeclaration,
   NullLiteral,
   NumberLiteral,
   ReturnStatement,
   StringLiteral,
-  TypeReference,
+  TypeReference
 } from "./generated/ast.js";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export class ELangTypeSystem
-  implements LangiumTypeSystemDefinition<ELangAstType>
-{
+  implements LangiumTypeSystemDefinition<ELangAstType> {
   onInitialize(typir: TypirLangiumServices<ELangAstType>): void {
     /**
      * Primitive types
@@ -135,10 +133,26 @@ export class ELangTypeSystem
     });
 
     // Null can be assigned to any type
-    typir.Subtype.markAsSubType(typeNull, typeBool);
-    typir.Subtype.markAsSubType(typeNull, typeNumber);
-    typir.Subtype.markAsSubType(typeNull, typeString);
-    typir.Subtype.markAsSubType(typeNull, typeAny);
+    typir.Conversion.markAsConvertible(
+      typeNull,
+      typeBool,
+      "IMPLICIT_EXPLICIT"
+    );
+    typir.Conversion.markAsConvertible(
+      typeNull,
+      typeNumber,
+      "IMPLICIT_EXPLICIT"
+    );
+    typir.Conversion.markAsConvertible(
+      typeNull,
+      typeString,
+      "IMPLICIT_EXPLICIT"
+    );
+    typir.Conversion.markAsConvertible(
+      typeNull,
+      typeAny,
+      "IMPLICIT_EXPLICIT"
+    );
 
     const prefixUnaryInferenceRule: InferOperatorWithSingleOperand<
       AstNode,
@@ -263,15 +277,12 @@ export class ELangTypeSystem
               node.right,
               accept,
               (actual, expected) => ({
-                message: `This comparison will always return '${
-                  node.operator === "==" || node.operator === "equals"
-                    ? "false"
-                    : "true"
-                }' as '${node.left.$cstNode?.text}' and '${
-                  node.right.$cstNode?.text
-                }' have the different types '${actual.name}' and '${
-                  expected.name
-                }'.`,
+                message: `This comparison will always return '${node.operator === "==" || node.operator === "equals"
+                  ? "false"
+                  : "true"
+                  }' as '${node.left.$cstNode?.text}' and '${node.right.$cstNode?.text
+                  }' have the different types '${actual.name}' and '${expected.name
+                  }'.`,
                 languageNode: node,
                 languageProperty: "operator",
                 severity: "warning",
@@ -376,10 +387,10 @@ export class ELangTypeSystem
         associatedLanguageNode: node, // this is used by the ScopeProvider to get the corresponding class declaration after inferring the (class) type of an expression
       })
         // inference rule for declaration
-        .inferenceRuleForClassDeclaration({
-          languageKey: ModelDeclaration,
-          matching: (languageNode: ModelDeclaration) => languageNode === node,
-        })
+        // .inferenceRuleForClassDeclaration({
+        //   languageKey: ModelDeclaration,
+        //   matching: (languageNode: ModelDeclaration) => languageNode === node,
+        // })
         // inference rule for constructor calls (i.e. class literals) conforming to the current class
         // .inferenceRuleForClassLiterals({
         //   // <InferClassLiteral<MemberCall>>
@@ -390,22 +401,22 @@ export class ELangTypeSystem
         //     languageNode.member,
         //   inputValuesForFields: (_languageNode: MemberCall) => new Map(), // values for fields don't matter for nominal typing
         // })
-        .inferenceRuleForClassLiterals({
-          // <InferClassLiteral<TypeReference>>
-          languageKey: TypeReference,
-          matching: (languageNode: TypeReference) =>
-            isModelDeclaration(languageNode.declaredType?.ref) &&
-            languageNode.declaredType!.ref.name === modelName,
-          inputValuesForFields: (_languageNode: TypeReference) => new Map(), // values for fields don't matter for nominal typing
-        })
+        // .inferenceRuleForClassLiterals({
+        //   // <InferClassLiteral<TypeReference>>
+        //   languageKey: TypeReference,
+        //   matching: (languageNode: TypeReference) =>
+        //     isModelDeclaration(languageNode.declaredType?.ref) &&
+        //     languageNode.declaredType!.ref.name === modelName,
+        //   inputValuesForFields: (_languageNode: TypeReference) => new Map(), // values for fields don't matter for nominal typing
+        // })
         // inference rule for accessing fields
-        .inferenceRuleForFieldAccess({
-          languageKey: MemberAccess,
-          matching: (languageNode: MemberAccess) =>
-            isParameterDeclaration(languageNode.member?.ref) &&
-            languageNode.member!.ref.$container === node,
-          field: (languageNode: MemberAccess) => languageNode.member!.ref!.name,
-        })
+        // .inferenceRuleForFieldAccess({
+        //   languageKey: MemberAccess,
+        //   matching: (languageNode: MemberAccess) =>
+        //     isParameterDeclaration(languageNode.member?.ref) &&
+        //     languageNode.member!.ref.$container === node,
+        //   field: (languageNode: MemberAccess) => languageNode.member!.ref!.name,
+        // })
         .finish();
 
       // explicitly declare, that 'nil' can be assigned to any Class variable

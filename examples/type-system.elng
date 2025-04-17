@@ -1,46 +1,7 @@
-// 10++;
-// 10--;
+// Equivalence of any primitive type to null
 
-// -10;
-// -10++;
-// -10++;
+// EXPLICIT
+const myBoolean: boolean = null;
+const myText: text = null;
 
-// !true;
-// !false;
-
-// const x: number = null;
-
-// x = 10
-
-// print x equals 12; // should print false
-
-// // x = 12
-
-// // print x equals 12; // should print true
-
-// // x = true
-
-// // const sum = 10 + 20;
-
-// // print sum == 30;
-
-// // formula add(a: number, b: number) {
-// //     return a + b
-// // }
-
-// // print add(10, 20) equals 30;
-
-
-// model Transformer {
-//     id: text or number
-// }
-
-
-// print tx1 equals null; // should print true
-model Transformer {
-    otherProp: boolean
-}
-
-const tx1: Transformer = null
-
-print tx1 equals null; // should print true
+// IMPLICIT
