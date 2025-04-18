@@ -7,11 +7,10 @@ import {
   InferenceRuleNotApplicable,
   InferOperatorWithMultipleOperands,
   InferOperatorWithSingleOperand,
-  isType,
   NO_PARAMETER_NAME,
   TypeInitializer,
   TypirServices,
-  ValidationProblemAcceptor,
+  ValidationProblemAcceptor
 } from "typir";
 import {
   LangiumTypeSystemDefinition,
@@ -26,7 +25,6 @@ import {
   FormulaDeclaration,
   IfStatement,
   isConstantDeclaration,
-  isExpression,
   isFormulaDeclaration,
   isModelDeclaration,
   isMutableDeclaration,
@@ -40,7 +38,7 @@ import {
   NumberLiteral,
   ReturnStatement,
   StringLiteral,
-  TypeReference,
+  TypeReference
 } from "./generated/ast.js";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -292,17 +290,19 @@ export class ELangTypeSystem
     }
 
     typir.factory.Operators.createBinary({
+      name: '=',
+      signature: { left: typeNull, right: typeAny, return: typeAny }
+    })
+      .inferenceRule(binaryInferenceRule)
+      .finish()
+
+    typir.factory.Operators.createBinary({
       name: "=",
       signature: { left: typeAny, right: typeAny, return: typeAny },
     })
       .inferenceRule({
         ...binaryInferenceRule,
         validation: [
-          (node, _opName, _opType, accept, _typir) => { 
-            if (isReferenceExpression(node.left) && isExpression(node.right)) {
-              const variableType
-            }
-          },
           (node, _opName, _opType, accept, typir) =>
             typir.validation.Constraints.ensureNodeIsAssignable(
               node.right,

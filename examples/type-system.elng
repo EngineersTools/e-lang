@@ -27,4 +27,6 @@ myNumberVar = 10
     myBooleanVar = true
     myTextVar = "Hello World"
     myNumberVar = 10
+
+    print myBooleanVar
 }
