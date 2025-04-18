@@ -15,7 +15,6 @@ export class ELangHoverProvider extends AstNodeHoverProvider {
   }
 
   protected override getAstNodeHoverContent(node: AstNode): Hover | undefined {
-    console.log("getAstNodeHoverContext")
     let hoverText = "";
     const nodeType = this.typir.Inference.inferType(node);
     const typeName = isType(nodeType)
