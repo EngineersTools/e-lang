@@ -7,6 +7,7 @@ import {
   InferenceRuleNotApplicable,
   InferOperatorWithMultipleOperands,
   InferOperatorWithSingleOperand,
+  isType,
   NO_PARAMETER_NAME,
   TypeInitializer,
   TypirServices,
@@ -25,6 +26,7 @@ import {
   FormulaDeclaration,
   IfStatement,
   isConstantDeclaration,
+  isExpression,
   isFormulaDeclaration,
   isModelDeclaration,
   isMutableDeclaration,
@@ -38,12 +40,13 @@ import {
   NumberLiteral,
   ReturnStatement,
   StringLiteral,
-  TypeReference
+  TypeReference,
 } from "./generated/ast.js";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export class ELangTypeSystem
-  implements LangiumTypeSystemDefinition<ELangAstType> {
+  implements LangiumTypeSystemDefinition<ELangAstType>
+{
   onInitialize(typir: TypirLangiumServices<ELangAstType>): void {
     /**
      * Primitive types
@@ -96,7 +99,7 @@ export class ELangTypeSystem
           return InferenceRuleNotApplicable;
         } else if (isConstantDeclaration(ref)) {
           return ref;
-        } else if (isMutableDeclaration(ref)) {
+        } else if (isMutableDeclaration(ref)) {      
           return ref;
         } else if (isParameterDeclaration(ref)) {
           return ref;
@@ -133,24 +136,17 @@ export class ELangTypeSystem
     });
 
     // Null can be assigned to any type
-    typir.Conversion.markAsConvertible(
-      typeNull,
-      typeBool,
-      "IMPLICIT_EXPLICIT"
-    );
+    typir.Conversion.markAsConvertible(typeNull, typeBool, "IMPLICIT_EXPLICIT");
+
     typir.Conversion.markAsConvertible(
       typeNull,
       typeNumber,
       "IMPLICIT_EXPLICIT"
     );
+
     typir.Conversion.markAsConvertible(
       typeNull,
       typeString,
-      "IMPLICIT_EXPLICIT"
-    );
-    typir.Conversion.markAsConvertible(
-      typeNull,
-      typeAny,
       "IMPLICIT_EXPLICIT"
     );
 
@@ -277,12 +273,15 @@ export class ELangTypeSystem
               node.right,
               accept,
               (actual, expected) => ({
-                message: `This comparison will always return '${node.operator === "==" || node.operator === "equals"
-                  ? "false"
-                  : "true"
-                  }' as '${node.left.$cstNode?.text}' and '${node.right.$cstNode?.text
-                  }' have the different types '${actual.name}' and '${expected.name
-                  }'.`,
+                message: `This comparison will always return '${
+                  node.operator === "==" || node.operator === "equals"
+                    ? "false"
+                    : "true"
+                }' as '${node.left.$cstNode?.text}' and '${
+                  node.right.$cstNode?.text
+                }' have the different types '${actual.name}' and '${
+                  expected.name
+                }'.`,
                 languageNode: node,
                 languageProperty: "operator",
                 severity: "warning",
@@ -299,6 +298,11 @@ export class ELangTypeSystem
       .inferenceRule({
         ...binaryInferenceRule,
         validation: [
+          (node, _opName, _opType, accept, _typir) => { 
+            if (isReferenceExpression(node.left) && isExpression(node.right)) {
+              const variableType
+            }
+          },
           (node, _opName, _opType, accept, typir) =>
             typir.validation.Constraints.ensureNodeIsAssignable(
               node.right,
@@ -351,11 +355,11 @@ export class ELangTypeSystem
     });
 
     typir.validation.Collector.addValidationRulesForAstNodes({
+      ConstantDeclaration: this.validateVariableDeclaration,
+      MutableDeclaration: this.validateVariableDeclaration,
       // ForStatement: this.validateCondition,
       // IfStatement: this.validateCondition,
       ReturnStatement: this.validateReturnStatement,
-      ConstantDeclaration: this.validateVariableDeclaration,
-      MutableDeclaration: this.validateVariableDeclaration,
       // WhileStatement: this.validateCondition,
     });
   }
@@ -527,18 +531,6 @@ export class ELangTypeSystem
     accept: ValidationProblemAcceptor<AstNode>,
     typir: TypirServices<AstNode>
   ): void {
-    const typeVoid = typir.factory.Primitives.get({ primitiveName: "void" })!;
-
-    typir.validation.Constraints.ensureNodeHasNotType(
-      node,
-      typeVoid,
-      accept,
-      () => ({
-        message: "Variable can't be declared with a type 'void'.",
-        languageProperty: "type",
-      })
-    );
-
     typir.validation.Constraints.ensureNodeIsAssignable(
       node.value,
       node,

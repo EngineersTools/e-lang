@@ -27,7 +27,7 @@ Statement:
 ;
 
 StatementBlock:
-    '{' (statements+=Statement (statements+=Statement)*)? returnValue=ReturnStatement? '}'
+    '{' (statements+=Statement ';'? (statements+=Statement ';'?)*)? returnValue=ReturnStatement? '}'
 ;
 
 ReturnStatement:

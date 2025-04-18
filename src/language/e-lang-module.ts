@@ -7,15 +7,17 @@ import {
 import {
   createDefaultModule,
   createDefaultSharedModule,
+  PartialLangiumLSPServices,
   type DefaultSharedModuleContext,
   type LangiumServices,
-  type LangiumSharedServices,
+  type LangiumSharedServices
 } from "langium/lsp";
 import {
   createTypirLangiumServices,
   initializeLangiumTypirServices,
   TypirLangiumServices,
 } from "typir-langium";
+import { ELangHoverProvider } from "./e-lang-hover-provider.js";
 import { ELangTypeSystem } from "./e-lang-type-checking.js";
 import { ELangValidationRegistry, ELangValidator } from "./e-lang-validator.js";
 import { ELangAstType, reflection } from "./generated/ast.js";
@@ -35,7 +37,10 @@ export type ELangServices = LangiumServices & ELangAddedServices;
 
 export function createELangModule(
   shared: LangiumSharedCoreServices
-): Module<ELangServices, PartialLangiumCoreServices & ELangAddedServices> {
+): Module<
+  ELangServices,
+  PartialLangiumCoreServices & PartialLangiumLSPServices & ELangAddedServices
+> {
   return {
     validation: {
       ValidationRegistry: (services) => new ELangValidationRegistry(services),
@@ -45,6 +50,9 @@ export function createELangModule(
       createTypirLangiumServices(shared, reflection, new ELangTypeSystem(), {
         /* customize Typir services here */
       }),
+    lsp: {
+      HoverProvider: (services) => new ELangHoverProvider(services),
+    },
   };
 }
 
