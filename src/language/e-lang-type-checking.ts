@@ -7,10 +7,11 @@ import {
   InferenceRuleNotApplicable,
   InferOperatorWithMultipleOperands,
   InferOperatorWithSingleOperand,
+  isType,
   NO_PARAMETER_NAME,
   TypeInitializer,
   TypirServices,
-  ValidationProblemAcceptor
+  ValidationProblemAcceptor,
 } from "typir";
 import {
   LangiumTypeSystemDefinition,
@@ -18,12 +19,12 @@ import {
 } from "typir-langium";
 import {
   BinaryExpression,
-  BooleanLiteral,
   ConstantDeclaration,
   ELangAstType,
   Expression,
   FormulaDeclaration,
   IfStatement,
+  isBinaryExpression,
   isConstantDeclaration,
   isFormulaDeclaration,
   isModelDeclaration,
@@ -35,11 +36,16 @@ import {
   ModelDeclaration,
   MutableDeclaration,
   NullLiteral,
-  NumberLiteral,
   ReturnStatement,
-  StringLiteral,
-  TypeReference
+  TypeReference,
 } from "./generated/ast.js";
+import {
+  createTypeAny,
+  createTypeNumber,
+  createTypeText,
+  getOrCreateTypeBool,
+  getOrCreateTypeNull,
+} from "./type-system/createPrimitives.js";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export class ELangTypeSystem
@@ -47,43 +53,13 @@ export class ELangTypeSystem
 {
   onInitialize(typir: TypirLangiumServices<ELangAstType>): void {
     /**
-     * Primitive types
+     * Create and register primitive types
      */
-    const typeBool = typir.factory.Primitives.create({
-      primitiveName: "boolean",
-    })
-      .inferenceRule({ languageKey: BooleanLiteral })
-      .inferenceRule({
-        languageKey: TypeReference,
-        matching: (node: TypeReference) => node.primitive === "boolean",
-      })
-      .finish();
-
-    const typeNumber = typir.factory.Primitives.create({
-      primitiveName: "number",
-    })
-      .inferenceRule({ languageKey: NumberLiteral })
-      .inferenceRule({
-        languageKey: TypeReference,
-        matching: (node: TypeReference) => node.primitive === "number",
-      })
-      .finish();
-
-    const typeString = typir.factory.Primitives.create({
-      primitiveName: "text",
-    })
-      .inferenceRule({ languageKey: StringLiteral })
-      .inferenceRule({
-        languageKey: TypeReference,
-        matching: (node: TypeReference) => node.primitive === "text",
-      })
-      .finish();
-
-    const typeNull = typir.factory.Primitives.create({ primitiveName: "null" })
-      .inferenceRule({ languageKey: NullLiteral })
-      .finish();
-
-    const typeAny = typir.factory.Top.create({}).finish();
+    const typeBool = getOrCreateTypeBool(typir);
+    const typeNumber = createTypeNumber(typir);
+    const typeText = createTypeText(typir);
+    const typeNull = getOrCreateTypeNull(typir);
+    const typeAny = createTypeAny(typir);
 
     typir.Inference.addInferenceRulesForAstNodes({
       MemberAccess: (node) => {
@@ -97,7 +73,7 @@ export class ELangTypeSystem
           return InferenceRuleNotApplicable;
         } else if (isConstantDeclaration(ref)) {
           return ref;
-        } else if (isMutableDeclaration(ref)) {      
+        } else if (isMutableDeclaration(ref)) {
           return ref;
         } else if (isParameterDeclaration(ref)) {
           return ref;
@@ -110,6 +86,34 @@ export class ELangTypeSystem
         }
       },
       ReferenceExpression: (node) => {
+        if (isBinaryExpression(node.$container)) {
+          const parent = node.$container;
+          if (
+            parent.operator === "=" &&
+            !isReferenceExpression(parent.right) &&
+            isReferenceExpression(parent.left) &&
+            parent.left.element.ref
+          ) {
+            const variableType = typir.Inference.inferType(
+              parent.left.element.ref
+            );
+            const valueType = typir.Inference.inferType(parent.right);
+
+            if (
+              isType(variableType) &&
+              variableType === typeNull &&
+              isType(valueType) &&
+              valueType !== typeNull
+            ) {
+              typir.caching.LanguageNodeInference.cacheSet(
+                node.element.ref,
+                valueType
+              );
+              return parent.right;
+            }
+          }
+        }
+
         return node.element.ref ?? InferenceRuleNotApplicable;
       },
       ConstantDeclaration: (node) => {
@@ -142,11 +146,7 @@ export class ELangTypeSystem
       "IMPLICIT_EXPLICIT"
     );
 
-    typir.Conversion.markAsConvertible(
-      typeNull,
-      typeString,
-      "IMPLICIT_EXPLICIT"
-    );
+    typir.Conversion.markAsConvertible(typeNull, typeText, "IMPLICIT_EXPLICIT");
 
     const prefixUnaryInferenceRule: InferOperatorWithSingleOperand<
       AstNode,
@@ -232,9 +232,9 @@ export class ELangTypeSystem
       name: "+",
       signatures: [
         { left: typeNumber, right: typeNumber, return: typeNumber },
-        { left: typeString, right: typeString, return: typeString },
-        { left: typeNumber, right: typeString, return: typeString },
-        { left: typeString, right: typeNumber, return: typeString },
+        { left: typeText, right: typeText, return: typeText },
+        { left: typeNumber, right: typeText, return: typeText },
+        { left: typeText, right: typeNumber, return: typeText },
       ],
     })
       .inferenceRule(binaryInferenceRule)
@@ -288,13 +288,6 @@ export class ELangTypeSystem
         })
         .finish();
     }
-
-    typir.factory.Operators.createBinary({
-      name: '=',
-      signature: { left: typeNull, right: typeAny, return: typeAny }
-    })
-      .inferenceRule(binaryInferenceRule)
-      .finish()
 
     typir.factory.Operators.createBinary({
       name: "=",
@@ -361,6 +354,7 @@ export class ELangTypeSystem
       // IfStatement: this.validateCondition,
       ReturnStatement: this.validateReturnStatement,
       // WhileStatement: this.validateCondition,
+      // BinaryExpression: this.inferTypeOfImplicitNullAssignment,
     });
   }
 
@@ -423,7 +417,7 @@ export class ELangTypeSystem
         // })
         .finish();
 
-      // explicitly declare, that 'nil' can be assigned to any Class variable
+      // explicitly declare, that 'null' can be assigned to any Class variable
       modelType.addListener((type) => {
         typir.Conversion.markAsConvertible(
           typir.factory.Primitives.get({ primitiveName: "null" })!,
@@ -567,11 +561,9 @@ export class ELangTypeSystem
   protected validateMatchCondition(
     node: MatchStatement,
     accept: ValidationProblemAcceptor<AstNode>,
-    typir: TypirServices<AstNode>
+    typir: TypirLangiumServices<ELangAstType>
   ): void {
-    const typeBool = typir.factory.Primitives.get({
-      primitiveName: "boolean",
-    })!;
+    const typeBool = getOrCreateTypeBool(typir)!;
 
     typir.validation.Constraints.ensureNodeIsAssignable(
       node.condition,
@@ -582,5 +574,64 @@ export class ELangTypeSystem
         languageProperty: "condition",
       })
     );
+  }
+
+  protected inferTypeOfImplicitNullAssignment(
+    node: BinaryExpression,
+    accept: ValidationProblemAcceptor<AstNode>,
+    typir: TypirServices<AstNode>
+  ): void {
+    // Only handle assignment operations
+    if (node.operator !== "=") {
+      return;
+    }
+
+    const left = node.left;
+    const right = node.right;
+
+    // Check if left side is a reference to a mutable variable
+    if (isReferenceExpression(left)) {
+      const ref = left.element.ref;
+      if (isMutableDeclaration(ref)) {
+        // If the variable's type is null and we're assigning a new value
+        const typeNull = typir.factory.Primitives.get({
+          primitiveName: "null",
+        })!;
+        const currentType = typir.Inference.inferType(ref);
+
+        if (currentType === typeNull) {
+          // Infer the type from the right-hand side expression
+          const newTypeResult = typir.Inference.inferType(right);
+          if (Array.isArray(newTypeResult)) {
+            // If there are inference problems, report them
+            newTypeResult.forEach((problem) => {
+              accept({
+                message: problem.location,
+                severity: "error",
+                languageNode: node,
+                languageProperty: "operator",
+              });
+            });
+            return;
+          }
+
+          if (newTypeResult !== typeNull) {
+            // Get the primitive type name from the type
+            // const typeName = typir.factory.Primitives.get({
+            //   primitiveName: newTypeResult.getIdentifier(),
+            // })?.getIdentifier();
+
+            // Create a new TypeReference based on the inferred type
+            const typeRef: TypeReference = {
+              $type: "TypeReference",
+              primitive: "text",
+              array: false,
+            };
+            // Update the variable's type
+            ref.type = typeRef;
+          }
+        }
+      }
+    }
   }
 }

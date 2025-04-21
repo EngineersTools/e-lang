@@ -1,32 +1,32 @@
 // Equivalence of any primitive type to null
 
 // EXPLICIT
-const myBoolean: boolean = null;
-const myText: text = null;
-const myNumber: number = null;
+{
+    const myBoolean: boolean = null;
+    const myText: text = null;
+    const myNumber: number = null;
 
-var myBooleanVar: boolean = null;
-var myTextVar: text = null;
-var myNumberVar: number = null;
+    var myBooleanVar: boolean = null;
+    var myTextVar: text = null;
+    var myNumberVar: number = null;
+
+    myBooleanVar = true
+    myTextVar = "Hello World"
+    myNumberVar = 10
+}
+
+
+// IMPLICIT
+const myBoolean = null;
+const myText = null;
+const myNumber = null;
+
+var myBooleanVar = null;
+var myTextVar = null;
+var myNumberVar = null;
 
 myBooleanVar = true
 myTextVar = "Hello World"
 myNumberVar = 10
 
-
-// IMPLICIT
-{
-    const myBoolean = null;
-    const myText = null;
-    const myNumber = null;
-
-    var myBooleanVar = null;
-    var myTextVar = null;
-    var myNumberVar = null;
-
-    myBooleanVar = true
-    myTextVar = "Hello World"
-    myNumberVar = 10
-
-    print myBooleanVar
-}
+print myBooleanVar
