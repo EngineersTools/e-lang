@@ -10,11 +10,13 @@ import {
   PartialLangiumLSPServices,
   type DefaultSharedModuleContext,
   type LangiumServices,
-  type LangiumSharedServices
+  type LangiumSharedServices,
 } from "langium/lsp";
+import { TypirServices } from "typir";
 import {
   createTypirLangiumServices,
   initializeLangiumTypirServices,
+  PartialTypirLangiumServices,
   TypirLangiumServices,
 } from "typir-langium";
 import { ELangHoverProvider } from "./e-lang-hover-provider.js";
@@ -25,6 +27,10 @@ import {
   ELangGeneratedModule,
   ELangGeneratedSharedModule,
 } from "./generated/module.js";
+import {
+  DimensionKind,
+  DimensionKindName,
+} from "./type-system/kinds/dimension-kind.js";
 
 export type ELangAddedServices = {
   validation: {
@@ -48,8 +54,14 @@ export function createELangModule(
     },
     typir: () =>
       createTypirLangiumServices(shared, reflection, new ELangTypeSystem(), {
-        /* customize Typir services here */
-      }),
+        factory: {
+          Dimensions: (services: TypirServices<ELangAstType>) =>
+            services.infrastructure.Kinds.getOrCreateKind(
+              DimensionKindName,
+              (services) => new DimensionKind(services)
+            ),
+        },
+      } as Module<PartialTypirLangiumServices<ELangAstType>>),
     lsp: {
       HoverProvider: (services) => new ELangHoverProvider(services),
     },
