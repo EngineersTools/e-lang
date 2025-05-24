@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "module": "Node16",
+    "target": "ESNext",
+    "module": "NodeNext",
     "lib": ["ESNext", "DOM", "WebWorker"],
     "sourceMap": true,
     "outDir": "out",
@@ -9,7 +9,7 @@
     "noUnusedLocals": true,
     "noImplicitReturns": true,
     "noImplicitOverride": true,
-    "moduleResolution": "Node16",
+    "moduleResolution": "nodenext",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

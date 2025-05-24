@@ -2,6 +2,7 @@ import { AstNode, AstUtils } from "langium";
 import {
   assertUnreachable,
   CreateFieldDetails,
+  CreateMethodDetails,
   CreateParameterDetails,
   FunctionType,
   InferenceRuleNotApplicable,
@@ -20,18 +21,24 @@ import {
 import {
   BinaryExpression,
   ConstantDeclaration,
+  DimensionDeclaration,
   ELangAstType,
   Expression,
   FormulaDeclaration,
   IfStatement,
   isBinaryExpression,
   isConstantDeclaration,
+  isConversionDeclaration,
+  isDimensionDeclaration,
   isFormulaDeclaration,
+  isLambdaExpression,
   isModelDeclaration,
   isMutableDeclaration,
   isNamedElement,
   isParameterDeclaration,
   isReferenceExpression,
+  isUnitDeclaration,
+  LambdaExpression,
   MatchStatement,
   ModelDeclaration,
   MutableDeclaration,
@@ -112,6 +119,8 @@ export class ELangTypeSystem
               return parent.right;
             }
           }
+        } else if (isParameterDeclaration(node.element.ref)) {
+          return node.element.ref.type;
         }
 
         return node.element.ref ?? InferenceRuleNotApplicable;
@@ -135,6 +144,8 @@ export class ELangTypeSystem
         }
       },
       ParameterDeclaration: (node) => node.type,
+      TypeReference: (node) =>
+        node.declaredType?.ref ?? InferenceRuleNotApplicable,
     });
 
     // Null can be assigned to any type
@@ -359,6 +370,7 @@ export class ELangTypeSystem
   }
 
   onNewAstNode(node: AstNode, typir: TypirLangiumServices<ELangAstType>): void {
+    // console.log(node.$type, node.$cstNode?.text);
     if (isModelDeclaration(node)) {
       const modelName = node.name;
       const modelType = typir.factory.Classes.create({
@@ -427,6 +439,61 @@ export class ELangTypeSystem
       });
       // The following idea does not work, since variables in LOX have a concrete class type and not an "any class" type:
       // typir.conversion.markAsConvertible(typeNil, this.classKind.getOrCreateTopClassType({}), 'IMPLICIT_EXPLICIT');
+    } else if (isDimensionDeclaration(node)) {
+      typir.factory.Classes.create({
+        className: node.name,
+        fields: node.units.filter(isUnitDeclaration).map(
+          (f) =>
+            <CreateFieldDetails<AstNode>>{
+              name: f.name,
+              type: f,
+            }
+        ),
+        methods: node.conversions.filter(isConversionDeclaration).map(
+          (m) =>
+            <CreateMethodDetails<AstNode>>{
+              type: m,
+            }
+        ),
+        associatedLanguageNode: node,
+      })
+        .inferenceRuleForClassDeclaration({
+          languageKey: DimensionDeclaration,
+          matching: (languageNode: DimensionDeclaration) =>
+            languageNode === node,
+        })
+        .finish();
+    } else if (isLambdaExpression(node)) {
+      this.createLambdaDetails(node, typir);
+    }
+  }
+
+  protected createLambdaDetails(
+    node: LambdaExpression,
+    typir: TypirLangiumServices<ELangAstType>
+  ) {
+    if (node.returnType !== undefined) {
+      const config = typir.factory.Functions.create({
+        functionName: "Lambda",
+        outputParameter: { name: NO_PARAMETER_NAME, type: node.returnType },
+        inputParameters: node.parameters.map(
+          (p) => <CreateParameterDetails<AstNode>>{ name: p.name, type: p.type }
+        ),
+      });
+
+      return config.finish();
+    } else {
+      const typeNull = getOrCreateTypeNull(typir);
+
+      const config = typir.factory.Functions.create({
+        functionName: "Lambda",
+        outputParameter: { name: NO_PARAMETER_NAME, type: typeNull },
+        inputParameters: node.parameters.map(
+          (p) => <CreateParameterDetails<AstNode>>{ name: p.name, type: p.type }
+        ),
+      });
+
+      return config.finish();
     }
   }
 

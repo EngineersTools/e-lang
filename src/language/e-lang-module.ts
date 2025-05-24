@@ -10,7 +10,7 @@ import {
   PartialLangiumLSPServices,
   type DefaultSharedModuleContext,
   type LangiumServices,
-  type LangiumSharedServices
+  type LangiumSharedServices,
 } from "langium/lsp";
 import {
   createTypirLangiumServices,
@@ -18,6 +18,7 @@ import {
   TypirLangiumServices,
 } from "typir-langium";
 import { ELangHoverProvider } from "./e-lang-hover-provider.js";
+import { ELangScopeComputation, ELangScopeProvider } from "./e-lang-scope.js";
 import { ELangTypeSystem } from "./e-lang-type-checking.js";
 import { ELangValidationRegistry, ELangValidator } from "./e-lang-validator.js";
 import { ELangAstType, reflection } from "./generated/ast.js";
@@ -52,6 +53,10 @@ export function createELangModule(
       }),
     lsp: {
       HoverProvider: (services) => new ELangHoverProvider(services),
+    },
+    references: {
+      ScopeProvider: (services) => new ELangScopeProvider(services),
+      ScopeComputation: (services) => new ELangScopeComputation(services),
     },
   };
 }

@@ -17,8 +17,11 @@ export class ELangHoverProvider extends AstNodeHoverProvider {
   protected override getAstNodeHoverContent(node: AstNode): Hover | undefined {
     let hoverText = "";
     const nodeType = this.typir.Inference.inferType(node);
+
+    // console.log(nodeType);
+
     const typeName = isType(nodeType)
-      ? nodeType.getIdentifier()
+      ? nodeType.getName()
       : nodeType.map((inferenceProblem) => inferenceProblem.languageNode.$type);
 
     if (isNamed(node)) {

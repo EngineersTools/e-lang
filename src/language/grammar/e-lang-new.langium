@@ -255,7 +255,15 @@ type NamedElement =
     ConstantDeclaration
     | MutableDeclaration
     | ParameterDeclaration
-    | FormulaDeclaration;
+    | FormulaDeclaration
+;
+
+type Exportable = 
+    ConstantDeclaration
+    | MutableDeclaration
+    | FormulaDeclaration
+    | DimensionDeclaration
+;
 
 hidden terminal WS: /\s+/;
 terminal ID: /[_a-zA-Z][\w_]*/;

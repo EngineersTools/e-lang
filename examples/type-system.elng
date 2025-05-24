@@ -1,32 +1,63 @@
 // Equivalence of any primitive type to null
 
 // EXPLICIT
-{
-    const myBoolean: boolean = null;
-    const myText: text = null;
-    const myNumber: number = null;
+// {
+//     const myBoolean: boolean = null;
+//     const myText: text = null;
+//     const myNumber: number = null;
 
-    var myBooleanVar: boolean = null;
-    var myTextVar: text = null;
-    var myNumberVar: number = null;
+//     var myBooleanVar: boolean = null;
+//     var myTextVar: text = null;
+//     var myNumberVar: number = null;
 
-    myBooleanVar = true
-    myTextVar = "Hello World"
-    myNumberVar = 10
-}
+//     myBooleanVar = true
+//     myTextVar = "Hello World"
+//     myNumberVar = 10
+
+//     model MyModel {
+//         modelText: text
+//         modelNumber: number
+//         modelBoolean: boolean
+//     }
+
+//     const aModel: MyModel = null
+// }
 
 
 // IMPLICIT
-const myBoolean = null;
-const myText = null;
-const myNumber = null;
+// const myBoolean = null;
+// const myText = null;
+// const myNumber = null;
 
 var myBooleanVar = null;
-var myTextVar = null;
-var myNumberVar = null;
+// var myTextVar = null;
+// var myNumberVar = null;
 
 myBooleanVar = true
-myTextVar = "Hello World"
-myNumberVar = 10
+// myTextVar = "Hello World"
+// myNumberVar = 10
 
-print myBooleanVar
+print myBooleanVar;
+
+dimension Distance {
+    unit m: meter
+    unit km: kilometer
+
+    conversion km->m: (val: km): m => val * 1000
+}
+
+const length: Distance = 10 m
+// const width: Distance = null
+
+print length
+// print width
+
+model MyModel {
+    modelText: text
+    modelNumber: number
+    modelBoolean: boolean
+}
+
+const myModel: MyModel = null
+
+print myModel
