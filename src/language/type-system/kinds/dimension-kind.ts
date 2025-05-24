@@ -2,10 +2,10 @@ import { Kind, TypirServices } from "typir";
 
 export const DimensionKindName = "DimensionKind";
 
-export interface ClassKindOptions {
-    typing: 'Structural' | 'Nominal', // JS classes are nominal, TS structures are structural
-    /** Will be used only internally as prefix for the unique identifiers for dimension type names. */
-    identifierPrefix: string,
+export interface DimensionKindOptions {
+  typing: "Structural" | "Nominal"; // JS classes are nominal, TS structures are structural
+  /** Will be used only internally as prefix for the unique identifiers for dimension type names. */
+  identifierPrefix: string;
 }
 
 export interface DimensionFactoryService<LanguageType> {
@@ -21,13 +21,29 @@ export interface DimensionFactoryService<LanguageType> {
 export class DimensionKind<LanguageType>
   implements Kind, DimensionFactoryService<LanguageType>
 {
-  $name = DimensionKindName;
+  readonly $name: "DimensionKind";
+  readonly services: TypirServices<LanguageType>;
+  readonly options: Readonly<DimensionKindOptions>;
 
-  constructor(services: TypirServices<LanguageType>, options?: Partial<ClassKindOptions>) {
-        this.$name = DimensionKindName;
-        // this.services = services;
-        // this.services.infrastructure.Kinds.register(this);
-        // this.options = this.collectOptions(options);
-        // assertTrue(this.options.maximumNumberOfSuperClasses >= 0); // no negative values
-    }
+  constructor(
+    services: TypirServices<LanguageType>,
+    options?: Partial<DimensionKindOptions>
+  ) {
+    this.$name = DimensionKindName;
+    this.services = services;
+    this.services.infrastructure.Kinds.register(this);
+    this.options = this.collectOptions(options);
+  }
+
+  protected collectOptions(
+    options?: Partial<DimensionKindOptions>
+  ): DimensionKindOptions {
+    return {
+      // the default values:
+      typing: "Nominal",
+      identifierPrefix: "dimension",
+      // the actually overriden values:
+      ...options,
+    };
+  }
 }
