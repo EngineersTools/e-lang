@@ -1,7 +1,4 @@
-import {
-    DefaultScopeProvider,
-    LangiumDocuments,
-} from "langium";
+import { DefaultScopeProvider, LangiumDocuments } from "langium";
 import { TypirLangiumServices } from "typir-langium";
 import { ELangServices } from "./ELangServices.type.js";
 import { ELangSpecifics } from "./type-system/ELangSpecifics.interface.js";
@@ -16,5 +13,3 @@ export class ELangScopeProvider extends DefaultScopeProvider {
     this.typir = services.typir;
   }
 }
-
-

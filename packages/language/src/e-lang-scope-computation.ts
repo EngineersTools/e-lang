@@ -1,11 +1,12 @@
 import {
-  AstNode,
-  AstNodeDescription,
-  DefaultScopeComputation,
-  LangiumDocument,
-  MultiMap,
+    AstNode,
+    AstNodeDescription,
+    DefaultScopeComputation,
+    LangiumDocument,
+    MultiMap,
 } from "langium";
 import { ELangServices } from "./ELangServices.type.js";
+import { isUnitDeclaration } from "./generated/ast.js";
 
 export class ELangScopeComputation extends DefaultScopeComputation {
   constructor(services: ELangServices) {
@@ -17,9 +18,19 @@ export class ELangScopeComputation extends DefaultScopeComputation {
     document: LangiumDocument,
     symbols: MultiMap<AstNode, AstNodeDescription>
   ): void {
-    console.log("Adding local symbol:", node);
-    console.log("Document:", document);
-    console.log("Symbols:", symbols);
+    if (isUnitDeclaration(node)) {
+      const container = node.$container.$container;
+      if (container) {
+        const name = this.nameProvider.getName(node);
+        if (name) {
+          symbols.add(
+            container,
+            this.descriptions.createDescription(node, name, document)
+          );
+        }
+      }
+    }
+
     super.addLocalSymbol(node, document, symbols);
   }
 }
