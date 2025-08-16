@@ -2,7 +2,6 @@ import { AstNode, AstUtils } from "langium";
 import {
   assertUnreachable,
   CreateFieldDetails,
-  CreateMethodDetails,
   CreateParameterDetails,
   FunctionType,
   InferenceRuleNotApplicable,
@@ -21,14 +20,12 @@ import {
 import {
   BinaryExpression,
   ConstantDeclaration,
-  DimensionDeclaration,
   ELangAstType,
   Expression,
   FormulaDeclaration,
   IfStatement,
   isBinaryExpression,
   isConstantDeclaration,
-  isConversionDeclaration,
   isDimensionDeclaration,
   isFormulaDeclaration,
   isLambdaExpression,
@@ -44,7 +41,7 @@ import {
   MutableDeclaration,
   NullLiteral,
   ReturnStatement,
-  TypeReference,
+  TypeReference
 } from "./generated/ast.js";
 import {
   createTypeAny,
@@ -53,6 +50,10 @@ import {
   getOrCreateTypeBool,
   getOrCreateTypeNull,
 } from "./type-system/createPrimitives.js";
+import { ElangTypirLangiumServices } from "./type-system/e-lang-type-services.js";
+import {
+  CreateUnitDetails
+} from "./type-system/kinds/dimension-kind.js";
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 export class ELangTypeSystem
@@ -361,15 +362,14 @@ export class ELangTypeSystem
     typir.validation.Collector.addValidationRulesForAstNodes({
       ConstantDeclaration: this.validateVariableDeclaration,
       MutableDeclaration: this.validateVariableDeclaration,
-      // ForStatement: this.validateCondition,
-      // IfStatement: this.validateCondition,
       ReturnStatement: this.validateReturnStatement,
-      // WhileStatement: this.validateCondition,
-      // BinaryExpression: this.inferTypeOfImplicitNullAssignment,
     });
   }
 
-  onNewAstNode(node: AstNode, typir: TypirLangiumServices<ELangAstType>): void {
+  onNewAstNode(
+    node: AstNode,
+    typir: ElangTypirLangiumServices<ELangAstType>
+  ): void {
     // console.log(node.$type, node.$cstNode?.text);
     if (isModelDeclaration(node)) {
       const modelName = node.name;
@@ -440,29 +440,50 @@ export class ELangTypeSystem
       // The following idea does not work, since variables in LOX have a concrete class type and not an "any class" type:
       // typir.conversion.markAsConvertible(typeNil, this.classKind.getOrCreateTopClassType({}), 'IMPLICIT_EXPLICIT');
     } else if (isDimensionDeclaration(node)) {
-      typir.factory.Classes.create({
-        className: node.name,
-        fields: node.units.filter(isUnitDeclaration).map(
+      typir.factory.Dimensions.create({
+        dimensionName: node.name,
+        units: node.units.filter(isUnitDeclaration).map(
           (f) =>
-            <CreateFieldDetails<AstNode>>{
+            <CreateUnitDetails<AstNode>>{
               name: f.name,
               type: f,
             }
         ),
-        methods: node.conversions.filter(isConversionDeclaration).map(
-          (m) =>
-            <CreateMethodDetails<AstNode>>{
-              type: m,
-            }
-        ),
-        associatedLanguageNode: node,
-      })
-        .inferenceRuleForClassDeclaration({
-          languageKey: DimensionDeclaration,
-          matching: (languageNode: DimensionDeclaration) =>
-            languageNode === node,
-        })
-        .finish();
+        conversions: [],
+        // node.conversions.filter(isConversionDeclaration).map(
+        //   (m) =>
+        //     <CreateConversionDetails<AstNode>>{
+        //       type: this.createLambdaDetails(m.lambda, typir),
+        //     }
+        // ),
+      }).finish();
+      // .inferenceRuleForDeclaration({
+      //   languageKey: node.$type,
+      //   matching: (languageNode: DimensionDeclaration) => languageNode === node,
+      // });
+      // typir.factory.Classes.create({
+      //   className: node.name,
+      //   fields: node.units.filter(isUnitDeclaration).map(
+      //     (f) =>
+      //       <CreateFieldDetails<AstNode>>{
+      //         name: f.name,
+      //         type: f,
+      //       }
+      //   ),
+      //   methods: node.conversions.filter(isConversionDeclaration).map(
+      //     (m) =>
+      //       <CreateMethodDetails<AstNode>>{
+      //         type: m,
+      //       }
+      //   ),
+      //   associatedLanguageNode: node,
+      // })
+      //   .inferenceRuleForClassDeclaration({
+      //     languageKey: DimensionDeclaration,
+      //     matching: (languageNode: DimensionDeclaration) =>
+      //       languageNode === node,
+      //   })
+      //   .finish();
     } else if (isLambdaExpression(node)) {
       this.createLambdaDetails(node, typir);
     }
