@@ -26,5 +26,8 @@
         "packages/language",
         "packages/cli",
         "packages/extension"
-    ]
+    ],
+    "dependencies": {
+        "typir-langium": "^0.3.0"
+    }
 }
