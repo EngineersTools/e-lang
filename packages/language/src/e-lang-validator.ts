@@ -1,6 +1,6 @@
 import type { ValidationChecks } from 'langium';
 import type { ELangAstType } from './generated/ast.js';
-import type { ELangServices } from './e-lang-module.js';
+import type { ELangServices } from "./ELangServices.type.js";
 
 /**
  * Register custom validation checks.

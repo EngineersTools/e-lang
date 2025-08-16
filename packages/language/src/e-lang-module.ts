@@ -3,41 +3,24 @@ import {
   createDefaultModule,
   createDefaultSharedModule,
   type DefaultSharedModuleContext,
-  type LangiumServices,
   type LangiumSharedServices,
   type PartialLangiumServices,
 } from "langium/lsp";
-import {
-  createTypirLangiumServices,
-  TypirLangiumServices,
-} from "typir-langium";
+import { createTypirLangiumServicesWithAdditionalServices } from "typir-langium";
+import { ELangAddedServices, ELangServices } from "./ELangServices.type.js";
 import {
   ELangValidator,
   registerValidationChecks,
 } from "./e-lang-validator.js";
+import { reflection } from "./generated/ast.js";
 import {
   ELangGeneratedModule,
   ELangGeneratedSharedModule,
 } from "./generated/module.js";
+import { ELangAdditionalTypirServices } from "./type-system/ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "./type-system/ELangSpecifics.interface.js";
-import { reflection } from "./generated/ast.js";
 import { ELangTypeSystem } from "./type-system/ELangTypeSystem.class.js";
-
-/**
- * Declaration of custom services - add your own service classes here.
- */
-export type ELangAddedServices = {
-  validation: {
-    ELangValidator: ELangValidator;
-  };
-  typir: TypirLangiumServices<ELangSpecifics>;
-};
-
-/**
- * Union of Langium default services and your custom services - use this as constructor parameter
- * of custom service classes.
- */
-export type ELangServices = LangiumServices & ELangAddedServices;
+import { dimensionFactory } from "./type-system/custom-types/dimension/dimensionFactory.js";
 
 /**
  * Dependency injection module that overrides Langium default services and contributes the
@@ -52,12 +35,14 @@ export const ELangModule: Module<
     ELangValidator: () => new ELangValidator(),
   },
   typir: (services) =>
-    createTypirLangiumServices(
-      services.shared,
-      reflection,
-      new ELangTypeSystem(),
-      {}
-    ),
+    createTypirLangiumServicesWithAdditionalServices<
+      ELangSpecifics,
+      ELangAdditionalTypirServices
+    >(services.shared, reflection, new ELangTypeSystem(), {
+      factory: {
+        Dimension: dimensionFactory,
+      },
+    }),
 };
 
 /**
