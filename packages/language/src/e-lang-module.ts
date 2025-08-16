@@ -6,7 +6,10 @@ import {
   type LangiumSharedServices,
   type PartialLangiumServices,
 } from "langium/lsp";
-import { createTypirLangiumServicesWithAdditionalServices } from "typir-langium";
+import {
+  createTypirLangiumServicesWithAdditionalServices,
+  initializeLangiumTypirServices,
+} from "typir-langium";
 import { ELangAddedServices, ELangServices } from "./ELangServices.type.js";
 import {
   ELangValidator,
@@ -70,17 +73,24 @@ export function createELangServices(context: DefaultSharedModuleContext): {
     createDefaultSharedModule(context),
     ELangGeneratedSharedModule
   );
+
   const ELang = inject(
     createDefaultModule({ shared }),
     ELangGeneratedModule,
     ELangModule
   );
+
   shared.ServiceRegistry.register(ELang);
+
   registerValidationChecks(ELang);
+
   if (!context.connection) {
     // We don't run inside a language server
     // Therefore, initialize the configuration provider instantly
     shared.workspace.ConfigurationProvider.initialized({});
   }
+
+  initializeLangiumTypirServices(ELang, ELang.typir);
+
   return { shared, ELang };
 }
