@@ -11,6 +11,7 @@ import {
   initializeLangiumTypirServices,
 } from "typir-langium";
 import { ELangAddedServices, ELangServices } from "./ELangServices.type.js";
+import { ELangHoverProvider } from "./e-lang-hover-provider.js";
 import {
   ELangValidator,
   registerValidationChecks,
@@ -37,6 +38,9 @@ export const ELangModule: Module<
 > = {
   validation: {
     ELangValidator: () => new ELangValidator(),
+  },
+  lsp: {
+    HoverProvider: (services) => new ELangHoverProvider(services),
   },
   typir: (services) =>
     createTypirLangiumServicesWithAdditionalServices<
