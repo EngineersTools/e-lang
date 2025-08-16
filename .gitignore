@@ -2,12 +2,11 @@
 !.vscode/extensions.json
 !.vscode/launch.json
 !.vscode/tasks.json
-.DS_Store
-*.vsix
 node_modules/
+dist/
 out/
-src/language/generated/
+**/src/generated
 syntaxes/
-static/bundle/
-static/monaco-editor-workers/
-static/worker/
+*.tsbuildinfo
+*.vsix
+.DS_Store
