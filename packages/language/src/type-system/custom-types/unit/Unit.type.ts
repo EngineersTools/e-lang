@@ -1,5 +1,5 @@
 export type UnitType = {
   name: string;
-  longName: string;
+  longName?: string;
   description?: string;
 };
