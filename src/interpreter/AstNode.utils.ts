@@ -1,8 +1,5 @@
 import { AstNode, LangiumDocument, URI } from "langium";
 import {
-  Domain,
-  Import,
-  isDomain,
   isExportable,
   isModelDeclaration,
 } from "../language/generated/ast.js";
@@ -10,7 +7,7 @@ import {
 export function getNodeDomain(node?: AstNode): AstNode | undefined {
   let container: AstNode | undefined = node?.$container;
 
-  while (container && !isDomain(container)) {
+  while (container) {
     container = getNodeDomain(node?.$container);
   }
 

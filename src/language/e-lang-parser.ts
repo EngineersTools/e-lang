@@ -1,13 +1,6 @@
 import { AstNode, DefaultAsyncParser, ParseResult } from "langium";
 import {
-    ELangProgram,
-    ForStatement,
-    isBinaryUnitFamilyExpression,
-    isELangProgram,
-    isUnitFamilyDeclaration,
-    StatementBlock,
-    UnitDeclaration,
-    UnitFamilyDeclaration,
+  isELangProgram
 } from "./generated/ast.js";
 
 export class ELangParser extends DefaultAsyncParser {
@@ -31,48 +24,10 @@ export class ELangParser extends DefaultAsyncParser {
     if (isELangProgram(result.value)) {
       for (let i = 0; i < result.value.statements.length; i++) {
         const statement = result.value.statements[i];
-
-        if (isUnitFamilyDeclaration(statement) && statement.complexDefinition) {
-          if (isBinaryUnitFamilyExpression(statement.complexDefinition)) {
-            switch (statement.complexDefinition.operator) {
-              case "*":
-                break;
-              case "/":
-                break;
-              case "^":
-                // statement.units.push({
-                //   $container: statement,F
-                //   $type: "UnitDeclaration",
-                //   name: "squared",
-                //   longName: "squared",
-                //   description: "squared",
-                // });
-                break;
-            }
-          }
-        }
+        console.log(statement);
       }
     }
 
     return Promise.resolve(result);
   }
-}
-
-export function createUnitDeclaration(
-  $container:
-    | ELangProgram
-    | ForStatement
-    | StatementBlock
-    | UnitFamilyDeclaration,
-  name: string,
-  longName?: string,
-  description?: string
-): UnitDeclaration {
-  return {
-    $container,
-    $type: "UnitDeclaration",
-    name,
-    longName,
-    description,
-  };
 }

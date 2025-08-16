@@ -1,8 +1,5 @@
 import { AstNode } from "langium";
-import {
-  isModelDeclaration,
-  isModelMemberAssignment
-} from "../language/generated/ast.js";
+import { isModelDeclaration } from "../language/generated/ast.js";
 
 /**
  * Calculates the full path of a nested model property
@@ -14,12 +11,12 @@ import {
 
 export function getQualifiedName(node: AstNode, name: string): string {
   let parent: AstNode | undefined = node.$container;
-  while (isModelDeclaration(parent) || isModelMemberAssignment(node)) {
+  while (isModelDeclaration(parent)) {
     name = isModelDeclaration(parent)
       ? `${parent.name}.${name}`
-      : isModelMemberAssignment(node)
-      ? `${node.property}.${name}`
-      : `${name}`;
+      : // : isModelMemberAssignment(node)
+        // ? `${node.property}.${name}`
+        `${name}`;
 
     parent = parent?.$container;
   }

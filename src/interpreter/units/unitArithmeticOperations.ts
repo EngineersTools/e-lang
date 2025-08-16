@@ -1,15 +1,15 @@
 import {
-    ConversionDeclaration,
-    ELangProgram,
-    MeasurementLiteral,
-    StatementBlock,
-    UnitDeclaration,
-    UnitFamilyDeclaration,
+  ConversionDeclaration,
+  DimensionDeclaration,
+  ELangProgram,
+  MeasurementLiteral,
+  StatementBlock,
+  UnitDeclaration,
 } from "../../language/generated/ast.js";
 import {
-    createComplexUnitFamilyType,
-    isComplexUnitFamilyType,
-    isMeasurementType,
+  createComplexUnitFamilyType,
+  isComplexUnitFamilyType,
+  isMeasurementType,
 } from "../../language/type-system/descriptions.js";
 import { inferType } from "../../language/type-system/infer.js";
 import { RunnerContext } from "../RunnerContext.js";
@@ -34,10 +34,10 @@ export function createUnitFamilyDeclaration(
   name: string,
   exported = false,
   description?: string
-): UnitFamilyDeclaration {
+): DimensionDeclaration {
   return {
     $container: program,
-    $type: "UnitFamilyDeclaration",
+    $type: "DimensionDeclaration",
     export: exported,
     name,
     description,
@@ -48,27 +48,27 @@ export function createUnitFamilyDeclaration(
 
 export function addUnitDeclarationToUnitFamilyDeclaration(
   unitDeclaration: UnitDeclaration,
-  unitFamily: UnitFamilyDeclaration
+  unitFamily: DimensionDeclaration
 ) {
   unitFamily.units.push(unitDeclaration);
 }
 
 export function addConversionDeclarationToUnitFamilyDeclaration(
   unitConversion: ConversionDeclaration,
-  unitFamily: UnitFamilyDeclaration
+  unitFamily: DimensionDeclaration
 ) {
   unitFamily.conversions.push(unitConversion);
 }
 
 export function addUnitFamilyDeclarationToProgram(
-  unitFamilyDeclaration: UnitFamilyDeclaration,
+  unitFamilyDeclaration: DimensionDeclaration,
   program: ELangProgram
 ) {
   program.statements.push(unitFamilyDeclaration);
 }
 
 export function addUnitFamilyDeclarationToStatementBlock(
-  unitFamilyDeclaration: UnitFamilyDeclaration,
+  unitFamilyDeclaration: DimensionDeclaration,
   block: StatementBlock
 ) {
   block.statements.push(unitFamilyDeclaration);
@@ -83,7 +83,7 @@ export async function multiplyMeasurements(
   const rightType = inferType(right, context.typeEnvironment);
 
   if (isMeasurementType(leftType) && isMeasurementType(rightType)) {
-    const resultValue = left.value * right.value;
+    const resultValue = left.value.value * right.value.value;
 
     const leftFamilyTypes = isComplexUnitFamilyType(leftType.unitFamilyType)
       ? leftType.unitFamilyType.unitFamilies
@@ -110,7 +110,7 @@ export async function multiplyMeasurements(
         ...right.unit,
         unitFamily: resultUnitFamilyType,
       },
-    } as MeasurementLiteral;
+    } as unknown as MeasurementLiteral;
   }
 
   return left;
