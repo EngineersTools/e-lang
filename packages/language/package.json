@@ -35,7 +35,8 @@
         "test": "vitest run"
     },
     "dependencies": {
-        "langium": "~3.5.0"
+        "langium": "~3.5.0",
+        "typir-langium": "^0.3.0"
     },
     "devDependencies": {
         "langium-cli": "~3.5.0",
