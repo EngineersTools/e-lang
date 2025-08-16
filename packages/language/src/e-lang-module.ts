@@ -1,32 +1,63 @@
-import { type Module, inject } from 'langium';
-import { createDefaultModule, createDefaultSharedModule, type DefaultSharedModuleContext, type LangiumServices, type LangiumSharedServices, type PartialLangiumServices } from 'langium/lsp';
-import { ELangGeneratedModule, ELangGeneratedSharedModule } from './generated/module.js';
-import { ELangValidator, registerValidationChecks } from './e-lang-validator.js';
+import { inject, type Module } from "langium";
+import {
+  createDefaultModule,
+  createDefaultSharedModule,
+  type DefaultSharedModuleContext,
+  type LangiumServices,
+  type LangiumSharedServices,
+  type PartialLangiumServices,
+} from "langium/lsp";
+import {
+  createTypirLangiumServices,
+  TypirLangiumServices,
+} from "typir-langium";
+import {
+  ELangValidator,
+  registerValidationChecks,
+} from "./e-lang-validator.js";
+import {
+  ELangGeneratedModule,
+  ELangGeneratedSharedModule,
+} from "./generated/module.js";
+import { ELangSpecifics } from "./type-system/ELangSpecifics.interface.js";
+import { reflection } from "./generated/ast.js";
+import { ELangTypeSystem } from "./type-system/ELangTypeSystem.class.js";
 
 /**
  * Declaration of custom services - add your own service classes here.
  */
 export type ELangAddedServices = {
-    validation: {
-        ELangValidator: ELangValidator
-    }
-}
+  validation: {
+    ELangValidator: ELangValidator;
+  };
+  typir: TypirLangiumServices<ELangSpecifics>;
+};
 
 /**
  * Union of Langium default services and your custom services - use this as constructor parameter
  * of custom service classes.
  */
-export type ELangServices = LangiumServices & ELangAddedServices
+export type ELangServices = LangiumServices & ELangAddedServices;
 
 /**
  * Dependency injection module that overrides Langium default services and contributes the
  * declared custom services. The Langium defaults can be partially specified to override only
  * selected services, while the custom services must be fully specified.
  */
-export const ELangModule: Module<ELangServices, PartialLangiumServices & ELangAddedServices> = {
-    validation: {
-        ELangValidator: () => new ELangValidator()
-    }
+export const ELangModule: Module<
+  ELangServices,
+  PartialLangiumServices & ELangAddedServices
+> = {
+  validation: {
+    ELangValidator: () => new ELangValidator(),
+  },
+  typir: (services) =>
+    createTypirLangiumServices(
+      services.shared,
+      reflection,
+      new ELangTypeSystem(),
+      {}
+    ),
 };
 
 /**
@@ -45,24 +76,24 @@ export const ELangModule: Module<ELangServices, PartialLangiumServices & ELangAd
  * @returns An object wrapping the shared services and the language-specific services
  */
 export function createELangServices(context: DefaultSharedModuleContext): {
-    shared: LangiumSharedServices,
-    ELang: ELangServices
+  shared: LangiumSharedServices;
+  ELang: ELangServices;
 } {
-    const shared = inject(
-        createDefaultSharedModule(context),
-        ELangGeneratedSharedModule
-    );
-    const ELang = inject(
-        createDefaultModule({ shared }),
-        ELangGeneratedModule,
-        ELangModule
-    );
-    shared.ServiceRegistry.register(ELang);
-    registerValidationChecks(ELang);
-    if (!context.connection) {
-        // We don't run inside a language server
-        // Therefore, initialize the configuration provider instantly
-        shared.workspace.ConfigurationProvider.initialized({});
-    }
-    return { shared, ELang };
+  const shared = inject(
+    createDefaultSharedModule(context),
+    ELangGeneratedSharedModule
+  );
+  const ELang = inject(
+    createDefaultModule({ shared }),
+    ELangGeneratedModule,
+    ELangModule
+  );
+  shared.ServiceRegistry.register(ELang);
+  registerValidationChecks(ELang);
+  if (!context.connection) {
+    // We don't run inside a language server
+    // Therefore, initialize the configuration provider instantly
+    shared.workspace.ConfigurationProvider.initialized({});
+  }
+  return { shared, ELang };
 }
