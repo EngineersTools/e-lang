@@ -36,6 +36,7 @@
     },
     "dependencies": {
         "langium": "^4.0.0",
+        "typir": "^0.3.0",
         "typir-langium": "^0.3.0"
     },
     "devDependencies": {

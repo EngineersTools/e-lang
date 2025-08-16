@@ -21,6 +21,7 @@ import { ELangAdditionalTypirServices } from "./type-system/ELangAdditionalTypir
 import { ELangSpecifics } from "./type-system/ELangSpecifics.interface.js";
 import { ELangTypeSystem } from "./type-system/ELangTypeSystem.class.js";
 import { dimensionFactory } from "./type-system/custom-types/dimension/dimensionFactory.js";
+import { unitFactory } from "./type-system/custom-types/unit/unitFactory.js";
 
 /**
  * Dependency injection module that overrides Langium default services and contributes the
@@ -40,6 +41,7 @@ export const ELangModule: Module<
       ELangAdditionalTypirServices
     >(services.shared, reflection, new ELangTypeSystem(), {
       factory: {
+        Unit: unitFactory,
         Dimension: dimensionFactory,
       },
     }),
