@@ -13,6 +13,10 @@ import {
 import { ELangAddedServices, ELangServices } from "./ELangServices.type.js";
 import { ELangHoverProvider } from "./e-lang-hover-provider.js";
 import {
+  ELangScopeProvider,
+} from "./e-lang-scope-provider.js";
+import { ELangScopeComputation } from "./e-lang-scope-computation.js";
+import {
   ELangValidator,
   registerValidationChecks,
 } from "./e-lang-validator.js";
@@ -41,6 +45,10 @@ export const ELangModule: Module<
   },
   lsp: {
     HoverProvider: (services) => new ELangHoverProvider(services),
+  },
+  references: {
+    ScopeProvider: (services) => new ELangScopeProvider(services),
+    ScopeComputation: (services) => new ELangScopeComputation(services),
   },
   typir: (services) =>
     createTypirLangiumServicesWithAdditionalServices<
