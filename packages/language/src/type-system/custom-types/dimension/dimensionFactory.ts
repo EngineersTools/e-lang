@@ -7,5 +7,7 @@ export function dimensionFactory(typir: TypirLangiumServices<ELangSpecifics>) {
   return new CustomKind<DimensionType, ELangSpecifics>(typir, {
     name: "Dimension",
     calculateTypeName: (properties) => `${properties.name}Dimension`,
+    calculateTypeUserRepresentation: (properties) =>
+      `(dimension) ${properties.name}`,
   });
 }

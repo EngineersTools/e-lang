@@ -1,32 +1,38 @@
-import { AstNode } from "langium";
 import {
   LangiumTypeSystemDefinition,
   TypirLangiumServices,
 } from "typir-langium";
-import { isDimensionDeclaration } from "../generated/ast.js";
+import {
+  isDimensionDeclaration,
+  isMeasurementLiteral,
+  isUnitDeclaration,
+} from "../generated/ast.js";
 import { ELangAdditionalTypirServices } from "./ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "./ELangSpecifics.interface.js";
+import { createDimensionType } from "./custom-types/dimension/createDimensionType.js";
+import { createMeasurementType } from "./custom-types/measurement/createMeasurementType.js";
+import { createUnitType } from "./custom-types/unit/createUnitType.js";
+import { createConstantDeclarationInferenceRules } from "./inference-rules/createConstantDeclarationInferenceRules.js";
+import { createMutableDeclarationInferenceRules } from "./inference-rules/createMutableDeclarationInferenceRules.js";
 
 export class ELangTypeSystem
   implements LangiumTypeSystemDefinition<ELangSpecifics>
 {
   onInitialize(typir: TypirLangiumServices<ELangSpecifics>): void {
-    // define constant types and rules for conversion, inference and validation here
+    createConstantDeclarationInferenceRules(typir);
+    createMutableDeclarationInferenceRules(typir);
   }
 
   onNewAstNode(
-    languageNode: AstNode,
+    languageNode: ELangSpecifics["LanguageType"],
     typir: TypirLangiumServices<ELangSpecifics> & ELangAdditionalTypirServices
   ): void {
-    // define types and their rules which depend on the current AST respectively the given AstNode (as parsed by Langium from programs written by users of your language) here
     if (isDimensionDeclaration(languageNode)) {
-      typir.factory.Dimension.create({
-        properties: {
-          name: languageNode.name,
-          description: languageNode.description,
-          units: [],
-        },
-      }).finish();
+      createDimensionType(languageNode, typir);
+    } else if (isUnitDeclaration(languageNode)) {
+      createUnitType(languageNode, typir);
+    } else if (isMeasurementLiteral(languageNode)) {
+      createMeasurementType(languageNode, typir);
     }
   }
 }

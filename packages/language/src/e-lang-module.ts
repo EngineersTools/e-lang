@@ -12,10 +12,8 @@ import {
 } from "typir-langium";
 import { ELangAddedServices, ELangServices } from "./ELangServices.type.js";
 import { ELangHoverProvider } from "./e-lang-hover-provider.js";
-import {
-  ELangScopeProvider,
-} from "./e-lang-scope-provider.js";
 import { ELangScopeComputation } from "./e-lang-scope-computation.js";
+import { ELangScopeProvider } from "./e-lang-scope-provider.js";
 import {
   ELangValidator,
   registerValidationChecks,
@@ -29,6 +27,7 @@ import { ELangAdditionalTypirServices } from "./type-system/ELangAdditionalTypir
 import { ELangSpecifics } from "./type-system/ELangSpecifics.interface.js";
 import { ELangTypeSystem } from "./type-system/ELangTypeSystem.class.js";
 import { dimensionFactory } from "./type-system/custom-types/dimension/dimensionFactory.js";
+import { measurementFactory } from "./type-system/custom-types/measurement/measurementFactory.js";
 import { unitFactory } from "./type-system/custom-types/unit/unitFactory.js";
 
 /**
@@ -58,6 +57,7 @@ export const ELangModule: Module<
       factory: {
         Unit: unitFactory,
         Dimension: dimensionFactory,
+        Measurement: measurementFactory,
       },
     }),
 };

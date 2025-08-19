@@ -7,5 +7,9 @@ export function unitFactory(typir: TypirLangiumServices<ELangSpecifics>) {
   return new CustomKind<UnitType, ELangSpecifics>(typir, {
     name: "Unit",
     calculateTypeName: (properties) => `${properties.name}Unit`,
+    calculateTypeUserRepresentation: (properties) =>
+      `(unit) ${
+        properties.longName !== "" ? properties.longName : properties.name
+      }${properties.description !== "" ? ` '${properties.description}'` : ""}`,
   });
 }

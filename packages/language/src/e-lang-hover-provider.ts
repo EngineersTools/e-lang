@@ -18,7 +18,7 @@ export class ELangHoverProvider extends AstNodeHoverProvider {
     const nodeType = this.typir.Inference.inferType(node);
 
     const typeName = isType(nodeType)
-      ? nodeType.getName()
+      ? nodeType.getUserRepresentation()
       : nodeType.map((inferenceProblem) => inferenceProblem.languageNode.$type);
 
     if (isNamed(node)) {
