@@ -111,7 +111,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@52"
+                "$ref": "#/rules@53"
               },
               "arguments": []
             }
@@ -139,7 +139,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@54"
               },
               "arguments": []
             }
@@ -334,7 +334,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@54"
               },
               "arguments": []
             }
@@ -413,7 +413,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@52"
+                    "$ref": "#/rules@53"
                   },
                   "arguments": []
                 }
@@ -432,7 +432,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@47"
+                        "$ref": "#/rules@48"
                       },
                       "arguments": []
                     }
@@ -500,7 +500,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@52"
+                    "$ref": "#/rules@53"
                   },
                   "arguments": []
                 }
@@ -519,7 +519,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@47"
+                        "$ref": "#/rules@48"
                       },
                       "arguments": []
                     }
@@ -575,7 +575,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@52"
+                "$ref": "#/rules@53"
               },
               "arguments": []
             }
@@ -601,7 +601,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@47"
+                "$ref": "#/rules@48"
               },
               "arguments": []
             }
@@ -683,7 +683,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@52"
+                "$ref": "#/rules@53"
               },
               "arguments": []
             }
@@ -707,7 +707,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@52"
+                      "$ref": "#/rules@53"
                     },
                     "arguments": []
                   },
@@ -734,7 +734,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@52"
+                          "$ref": "#/rules@53"
                         },
                         "arguments": []
                       },
@@ -788,7 +788,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@52"
+                "$ref": "#/rules@53"
               },
               "arguments": []
             }
@@ -855,7 +855,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@47"
+                    "$ref": "#/rules@48"
                   },
                   "arguments": []
                 }
@@ -919,7 +919,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@52"
+                "$ref": "#/rules@53"
               },
               "arguments": []
             }
@@ -931,7 +931,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@54"
               },
               "arguments": []
             },
@@ -1004,7 +1004,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@52"
+                "$ref": "#/rules@53"
               },
               "arguments": []
             }
@@ -1023,7 +1023,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@52"
+                    "$ref": "#/rules@53"
                   },
                   "arguments": []
                 }
@@ -1038,7 +1038,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@53"
+                "$ref": "#/rules@54"
               },
               "arguments": []
             },
@@ -1072,7 +1072,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@52"
+                  "$ref": "#/rules@53"
                 },
                 "arguments": []
               },
@@ -1096,7 +1096,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@52"
+                  "$ref": "#/rules@53"
                 },
                 "arguments": []
               },
@@ -1118,7 +1118,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@45"
+                    "$ref": "#/rules@46"
                   },
                   "arguments": []
                 }
@@ -1135,7 +1135,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@52"
+                      "$ref": "#/rules@53"
                     },
                     "arguments": []
                   },
@@ -2134,7 +2134,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
     },
     {
       "$type": "ParserRule",
-      "name": "UnaryExpression",
+      "name": "PostUnaryExpression",
       "inferredType": {
         "$type": "InferredType",
         "name": "Expression"
@@ -2143,58 +2143,44 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
         "$type": "Group",
         "elements": [
           {
-            "$type": "Assignment",
-            "feature": "prefixOperator",
-            "operator": "=",
-            "terminal": {
-              "$type": "Alternatives",
-              "elements": [
-                {
-                  "$type": "Keyword",
-                  "value": "-"
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "!"
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "not"
-                }
-              ]
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@32"
             },
-            "cardinality": "?"
+            "arguments": []
           },
           {
-            "$type": "Assignment",
-            "feature": "value",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@32"
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "PostUnaryExpression"
+                },
+                "feature": "value",
+                "operator": "="
               },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "postfixOperator",
-            "operator": "=",
-            "terminal": {
-              "$type": "Alternatives",
-              "elements": [
-                {
-                  "$type": "Keyword",
-                  "value": "++"
-                },
-                {
-                  "$type": "Keyword",
-                  "value": "--"
+              {
+                "$type": "Assignment",
+                "feature": "postOperator",
+                "operator": "=",
+                "terminal": {
+                  "$type": "Alternatives",
+                  "elements": [
+                    {
+                      "$type": "Keyword",
+                      "value": "++"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "--"
+                    }
+                  ]
                 }
-              ]
-            },
-            "cardinality": "?"
+              }
+            ],
+            "cardinality": "*"
           }
         ]
       },
@@ -2250,7 +2236,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                       "terminal": {
                         "$type": "RuleCall",
                         "rule": {
-                          "$ref": "#/rules@52"
+                          "$ref": "#/rules@53"
                         },
                         "arguments": []
                       },
@@ -2368,6 +2354,10 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
     {
       "$type": "ParserRule",
       "name": "PrimitiveExpression",
+      "inferredType": {
+        "$type": "InferredType",
+        "name": "Expression"
+      },
       "definition": {
         "$type": "Alternatives",
         "elements": [
@@ -2408,13 +2398,6 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@39"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
               "$ref": "#/rules@36"
             },
             "arguments": []
@@ -2429,6 +2412,13 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
+              "$ref": "#/rules@37"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
               "$ref": "#/rules@41"
             },
             "arguments": []
@@ -2436,7 +2426,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@43"
+              "$ref": "#/rules@42"
             },
             "arguments": []
           },
@@ -2453,6 +2443,55 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               "$ref": "#/rules@45"
             },
             "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@46"
+            },
+            "arguments": []
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "PreUnaryExpression",
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "Assignment",
+            "feature": "operator",
+            "operator": "=",
+            "terminal": {
+              "$type": "Alternatives",
+              "elements": [
+                {
+                  "$type": "Keyword",
+                  "value": "not"
+                },
+                {
+                  "$type": "Keyword",
+                  "value": "-"
+                }
+              ]
+            }
+          },
+          {
+            "$type": "Assignment",
+            "feature": "value",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@21"
+              },
+              "arguments": []
+            }
           }
         ]
       },
@@ -2475,7 +2514,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           "terminal": {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@52"
+              "$ref": "#/rules@53"
             },
             "arguments": []
           },
@@ -2497,7 +2536,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
         "terminal": {
           "$type": "RuleCall",
           "rule": {
-            "$ref": "#/rules@53"
+            "$ref": "#/rules@54"
           },
           "arguments": []
         }
@@ -2545,7 +2584,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
         "terminal": {
           "$type": "RuleCall",
           "rule": {
-            "$ref": "#/rules@55"
+            "$ref": "#/rules@56"
           },
           "arguments": []
         }
@@ -2568,7 +2607,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
         "terminal": {
           "$type": "RuleCall",
           "rule": {
-            "$ref": "#/rules@54"
+            "$ref": "#/rules@55"
           },
           "arguments": []
         }
@@ -2586,14 +2625,14 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@37"
+              "$ref": "#/rules@38"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@38"
+              "$ref": "#/rules@39"
             },
             "arguments": []
           }
@@ -2632,7 +2671,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@39"
+                "$ref": "#/rules@40"
               },
               "arguments": []
             }
@@ -2649,7 +2688,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@52"
+                  "$ref": "#/rules@53"
                 },
                 "arguments": []
               },
@@ -2681,7 +2720,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@52"
+                  "$ref": "#/rules@53"
                 },
                 "arguments": []
               },
@@ -2731,7 +2770,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@42"
+                    "$ref": "#/rules@43"
                   },
                   "arguments": []
                 }
@@ -2750,7 +2789,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@42"
+                        "$ref": "#/rules@43"
                       },
                       "arguments": []
                     }
@@ -2899,7 +2938,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@47"
+                    "$ref": "#/rules@48"
                   },
                   "arguments": []
                 }
@@ -3006,7 +3045,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@47"
+                "$ref": "#/rules@48"
               },
               "arguments": []
             }
@@ -3023,7 +3062,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
       "definition": {
         "$type": "RuleCall",
         "rule": {
-          "$ref": "#/rules@48"
+          "$ref": "#/rules@49"
         },
         "arguments": []
       },
@@ -3044,7 +3083,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@49"
+              "$ref": "#/rules@50"
             },
             "arguments": []
           },
@@ -3076,7 +3115,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@49"
+                    "$ref": "#/rules@50"
                   },
                   "arguments": []
                 }
@@ -3103,7 +3142,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@50"
+              "$ref": "#/rules@51"
             },
             "arguments": []
           },
@@ -3135,7 +3174,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@50"
+                    "$ref": "#/rules@51"
                   },
                   "arguments": []
                 }
@@ -3172,7 +3211,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                   {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@47"
+                      "$ref": "#/rules@48"
                     },
                     "arguments": []
                   },
@@ -3216,7 +3255,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@52"
+                      "$ref": "#/rules@53"
                     },
                     "arguments": []
                   },
@@ -3227,7 +3266,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@46"
+                  "$ref": "#/rules@47"
                 },
                 "arguments": []
               }
@@ -3299,7 +3338,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "TerminalRuleCall",
             "rule": {
-              "$ref": "#/rules@55"
+              "$ref": "#/rules@56"
             },
             "parenthesized": false
           },
@@ -3314,7 +3353,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "TerminalRuleCall",
             "rule": {
-              "$ref": "#/rules@55"
+              "$ref": "#/rules@56"
             },
             "parenthesized": false
           }

@@ -19,7 +19,6 @@ export const ELangTerminals = {
 export type ELangTerminalNames = keyof typeof ELangTerminals;
 
 export type ELangKeywordNames =
-    | "!"
     | "!="
     | "("
     | ")"
@@ -83,7 +82,8 @@ export type ELangKeywordNames =
 
 export type ELangTokenNames = ELangTerminalNames | ELangKeywordNames;
 
-export interface BinaryExpression extends Expression {
+export interface BinaryExpression extends langium.AstNode {
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'BinaryExpression';
     left: Expression;
     operator: '!=' | '*' | '+' | '-' | '/' | '<' | '<=' | '=' | '==' | '>' | '>=' | '^' | 'and' | 'equal' | 'not_equal' | 'or';
@@ -94,10 +94,7 @@ export const BinaryExpression = {
     $type: 'BinaryExpression',
     left: 'left',
     operator: 'operator',
-    postfixOperator: 'postfixOperator',
-    prefixOperator: 'prefixOperator',
-    right: 'right',
-    value: 'value'
+    right: 'right'
 } as const;
 
 export function isBinaryExpression(item: unknown): item is BinaryExpression {
@@ -105,7 +102,7 @@ export function isBinaryExpression(item: unknown): item is BinaryExpression {
 }
 
 export interface BooleanLiteral extends langium.AstNode {
-    readonly $container: CallExpression | IndexedAccess | MemberAccess;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'BooleanLiteral';
     value: boolean;
 }
@@ -119,19 +116,17 @@ export function isBooleanLiteral(item: unknown): item is BooleanLiteral {
     return reflection.isInstance(item, BooleanLiteral.$type);
 }
 
-export interface CallExpression extends Expression {
+export interface CallExpression extends langium.AstNode {
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'CallExpression';
     arguments: Array<Expression>;
-    callee: PrimitiveExpression;
+    callee: Expression;
 }
 
 export const CallExpression = {
     $type: 'CallExpression',
     arguments: 'arguments',
-    callee: 'callee',
-    postfixOperator: 'postfixOperator',
-    prefixOperator: 'prefixOperator',
-    value: 'value'
+    callee: 'callee'
 } as const;
 
 export function isCallExpression(item: unknown): item is CallExpression {
@@ -249,18 +244,10 @@ export function isExportableElement(item: unknown): item is ExportableElement {
     return reflection.isInstance(item, ExportableElement.$type);
 }
 
-export interface Expression extends langium.AstNode {
-    readonly $type: 'BinaryExpression' | 'BooleanLiteral' | 'CallExpression' | 'Expression' | 'IndexedAccess' | 'LambdaExpression' | 'ListExpression' | 'MeasurementLiteral' | 'MemberAccess' | 'ModelExpression' | 'NullLiteral' | 'NumberLiteral' | 'PrimitiveExpression' | 'ReferenceExpression' | 'StringLiteral';
-    postfixOperator?: '++' | '--';
-    prefixOperator?: '!' | '-' | 'not';
-    value: Expression;
-}
+export type Expression = BinaryExpression | BooleanLiteral | CallExpression | IndexedAccess | LambdaExpression | ListExpression | MeasurementLiteral | MemberAccess | ModelExpression | NullLiteral | NumberLiteral | PostUnaryExpression | PreUnaryExpression | ReferenceExpression | StringLiteral;
 
 export const Expression = {
-    $type: 'Expression',
-    postfixOperator: 'postfixOperator',
-    prefixOperator: 'prefixOperator',
-    value: 'value'
+    $type: 'Expression'
 } as const;
 
 export function isExpression(item: unknown): item is Expression {
@@ -362,19 +349,17 @@ export function isImportStatement(item: unknown): item is ImportStatement {
     return reflection.isInstance(item, ImportStatement.$type);
 }
 
-export interface IndexedAccess extends Expression {
+export interface IndexedAccess extends langium.AstNode {
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'IndexedAccess';
     index: Expression;
-    receiver: PrimitiveExpression;
+    receiver: Expression;
 }
 
 export const IndexedAccess = {
     $type: 'IndexedAccess',
     index: 'index',
-    postfixOperator: 'postfixOperator',
-    prefixOperator: 'prefixOperator',
-    receiver: 'receiver',
-    value: 'value'
+    receiver: 'receiver'
 } as const;
 
 export function isIndexedAccess(item: unknown): item is IndexedAccess {
@@ -382,7 +367,7 @@ export function isIndexedAccess(item: unknown): item is IndexedAccess {
 }
 
 export interface LambdaExpression extends langium.AstNode {
-    readonly $container: CallExpression | ConversionDeclaration | IndexedAccess | MemberAccess;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ConversionDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'LambdaExpression';
     body: Expression | StatementBlock;
     parameters: Array<ParameterDeclaration>;
@@ -420,7 +405,7 @@ export function isLambdaType(item: unknown): item is LambdaType {
 }
 
 export interface ListExpression extends langium.AstNode {
-    readonly $container: CallExpression | IndexedAccess | MemberAccess;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'ListExpression';
     elements: Array<Expression>;
 }
@@ -475,7 +460,7 @@ export function isMatchStatement(item: unknown): item is MatchStatement {
 }
 
 export interface MeasurementLiteral extends langium.AstNode {
-    readonly $container: CallExpression | IndexedAccess | MemberAccess;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'MeasurementLiteral';
     unit: langium.Reference<UnitDeclaration>;
     value: NumberLiteral;
@@ -491,19 +476,17 @@ export function isMeasurementLiteral(item: unknown): item is MeasurementLiteral 
     return reflection.isInstance(item, MeasurementLiteral.$type);
 }
 
-export interface MemberAccess extends Expression {
+export interface MemberAccess extends langium.AstNode {
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'MemberAccess';
     member: langium.Reference<NamedElement>;
-    receiver: PrimitiveExpression;
+    receiver: Expression;
 }
 
 export const MemberAccess = {
     $type: 'MemberAccess',
     member: 'member',
-    postfixOperator: 'postfixOperator',
-    prefixOperator: 'prefixOperator',
-    receiver: 'receiver',
-    value: 'value'
+    receiver: 'receiver'
 } as const;
 
 export function isMemberAccess(item: unknown): item is MemberAccess {
@@ -535,7 +518,7 @@ export function isModelDeclaration(item: unknown): item is ModelDeclaration {
 }
 
 export interface ModelExpression extends langium.AstNode {
-    readonly $container: CallExpression | IndexedAccess | MemberAccess;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'ModelExpression';
     members: Array<ModelMemberAssignment>;
 }
@@ -600,7 +583,7 @@ export function isNamedElement(item: unknown): item is NamedElement {
 }
 
 export interface NullLiteral extends langium.AstNode {
-    readonly $container: CallExpression | IndexedAccess | MemberAccess;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'NullLiteral';
     value: 'null';
 }
@@ -615,7 +598,7 @@ export function isNullLiteral(item: unknown): item is NullLiteral {
 }
 
 export interface NumberLiteral extends langium.AstNode {
-    readonly $container: CallExpression | IndexedAccess | MeasurementLiteral | MemberAccess;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MeasurementLiteral | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'NumberLiteral';
     value: number;
 }
@@ -648,14 +631,38 @@ export function isParameterDeclaration(item: unknown): item is ParameterDeclarat
     return reflection.isInstance(item, ParameterDeclaration.$type);
 }
 
-export type PrimitiveExpression = BooleanLiteral | Expression | LambdaExpression | ListExpression | MeasurementLiteral | ModelExpression | NullLiteral | NumberLiteral | ReferenceExpression | StringLiteral;
+export interface PostUnaryExpression extends langium.AstNode {
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $type: 'PostUnaryExpression';
+    postOperator: '++' | '--';
+    value: Expression;
+}
 
-export const PrimitiveExpression = {
-    $type: 'PrimitiveExpression'
+export const PostUnaryExpression = {
+    $type: 'PostUnaryExpression',
+    postOperator: 'postOperator',
+    value: 'value'
 } as const;
 
-export function isPrimitiveExpression(item: unknown): item is PrimitiveExpression {
-    return reflection.isInstance(item, PrimitiveExpression.$type);
+export function isPostUnaryExpression(item: unknown): item is PostUnaryExpression {
+    return reflection.isInstance(item, PostUnaryExpression.$type);
+}
+
+export interface PreUnaryExpression extends langium.AstNode {
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $type: 'PreUnaryExpression';
+    operator: '-' | 'not';
+    value: Expression;
+}
+
+export const PreUnaryExpression = {
+    $type: 'PreUnaryExpression',
+    operator: 'operator',
+    value: 'value'
+} as const;
+
+export function isPreUnaryExpression(item: unknown): item is PreUnaryExpression {
+    return reflection.isInstance(item, PreUnaryExpression.$type);
 }
 
 export interface PrintStatement extends langium.AstNode {
@@ -674,7 +681,7 @@ export function isPrintStatement(item: unknown): item is PrintStatement {
 }
 
 export interface ReferenceExpression extends langium.AstNode {
-    readonly $container: CallExpression | IndexedAccess | MemberAccess;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'ReferenceExpression';
     element: langium.Reference<NamedElement>;
 }
@@ -731,7 +738,7 @@ export function isStatementBlock(item: unknown): item is StatementBlock {
 }
 
 export interface StringLiteral extends langium.AstNode {
-    readonly $container: CallExpression | IndexedAccess | MemberAccess;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'StringLiteral';
     value: string;
 }
@@ -856,7 +863,8 @@ export type ELangAstType = {
     NullLiteral: NullLiteral
     NumberLiteral: NumberLiteral
     ParameterDeclaration: ParameterDeclaration
-    PrimitiveExpression: PrimitiveExpression
+    PostUnaryExpression: PostUnaryExpression
+    PreUnaryExpression: PreUnaryExpression
     PrintStatement: PrintStatement
     ReferenceExpression: ReferenceExpression
     ReturnStatement: ReturnStatement
@@ -880,17 +888,8 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 operator: {
                     name: BinaryExpression.operator
                 },
-                postfixOperator: {
-                    name: BinaryExpression.postfixOperator
-                },
-                prefixOperator: {
-                    name: BinaryExpression.prefixOperator
-                },
                 right: {
                     name: BinaryExpression.right
-                },
-                value: {
-                    name: BinaryExpression.value
                 }
             },
             superTypes: [Expression.$type]
@@ -903,7 +902,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     defaultValue: false
                 }
             },
-            superTypes: [PrimitiveExpression.$type]
+            superTypes: [Expression.$type]
         },
         CallExpression: {
             name: CallExpression.$type,
@@ -914,15 +913,6 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 },
                 callee: {
                     name: CallExpression.callee
-                },
-                postfixOperator: {
-                    name: CallExpression.postfixOperator
-                },
-                prefixOperator: {
-                    name: CallExpression.prefixOperator
-                },
-                value: {
-                    name: CallExpression.value
                 }
             },
             superTypes: [Expression.$type]
@@ -1046,17 +1036,8 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         Expression: {
             name: Expression.$type,
             properties: {
-                postfixOperator: {
-                    name: Expression.postfixOperator
-                },
-                prefixOperator: {
-                    name: Expression.prefixOperator
-                },
-                value: {
-                    name: Expression.value
-                }
             },
-            superTypes: [PrimitiveExpression.$type, Statement.$type]
+            superTypes: [Statement.$type]
         },
         ForStatement: {
             name: ForStatement.$type,
@@ -1143,17 +1124,8 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 index: {
                     name: IndexedAccess.index
                 },
-                postfixOperator: {
-                    name: IndexedAccess.postfixOperator
-                },
-                prefixOperator: {
-                    name: IndexedAccess.prefixOperator
-                },
                 receiver: {
                     name: IndexedAccess.receiver
-                },
-                value: {
-                    name: IndexedAccess.value
                 }
             },
             superTypes: [Expression.$type]
@@ -1172,7 +1144,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     name: LambdaExpression.returnType
                 }
             },
-            superTypes: [PrimitiveExpression.$type]
+            superTypes: [Expression.$type]
         },
         LambdaType: {
             name: LambdaType.$type,
@@ -1206,7 +1178,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     defaultValue: []
                 }
             },
-            superTypes: [PrimitiveExpression.$type]
+            superTypes: [Expression.$type]
         },
         MatchOption: {
             name: MatchOption.$type,
@@ -1253,7 +1225,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     name: MeasurementLiteral.value
                 }
             },
-            superTypes: [PrimitiveExpression.$type]
+            superTypes: [Expression.$type]
         },
         MemberAccess: {
             name: MemberAccess.$type,
@@ -1262,17 +1234,8 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     name: MemberAccess.member,
                     referenceType: NamedElement.$type
                 },
-                postfixOperator: {
-                    name: MemberAccess.postfixOperator
-                },
-                prefixOperator: {
-                    name: MemberAccess.prefixOperator
-                },
                 receiver: {
                     name: MemberAccess.receiver
-                },
-                value: {
-                    name: MemberAccess.value
                 }
             },
             superTypes: [Expression.$type]
@@ -1318,7 +1281,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     defaultValue: []
                 }
             },
-            superTypes: [PrimitiveExpression.$type]
+            superTypes: [Expression.$type]
         },
         ModelMemberAssignment: {
             name: ModelMemberAssignment.$type,
@@ -1369,7 +1332,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     name: NullLiteral.value
                 }
             },
-            superTypes: [PrimitiveExpression.$type]
+            superTypes: [Expression.$type]
         },
         NumberLiteral: {
             name: NumberLiteral.$type,
@@ -1378,7 +1341,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     name: NumberLiteral.value
                 }
             },
-            superTypes: [PrimitiveExpression.$type]
+            superTypes: [Expression.$type]
         },
         ParameterDeclaration: {
             name: ParameterDeclaration.$type,
@@ -1396,9 +1359,27 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
             },
             superTypes: [NamedElement.$type]
         },
-        PrimitiveExpression: {
-            name: PrimitiveExpression.$type,
+        PostUnaryExpression: {
+            name: PostUnaryExpression.$type,
             properties: {
+                postOperator: {
+                    name: PostUnaryExpression.postOperator
+                },
+                value: {
+                    name: PostUnaryExpression.value
+                }
+            },
+            superTypes: [Expression.$type]
+        },
+        PreUnaryExpression: {
+            name: PreUnaryExpression.$type,
+            properties: {
+                operator: {
+                    name: PreUnaryExpression.operator
+                },
+                value: {
+                    name: PreUnaryExpression.value
+                }
             },
             superTypes: [Expression.$type]
         },
@@ -1419,7 +1400,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     referenceType: NamedElement.$type
                 }
             },
-            superTypes: [PrimitiveExpression.$type]
+            superTypes: [Expression.$type]
         },
         ReturnStatement: {
             name: ReturnStatement.$type,
@@ -1456,7 +1437,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     name: StringLiteral.value
                 }
             },
-            superTypes: [PrimitiveExpression.$type]
+            superTypes: [Expression.$type]
         },
         TypeIntersection: {
             name: TypeIntersection.$type,
