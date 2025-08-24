@@ -2906,52 +2906,32 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               },
               {
                 "$type": "Assignment",
-                "feature": "dimension",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@12"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@49"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "unit",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@13"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@49"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
-              },
-              {
-                "$type": "Assignment",
                 "feature": "model",
                 "operator": "=",
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
                     "$ref": "#/rules@10"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@49"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              },
+              {
+                "$type": "Assignment",
+                "feature": "dimension",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@12"
                   },
                   "terminal": {
                     "$type": "RuleCall",
@@ -3157,13 +3137,13 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@8"
+              "$ref": "#/rules@11"
             }
           },
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@11"
+              "$ref": "#/rules@12"
             }
           }
         ]

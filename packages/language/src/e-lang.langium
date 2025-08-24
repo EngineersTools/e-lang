@@ -214,7 +214,7 @@ LambdaType:
 ;
 
 TypeReference:
-    TypeUnion
+    TypeUnion | ModelDeclaration | DimensionDeclaration | LambdaType
 ;
 
 TypeUnion infers TypeReference:
@@ -223,14 +223,14 @@ TypeUnion infers TypeReference:
 TypeIntersection infers TypeReference:
     PrimaryTypeReference ({infer TypeIntersection.left=current} operator=('and') right=PrimaryTypeReference)*;
 
-
 PrimaryTypeReference infers TypeReference:
-    ('(' TypeReference ')'
-    | primitive=('number' | 'text' | 'boolean')
-    | dimension=[DimensionDeclaration:ID]
-    | unit=[UnitDeclaration:ID]
-    | model=[ModelDeclaration:ID]
-    | LambdaType)
+    (
+        '(' TypeReference ')'
+        | primitive=('number' | 'text' | 'boolean')
+        | model=[ModelDeclaration:ID]
+        | dimension=[DimensionDeclaration:ID]
+        | LambdaType
+    )
     (array?='list')?
 ;
 
@@ -243,8 +243,8 @@ type NamedElement =
 type ExportableElement =
     ConstantDeclaration
     | MutableDeclaration
-    | ParameterDeclaration
-    | FormulaDeclaration;
+    | FormulaDeclaration
+    | DimensionDeclaration;
 
 hidden terminal WS: /\s+/;
 terminal ID: /[_a-zA-Z][\w_]*/;

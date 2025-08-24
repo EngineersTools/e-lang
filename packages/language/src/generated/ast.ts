@@ -217,7 +217,7 @@ export function isELangProgram(item: unknown): item is ELangProgram {
     return reflection.isInstance(item, ELangProgram.$type);
 }
 
-export type ExportableElement = ConstantDeclaration | FormulaDeclaration | MutableDeclaration | ParameterDeclaration;
+export type ExportableElement = ConstantDeclaration | DimensionDeclaration | FormulaDeclaration | MutableDeclaration;
 
 export const ExportableElement = {
     $type: 'ExportableElement'
@@ -372,8 +372,7 @@ export const LambdaType = {
     model: 'model',
     parameters: 'parameters',
     primitive: 'primitive',
-    returnType: 'returnType',
-    unit: 'unit'
+    returnType: 'returnType'
 } as const;
 
 export function isLambdaType(item: unknown): item is LambdaType {
@@ -667,8 +666,7 @@ export const TypeIntersection = {
     model: 'model',
     operator: 'operator',
     primitive: 'primitive',
-    right: 'right',
-    unit: 'unit'
+    right: 'right'
 } as const;
 
 export function isTypeIntersection(item: unknown): item is TypeIntersection {
@@ -681,7 +679,6 @@ export interface TypeReference extends langium.AstNode {
     dimension?: langium.Reference<DimensionDeclaration>;
     model?: langium.Reference<ModelDeclaration>;
     primitive?: 'boolean' | 'number' | 'text';
-    unit?: langium.Reference<UnitDeclaration>;
 }
 
 export const TypeReference = {
@@ -689,8 +686,7 @@ export const TypeReference = {
     array: 'array',
     dimension: 'dimension',
     model: 'model',
-    primitive: 'primitive',
-    unit: 'unit'
+    primitive: 'primitive'
 } as const;
 
 export function isTypeReference(item: unknown): item is TypeReference {
@@ -712,8 +708,7 @@ export const TypeUnion = {
     model: 'model',
     operator: 'operator',
     primitive: 'primitive',
-    right: 'right',
-    unit: 'unit'
+    right: 'right'
 } as const;
 
 export function isTypeUnion(item: unknown): item is TypeUnion {
@@ -881,7 +876,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     defaultValue: []
                 }
             },
-            superTypes: [Statement.$type]
+            superTypes: [ExportableElement.$type, Statement.$type]
         },
         Domain: {
             name: Domain.$type,
@@ -1054,10 +1049,6 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 },
                 returnType: {
                     name: LambdaType.returnType
-                },
-                unit: {
-                    name: LambdaType.unit,
-                    referenceType: UnitDeclaration.$type
                 }
             },
             superTypes: [TypeReference.$type]
@@ -1202,7 +1193,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     name: ParameterDeclaration.type
                 }
             },
-            superTypes: [ExportableElement.$type, NamedElement.$type]
+            superTypes: [NamedElement.$type]
         },
         PrimitiveExpression: {
             name: PrimitiveExpression.$type,
@@ -1292,10 +1283,6 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 },
                 right: {
                     name: TypeIntersection.right
-                },
-                unit: {
-                    name: TypeIntersection.unit,
-                    referenceType: UnitDeclaration.$type
                 }
             },
             superTypes: [TypeReference.$type]
@@ -1317,10 +1304,6 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 },
                 primitive: {
                     name: TypeReference.primitive
-                },
-                unit: {
-                    name: TypeReference.unit,
-                    referenceType: UnitDeclaration.$type
                 }
             },
             superTypes: []
@@ -1351,10 +1334,6 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 },
                 right: {
                     name: TypeUnion.right
-                },
-                unit: {
-                    name: TypeUnion.unit,
-                    referenceType: UnitDeclaration.$type
                 }
             },
             superTypes: [TypeReference.$type]

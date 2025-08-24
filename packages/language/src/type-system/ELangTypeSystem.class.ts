@@ -15,6 +15,7 @@ import { createUnitType } from "./custom-types/unit/createUnitType.js";
 import { createBinaryOperationInferenceRules } from "./inference-rules/createBinaryOperationInferenceRules.js";
 import { createConstantDeclarationInferenceRules } from "./inference-rules/createConstantDeclarationInferenceRules.js";
 import { createMutableDeclarationInferenceRules } from "./inference-rules/createMutableDeclarationInferenceRules.js";
+import { createTypeReferenceInferenceRules } from "./inference-rules/createTypeReferenceInferenceRule.js";
 import {
   getOrCreateTypeBool,
   getOrCreateTypeNull,
@@ -33,6 +34,7 @@ export class ELangTypeSystem
     createConstantDeclarationInferenceRules(typir);
     createMutableDeclarationInferenceRules(typir);
     createBinaryOperationInferenceRules(typir);
+    createTypeReferenceInferenceRules(typir);
   }
 
   onNewAstNode(
