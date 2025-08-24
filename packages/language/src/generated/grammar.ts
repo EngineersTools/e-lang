@@ -648,9 +648,20 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
     {
       "$type": "ParserRule",
       "name": "ModelDeclaration",
+      "inferredType": {
+        "$type": "InferredType",
+        "name": "TypeReference"
+      },
       "definition": {
         "$type": "Group",
         "elements": [
+          {
+            "$type": "Action",
+            "inferredType": {
+              "$type": "InferredType",
+              "name": "ModelDeclaration"
+            }
+          },
           {
             "$type": "Assignment",
             "feature": "export",
@@ -691,7 +702,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@10"
+                    "$ref": "#/rules@10/inferredType"
                   },
                   "terminal": {
                     "$type": "RuleCall",
@@ -718,7 +729,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                     "terminal": {
                       "$type": "CrossReference",
                       "type": {
-                        "$ref": "#/rules@10"
+                        "$ref": "#/rules@10/inferredType"
                       },
                       "terminal": {
                         "$type": "RuleCall",
@@ -873,9 +884,20 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
     {
       "$type": "ParserRule",
       "name": "DimensionDeclaration",
+      "inferredType": {
+        "$type": "InferredType",
+        "name": "TypeReference"
+      },
       "definition": {
         "$type": "Group",
         "elements": [
+          {
+            "$type": "Action",
+            "inferredType": {
+              "$type": "InferredType",
+              "name": "DimensionDeclaration"
+            }
+          },
           {
             "$type": "Assignment",
             "feature": "export",
@@ -2906,32 +2928,12 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               },
               {
                 "$type": "Assignment",
-                "feature": "model",
+                "feature": "reference",
                 "operator": "=",
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@10"
-                  },
-                  "terminal": {
-                    "$type": "RuleCall",
-                    "rule": {
-                      "$ref": "#/rules@49"
-                    },
-                    "arguments": []
-                  },
-                  "deprecatedSyntax": false,
-                  "isMulti": false
-                }
-              },
-              {
-                "$type": "Assignment",
-                "feature": "dimension",
-                "operator": "=",
-                "terminal": {
-                  "$type": "CrossReference",
-                  "type": {
-                    "$ref": "#/rules@12"
+                    "$ref": "#/rules@10/inferredType"
                   },
                   "terminal": {
                     "$type": "RuleCall",
@@ -3143,7 +3145,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@12"
+              "$ref": "#/rules@10/inferredType"
             }
           }
         ]

@@ -6,13 +6,6 @@ export function createTypeReferenceInferenceRules(
   typir: TypirLangiumServices<ELangSpecifics>
 ) {
   typir.Inference.addInferenceRulesForAstNodes({
-    TypeReference: (node) => {
-      console.log("Inferring type for:", node);
-      return node.model
-        ? node.model.ref ?? InferenceRuleNotApplicable
-        : node.dimension
-        ? node.dimension.ref ?? InferenceRuleNotApplicable
-        : InferenceRuleNotApplicable;
-    },
+    TypeReference: (node) => node.reference?.ref ?? InferenceRuleNotApplicable,
   });
 }

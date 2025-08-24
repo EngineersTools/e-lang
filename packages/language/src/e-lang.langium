@@ -57,16 +57,16 @@ fragment ParameterBlock:
     '}'
 ;
 
-ModelDeclaration:
-    (export?='export')? 'model' name=ID ('extends' parentTypes+=[ModelDeclaration:ID] (',' parentTypes+=[ModelDeclaration:ID])*)? ParameterBlock
+ModelDeclaration infers TypeReference:
+    {infer ModelDeclaration} (export?='export')? 'model' name=ID ('extends' parentTypes+=[TypeReference:ID] (',' parentTypes+=[TypeReference:ID])*)? ParameterBlock
 ;
 
 FormulaDeclaration:
     (export?='export')? 'formula' name=ID '(' (parameters+=ParameterDeclaration (',' parameters+=ParameterDeclaration)*)? ')' (':' returnType=TypeReference)? body=StatementBlock
 ;
 
-DimensionDeclaration:
-    (export?='export')? 'dimension' name=ID description=STRING? ('{' (units+=UnitDeclaration | conversions+=ConversionDeclaration)* '}')?
+DimensionDeclaration infers TypeReference:
+    {infer DimensionDeclaration} (export?='export')? 'dimension' name=ID description=STRING? ('{' (units+=UnitDeclaration | conversions+=ConversionDeclaration)* '}')?
 ;
 
 UnitDeclaration:
@@ -214,7 +214,7 @@ LambdaType:
 ;
 
 TypeReference:
-    TypeUnion | ModelDeclaration | DimensionDeclaration | LambdaType
+    TypeUnion
 ;
 
 TypeUnion infers TypeReference:
@@ -227,8 +227,7 @@ PrimaryTypeReference infers TypeReference:
     (
         '(' TypeReference ')'
         | primitive=('number' | 'text' | 'boolean')
-        | model=[ModelDeclaration:ID]
-        | dimension=[DimensionDeclaration:ID]
+        | reference=[TypeReference:ID]
         | LambdaType
     )
     (array?='list')?
@@ -244,7 +243,7 @@ type ExportableElement =
     ConstantDeclaration
     | MutableDeclaration
     | FormulaDeclaration
-    | DimensionDeclaration;
+    | TypeReference;
 
 hidden terminal WS: /\s+/;
 terminal ID: /[_a-zA-Z][\w_]*/;
