@@ -153,7 +153,16 @@ ExponentiationExpression infers Expression:
 ;
 
 UnaryExpression infers Expression:
-    (prefixOperator=('-' | '!' | 'not'))? value=PrimitiveExpression (postfixOperator=('++' | '--'))?
+    (prefixOperator=('-' | '!' | 'not'))? value=EvaluationExpression (postfixOperator=('++' | '--'))?
+;
+
+EvaluationExpression infers Expression:
+    PrimitiveExpression
+    ( // These can chain: obj.member[index](arg)
+        {infer MemberAccess.receiver=current} '.' member=[NamedElement:ID] |
+        {infer IndexedAccess.receiver=current} '[' index=Expression ']' |
+        {infer CallExpression.callee=current} '(' (arguments+=Expression (',' arguments+=Expression)*)? ')'
+    )*
 ;
 
 PrimitiveExpression:
@@ -164,6 +173,7 @@ PrimitiveExpression:
     | BooleanLiteral
     | NullLiteral
     | MeasurementLiteral
+    | ModelExpression
     | ListExpression
     | LambdaExpression
 ;
@@ -199,6 +209,16 @@ NullLiteral:
 
 MeasurementLiteral:
     value=NumberLiteral unit=[UnitDeclaration:ID]
+;
+
+ModelMemberAssignment:
+    property=[ParameterDeclaration:ID] ':' value=Expression
+;
+
+ModelExpression:
+    '{'
+        (members+=ModelMemberAssignment (',' members+=ModelMemberAssignment)*)?
+    '}'
 ;
 
 ListExpression:
@@ -237,7 +257,8 @@ type NamedElement =
     ConstantDeclaration
     | MutableDeclaration
     | ParameterDeclaration
-    | FormulaDeclaration;
+    | FormulaDeclaration
+    | ModelDeclaration;
 
 type ExportableElement =
     ConstantDeclaration

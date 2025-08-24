@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import * as path from "node:path";
 import type * as vscode from "vscode";
 import type {
@@ -5,6 +6,7 @@ import type {
   ServerOptions,
 } from "vscode-languageclient/node.js";
 import { LanguageClient, TransportKind } from "vscode-languageclient/node.js";
+import { setupLogging } from "../setupLogging.js";
 
 let client: LanguageClient;
 
@@ -66,10 +68,14 @@ async function startLanguageClient(
     clientOptions
   );
 
-  // fs.mkdirSync(path.join(__dirname, "logs"), { recursive: true });
-  // setupLogging(path.join(__dirname, "logs", "extension.log"));
+  fs.mkdirSync(path.join(__dirname, "logs"), { recursive: true });
+  setupLogging(path.join(__dirname, "logs", "extension.log"));
 
-  // Start the client. This will also launch the server
-  await client.start();
+  try {
+    await client.start();
+  } catch (error) {
+    console.error("Error starting language client:", error);
+  }
+
   return client;
 }
