@@ -1,10 +1,10 @@
 import { TypirLangiumServices } from "typir-langium";
 import {
-    BooleanLiteral,
-    NullLiteral,
-    NumberLiteral,
-    StringLiteral,
-    TypeReference,
+  BooleanLiteral,
+  NullLiteral,
+  NumberLiteral,
+  StringLiteral,
+  TypeReference,
 } from "../../generated/ast.js";
 import { ELangSpecifics } from "../ELangSpecifics.interface.js";
 
@@ -77,4 +77,18 @@ export function getOrCreateTypeNull(
 
 export function createTypeAny(typir: TypirLangiumServices<ELangSpecifics>) {
   return typir.factory.Top.create({}).finish();
+}
+
+export function declarePrimitiveConvertibilityToNull(
+  typir: TypirLangiumServices<ELangSpecifics>
+) {
+  // Null can be assigned to any type
+  const typeNull = getOrCreateTypeNull(typir);
+  const typeBool = getOrCreateTypeBool(typir);
+  const typeNumber = getOrCreateTypeNumber(typir);
+  const typeText = getOrCreateTypeText(typir);
+
+  typir.Conversion.markAsConvertible(typeNull, typeBool, "IMPLICIT_EXPLICIT");
+  typir.Conversion.markAsConvertible(typeNull, typeNumber, "IMPLICIT_EXPLICIT");
+  typir.Conversion.markAsConvertible(typeNull, typeText, "IMPLICIT_EXPLICIT");
 }

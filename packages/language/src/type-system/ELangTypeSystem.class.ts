@@ -17,6 +17,7 @@ import { createConstantDeclarationInferenceRules } from "./inference-rules/creat
 import { createMutableDeclarationInferenceRules } from "./inference-rules/createMutableDeclarationInferenceRules.js";
 import { createTypeReferenceInferenceRules } from "./inference-rules/createTypeReferenceInferenceRule.js";
 import {
+  declarePrimitiveConvertibilityToNull,
   getOrCreateTypeBool,
   getOrCreateTypeNull,
   getOrCreateTypeNumber,
@@ -31,6 +32,7 @@ export class ELangTypeSystem
     getOrCreateTypeNumber(typir);
     getOrCreateTypeText(typir);
     getOrCreateTypeNull(typir);
+    declarePrimitiveConvertibilityToNull(typir);
     createConstantDeclarationInferenceRules(typir);
     createMutableDeclarationInferenceRules(typir);
     createBinaryOperationInferenceRules(typir);
