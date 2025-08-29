@@ -5,12 +5,14 @@ import {
 import {
   isDimensionDeclaration,
   isMeasurementLiteral,
+  isModelDeclaration,
   isUnitDeclaration,
 } from "../generated/ast.js";
 import { ELangAdditionalTypirServices } from "./ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "./ELangSpecifics.interface.js";
 import { createDimensionType } from "./custom-types/dimension/createDimensionType.js";
 import { createMeasurementType } from "./custom-types/measurement/createMeasurementType.js";
+import { createModelType } from "./custom-types/model/createModelType.js";
 import { createUnitType } from "./custom-types/unit/createUnitType.js";
 import { createBinaryOperationInferenceRules } from "./inference-rules/createBinaryOperationInferenceRules.js";
 import { createConstantDeclarationInferenceRules } from "./inference-rules/createConstantDeclarationInferenceRules.js";
@@ -49,6 +51,8 @@ export class ELangTypeSystem
       createUnitType(languageNode, typir);
     } else if (isMeasurementLiteral(languageNode)) {
       createMeasurementType(languageNode, typir);
+    } else if (isModelDeclaration(languageNode)) {
+      createModelType(languageNode, typir);
     }
   }
 }

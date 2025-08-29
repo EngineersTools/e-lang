@@ -2163,7 +2163,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               },
               {
                 "$type": "Assignment",
-                "feature": "postOperator",
+                "feature": "operator",
                 "operator": "=",
                 "terminal": {
                   "$type": "Alternatives",

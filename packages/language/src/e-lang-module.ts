@@ -28,6 +28,7 @@ import { ELangSpecifics } from "./type-system/ELangSpecifics.interface.js";
 import { ELangTypeSystem } from "./type-system/ELangTypeSystem.class.js";
 import { dimensionFactory } from "./type-system/custom-types/dimension/dimensionFactory.js";
 import { measurementFactory } from "./type-system/custom-types/measurement/measurementFactory.js";
+import { modelFactory } from "./type-system/custom-types/model/modelFactory.js";
 import { unitFactory } from "./type-system/custom-types/unit/unitFactory.js";
 
 /**
@@ -58,6 +59,7 @@ export const ELangModule: Module<
         Unit: unitFactory,
         Dimension: dimensionFactory,
         Measurement: measurementFactory,
+        Model: modelFactory,
       },
     }),
 };

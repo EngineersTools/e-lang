@@ -634,13 +634,13 @@ export function isParameterDeclaration(item: unknown): item is ParameterDeclarat
 export interface PostUnaryExpression extends langium.AstNode {
     readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'PostUnaryExpression';
-    postOperator: '++' | '--';
+    operator: '++' | '--';
     value: Expression;
 }
 
 export const PostUnaryExpression = {
     $type: 'PostUnaryExpression',
-    postOperator: 'postOperator',
+    operator: 'operator',
     value: 'value'
 } as const;
 
@@ -1362,8 +1362,8 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         PostUnaryExpression: {
             name: PostUnaryExpression.$type,
             properties: {
-                postOperator: {
-                    name: PostUnaryExpression.postOperator
+                operator: {
+                    name: PostUnaryExpression.operator
                 },
                 value: {
                     name: PostUnaryExpression.value
