@@ -1,10 +1,7 @@
 import { InferenceRuleNotApplicable } from "typir";
-import { TypirLangiumServices } from "typir-langium";
-import { ELangSpecifics } from "../ELangSpecifics.interface.js";
+import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 
-export function createTypeReferenceInferenceRules(
-  typir: TypirLangiumServices<ELangSpecifics>
-) {
+export function createTypeReferenceInferenceRules(typir: ElangTypirServices) {
   typir.Inference.addInferenceRulesForAstNodes({
     TypeReference: (node) => node.reference?.ref ?? InferenceRuleNotApplicable,
   });

@@ -1,4 +1,5 @@
-import { CustomKind, TypirServices } from "typir";
+import { CustomKind } from "typir";
+import { TypirLangiumServices } from "typir-langium";
 import { DimensionType } from "./custom-types/dimension/Dimension.type.js";
 import { MeasurementType } from "./custom-types/measurement/Measurement.type.js";
 import { ModelType } from "./custom-types/model/Model.type.js";
@@ -14,5 +15,5 @@ export type ELangAdditionalTypirServices = {
   };
 };
 
-export type ElangTypirServices = TypirServices<ELangSpecifics> &
+export type ElangTypirServices = TypirLangiumServices<ELangSpecifics> &
   ELangAdditionalTypirServices;

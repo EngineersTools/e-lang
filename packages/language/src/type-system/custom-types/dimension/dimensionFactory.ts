@@ -1,12 +1,12 @@
 import { CustomKind } from "typir";
-import { TypirLangiumServices } from "typir-langium";
+import { ElangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "../../ELangSpecifics.interface.js";
 import { DimensionType } from "./Dimension.type.js";
 
-export function dimensionFactory(typir: TypirLangiumServices<ELangSpecifics>) {
+export function dimensionFactory(typir: ElangTypirServices) {
   return new CustomKind<DimensionType, ELangSpecifics>(typir, {
     name: "Dimension",
-    calculateTypeName: (properties) => `${properties.name}Dimension`,
+    calculateTypeName: (properties) => `Dimension:${properties.name}`,
     calculateTypeUserRepresentation: (properties) =>
       `(dimension) ${properties.name}`,
   });

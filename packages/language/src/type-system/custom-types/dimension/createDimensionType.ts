@@ -1,15 +1,12 @@
-import { TypirLangiumServices } from "typir-langium";
-import {
-    DimensionDeclaration
-} from "../../../generated/ast.js";
-import { ELangAdditionalTypirServices } from "../../ELangAdditionalTypirServices.type.js";
-import { ELangSpecifics } from "../../ELangSpecifics.interface.js";
+import { DimensionDeclaration } from "../../../generated/ast.js";
+import { ElangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
+import { createMeasurementTypeForUnit } from "../measurement/createMeasurementType.js";
 
 export function createDimensionType(
   languageNode: DimensionDeclaration,
-  typir: TypirLangiumServices<ELangSpecifics> & ELangAdditionalTypirServices
+  typir: ElangTypirServices
 ) {
-  return typir.factory.Dimension.create({
+  const dimensionType = typir.factory.Dimension.create({
     properties: {
       name: languageNode.name,
       description: languageNode.description ?? "",
@@ -26,4 +23,20 @@ export function createDimensionType(
     })
     .finish()
     .getTypeFinal();
+
+  if (dimensionType && languageNode.units.length > 0) {
+    for (const unit of languageNode.units) {
+      const measurementType = createMeasurementTypeForUnit(unit.name, typir);
+
+      if (measurementType) {
+        typir.Conversion.markAsConvertible(
+          measurementType,
+          dimensionType,
+          "IMPLICIT_EXPLICIT"
+        );
+      }
+    }
+  }
+
+  return dimensionType;
 }

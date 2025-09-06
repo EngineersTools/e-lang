@@ -1,11 +1,11 @@
-import { TypirLangiumServices } from "typir-langium";
 import { UnitDeclaration } from "../../../generated/ast.js";
-import { ELangAdditionalTypirServices } from "../../ELangAdditionalTypirServices.type.js";
-import { ELangSpecifics } from "../../ELangSpecifics.interface.js";
+import {
+  ElangTypirServices
+} from "../../ELangAdditionalTypirServices.type.js";
 
 export function createUnitType(
   languageNode: UnitDeclaration,
-  typir: TypirLangiumServices<ELangSpecifics> & ELangAdditionalTypirServices
+  typir: ElangTypirServices
 ) {
   return typir.factory.Unit.create({
     properties: {

@@ -1,17 +1,14 @@
 import { CustomKind } from "typir";
-import { TypirLangiumServices } from "typir-langium";
+import { ElangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "../../ELangSpecifics.interface.js";
 import { MeasurementType } from "./Measurement.type.js";
 
-export function measurementFactory(
-  typir: TypirLangiumServices<ELangSpecifics>
-) {
+export function measurementFactory(typir: ElangTypirServices) {
   return new CustomKind<MeasurementType, ELangSpecifics>(typir, {
     name: "Measurement",
-    // calculateTypeName: (properties) => `${properties.name}Measurement`,
-    // calculateTypeUserRepresentation: (properties) =>
-    //   `(measurement) ${
-    //     properties.longName !== "" ? properties.longName : properties.name
-    //   }${properties.description !== "" ? ` '${properties.description}'` : ""}`,
+    calculateTypeName: (properties) =>
+      `Measurement:${properties.unit.longName ?? properties.unit.name}`,
+    calculateTypeUserRepresentation: (properties) =>
+      `(measurement) ${properties.unit.name}`,
   });
 }

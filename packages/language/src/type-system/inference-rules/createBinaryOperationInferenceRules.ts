@@ -1,18 +1,20 @@
 import { diagnosticData } from "langium";
 import { InferOperatorWithMultipleOperands } from "typir";
-import { TypirLangiumServices } from "typir-langium";
-import { BinaryExpression } from "../../generated/ast.js";
+import {
+  BinaryExpression,
+  isConstantDeclaration,
+  isReferenceExpression,
+} from "../../generated/ast.js";
+import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "../ELangSpecifics.interface.js";
 import {
-    createTypeAny,
-    getOrCreateTypeBool,
-    getOrCreateTypeNumber,
-    getOrCreateTypeText,
+  createTypeAny,
+  getOrCreateTypeBool,
+  getOrCreateTypeNumber,
+  getOrCreateTypeText,
 } from "../typir-types/createPrimitives.js";
 
-export function createBinaryOperationInferenceRules(
-  typir: TypirLangiumServices<ELangSpecifics>
-) {
+export function createBinaryOperationInferenceRules(typir: ElangTypirServices) {
   const typeAny = createTypeAny(typir);
   const typeNumber = getOrCreateTypeNumber(typir);
   const typeText = getOrCreateTypeText(typir);
@@ -113,16 +115,31 @@ export function createBinaryOperationInferenceRules(
   })
     .inferenceRule({
       ...binaryInferenceRule,
-      validation: (node, _opName, _opType, accept, typir) =>
-        typir.validation.Constraints.ensureNodeIsAssignable(
-          node.right,
-          node.left,
-          accept,
-          (actual, expected) => ({
-            message: `The expression '${node.right.$cstNode?.text}' of type '${actual.name}' is not assignable to '${node.left.$cstNode?.text}' with type '${expected.name}'`,
-            languageProperty: "value",
-          })
-        ),
+      validation: [
+        (node, _opName, _opType, accept, typir) =>
+          typir.validation.Constraints.ensureNodeIsAssignable(
+            node.right,
+            node.left,
+            accept,
+            (actual, expected) => ({
+              message: `The expression '${node.right.$cstNode?.text}' of type '${actual.name}' is not assignable to '${node.left.$cstNode?.text}' with type '${expected.name}'`,
+              languageProperty: "value",
+            })
+          ),
+        (node, _opName, _opType, accept, _typir) => {
+          if (
+            isReferenceExpression(node.left) &&
+            isConstantDeclaration(node.left.element.ref)
+          ) {
+            accept({
+              message: `The constant '${node.left.element.ref.name}' value can't be re-assigned.`,
+              languageNode: node,
+              languageProperty: "operator",
+              severity: "error",
+            });
+          }
+        },
+      ],
     })
     .finish();
 }

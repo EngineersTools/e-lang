@@ -1,9 +1,14 @@
-import { InferenceRuleNotApplicable } from "typir";
-import { TypirLangiumServices } from "typir-langium";
+import {
+  InferenceRuleNotApplicable,
+  TypirServices,
+  ValidationProblemAcceptor,
+} from "typir";
+import { MutableDeclaration } from "../../generated/ast.js";
+import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "../ELangSpecifics.interface.js";
 
 export function createMutableDeclarationInferenceRules(
-  typir: TypirLangiumServices<ELangSpecifics>
+  typir: ElangTypirServices
 ) {
   typir.Inference.addInferenceRulesForAstNodes({
     MutableDeclaration: (languageNode) => {
@@ -16,4 +21,24 @@ export function createMutableDeclarationInferenceRules(
       }
     },
   });
+
+  typir.validation.Collector.addValidationRulesForAstNodes({
+    MutableDeclaration: validateVariableDeclaration,
+  });
+}
+
+function validateVariableDeclaration(
+  node: MutableDeclaration,
+  accept: ValidationProblemAcceptor<ELangSpecifics>,
+  typir: TypirServices<ELangSpecifics>
+): void {
+  typir.validation.Constraints.ensureNodeIsAssignable(
+    node.value,
+    node,
+    accept,
+    (actual, expected) => ({
+      message: `The expression '${node.value?.$cstNode?.text}' of type '${actual.name}' is not assignable to '${node.name}' with type '${expected.name}'`,
+      languageProperty: "value",
+    })
+  );
 }

@@ -1,16 +1,13 @@
-import { TypirLangiumServices } from "typir-langium";
 import {
   BooleanLiteral,
   NullLiteral,
   NumberLiteral,
   StringLiteral,
-  TypeReference,
+  TypeReference
 } from "../../generated/ast.js";
-import { ELangSpecifics } from "../ELangSpecifics.interface.js";
+import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 
-export function getOrCreateTypeBool(
-  typir: TypirLangiumServices<ELangSpecifics>
-) {
+export function getOrCreateTypeBool(typir: ElangTypirServices) {
   return (
     typir.factory.Primitives.get({
       primitiveName: "boolean",
@@ -27,9 +24,7 @@ export function getOrCreateTypeBool(
   );
 }
 
-export function getOrCreateTypeNumber(
-  typir: TypirLangiumServices<ELangSpecifics>
-) {
+export function getOrCreateTypeNumber(typir: ElangTypirServices) {
   return (
     typir.factory.Primitives.get({ primitiveName: "number" }) ??
     typir.factory.Primitives.create({
@@ -43,9 +38,7 @@ export function getOrCreateTypeNumber(
       .finish()
   );
 }
-export function getOrCreateTypeText(
-  typir: TypirLangiumServices<ELangSpecifics>
-) {
+export function getOrCreateTypeText(typir: ElangTypirServices) {
   return (
     typir.factory.Primitives.get({
       primitiveName: "text",
@@ -62,9 +55,7 @@ export function getOrCreateTypeText(
   );
 }
 
-export function getOrCreateTypeNull(
-  typir: TypirLangiumServices<ELangSpecifics>
-) {
+export function getOrCreateTypeNull(typir: ElangTypirServices) {
   return (
     typir.factory.Primitives.get({
       primitiveName: "null",
@@ -75,12 +66,12 @@ export function getOrCreateTypeNull(
   );
 }
 
-export function createTypeAny(typir: TypirLangiumServices<ELangSpecifics>) {
+export function createTypeAny(typir: ElangTypirServices) {
   return typir.factory.Top.create({}).finish();
 }
 
 export function declarePrimitiveConvertibilityToNull(
-  typir: TypirLangiumServices<ELangSpecifics>
+  typir: ElangTypirServices
 ) {
   // Null can be assigned to any type
   const typeNull = getOrCreateTypeNull(typir);
