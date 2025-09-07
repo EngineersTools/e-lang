@@ -2,6 +2,7 @@ import { diagnosticData } from "langium";
 import { InferOperatorWithMultipleOperands } from "typir";
 import {
   BinaryExpression,
+  isBinaryExpression,
   isConstantDeclaration,
   isReferenceExpression,
 } from "../../generated/ast.js";
@@ -26,6 +27,7 @@ export function createBinaryOperationInferenceRules(typir: ElangTypirServices) {
   > = {
     languageKey: BinaryExpression.$type,
     matching: (node: BinaryExpression, name: string) => node.operator === name,
+    filter: isBinaryExpression,
     operands: (node: BinaryExpression, _name: string) => [
       node.left,
       node.right,
@@ -72,7 +74,7 @@ export function createBinaryOperationInferenceRules(typir: ElangTypirServices) {
       .finish();
   }
 
-  for (const operator of ["equal", "not_equal"]) {
+  for (const operator of ["==", "equal", "!=", "not_equal"]) {
     typir.factory.Operators.createBinary({
       name: operator,
       signature: { left: typeAny, right: typeAny, return: typeBoolean },

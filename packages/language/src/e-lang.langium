@@ -66,7 +66,11 @@ FormulaDeclaration:
 ;
 
 DimensionDeclaration infers TypeReference:
-    {infer DimensionDeclaration} (export?='export')? 'dimension' name=ID description=STRING? ('{' (units+=UnitDeclaration | conversions+=ConversionDeclaration)* '}')?
+    {infer DimensionDeclaration} 
+    (export?='export')? 
+    'dimension' name=ID description=STRING? (
+        '{' (base=DimensionBaseList)? (units+=UnitDeclaration | conversions+=ConversionDeclaration)* '}'
+    )?
 ;
 
 UnitDeclaration:
@@ -75,6 +79,14 @@ UnitDeclaration:
 
 ConversionDeclaration:
     'conversion' from=[UnitDeclaration:ID] '->' to=[UnitDeclaration:ID] ':' (lambda=LambdaExpression | formula=[FormulaDeclaration:ID])
+;
+
+DimensionBase:
+    base=[DimensionDeclaration:ID] ('^' (negativeExponent?='-')? exponent=INT)?
+;
+
+DimensionBaseList:
+    'base' '[' (elements+=DimensionBase (',' elements+=DimensionBase)*)? ']'
 ;
 
 PrintStatement:

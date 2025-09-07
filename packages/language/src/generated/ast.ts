@@ -44,6 +44,7 @@ export type ELangKeywordNames =
     | "]"
     | "^"
     | "and"
+    | "base"
     | "boolean"
     | "const"
     | "conversion"
@@ -177,8 +178,43 @@ export function isConversionDeclaration(item: unknown): item is ConversionDeclar
     return reflection.isInstance(item, ConversionDeclaration.$type);
 }
 
+export interface DimensionBase extends langium.AstNode {
+    readonly $container: DimensionBaseList;
+    readonly $type: 'DimensionBase';
+    base: langium.Reference<DimensionDeclaration>;
+    exponent?: number;
+    negativeExponent: boolean;
+}
+
+export const DimensionBase = {
+    $type: 'DimensionBase',
+    base: 'base',
+    exponent: 'exponent',
+    negativeExponent: 'negativeExponent'
+} as const;
+
+export function isDimensionBase(item: unknown): item is DimensionBase {
+    return reflection.isInstance(item, DimensionBase.$type);
+}
+
+export interface DimensionBaseList extends langium.AstNode {
+    readonly $container: DimensionDeclaration;
+    readonly $type: 'DimensionBaseList';
+    elements: Array<DimensionBase>;
+}
+
+export const DimensionBaseList = {
+    $type: 'DimensionBaseList',
+    elements: 'elements'
+} as const;
+
+export function isDimensionBaseList(item: unknown): item is DimensionBaseList {
+    return reflection.isInstance(item, DimensionBaseList.$type);
+}
+
 export interface DimensionDeclaration extends TypeReference {
     readonly $type: 'DimensionDeclaration';
+    base?: DimensionBaseList;
     conversions: Array<ConversionDeclaration>;
     description?: string;
     export: boolean;
@@ -189,6 +225,7 @@ export interface DimensionDeclaration extends TypeReference {
 export const DimensionDeclaration = {
     $type: 'DimensionDeclaration',
     array: 'array',
+    base: 'base',
     conversions: 'conversions',
     description: 'description',
     export: 'export',
@@ -837,6 +874,8 @@ export type ELangAstType = {
     CallExpression: CallExpression
     ConstantDeclaration: ConstantDeclaration
     ConversionDeclaration: ConversionDeclaration
+    DimensionBase: DimensionBase
+    DimensionBaseList: DimensionBaseList
     DimensionDeclaration: DimensionDeclaration
     Domain: Domain
     ELangProgram: ELangProgram
@@ -961,12 +1000,42 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
             },
             superTypes: [Statement.$type]
         },
+        DimensionBase: {
+            name: DimensionBase.$type,
+            properties: {
+                base: {
+                    name: DimensionBase.base,
+                    referenceType: DimensionDeclaration.$type
+                },
+                exponent: {
+                    name: DimensionBase.exponent
+                },
+                negativeExponent: {
+                    name: DimensionBase.negativeExponent,
+                    defaultValue: false
+                }
+            },
+            superTypes: []
+        },
+        DimensionBaseList: {
+            name: DimensionBaseList.$type,
+            properties: {
+                elements: {
+                    name: DimensionBaseList.elements,
+                    defaultValue: []
+                }
+            },
+            superTypes: []
+        },
         DimensionDeclaration: {
             name: DimensionDeclaration.$type,
             properties: {
                 array: {
                     name: DimensionDeclaration.array,
                     defaultValue: false
+                },
+                base: {
+                    name: DimensionDeclaration.base
                 },
                 conversions: {
                     name: DimensionDeclaration.conversions,

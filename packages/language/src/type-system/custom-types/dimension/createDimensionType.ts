@@ -15,6 +15,16 @@ export function createDimensionType(
         description: unit.description ?? "",
         longName: unit.longName ?? "",
       })),
+      base: languageNode.base
+        ? languageNode.base.elements.map((base) => ({
+            base: base.base.ref?.name ?? "Unknown Dimension",
+            exponent: base.exponent
+              ? base.negativeExponent
+                ? -Math.abs(base.exponent)
+                : base.exponent
+              : 1,
+          }))
+        : [],
     },
   })
     .inferenceRule({

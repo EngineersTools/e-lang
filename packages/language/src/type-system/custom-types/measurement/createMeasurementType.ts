@@ -9,6 +9,12 @@ export function createMeasurementType(
     throw new Error("Unit reference is undefined in MeasurementLiteral");
   }
 
+  const existingMeasurement = typir.factory.Measurement.get({ unit: { name: languageNode.unit.ref.name } });
+
+  if (existingMeasurement) {
+    return existingMeasurement;
+  }
+
   return typir.factory.Measurement.create({
     properties: {
       unit: {
