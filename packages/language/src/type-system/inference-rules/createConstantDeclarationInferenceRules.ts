@@ -3,7 +3,9 @@ import {
   TypirServices,
   ValidationProblemAcceptor,
 } from "typir";
-import { ConstantDeclaration } from "../../index.js";
+import {
+  ConstantDeclaration
+} from "../../index.js";
 import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "../ELangSpecifics.interface.js";
 

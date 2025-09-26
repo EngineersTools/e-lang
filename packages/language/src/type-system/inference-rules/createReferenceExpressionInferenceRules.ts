@@ -4,7 +4,6 @@ import {
   isParameterDeclaration,
   isReferenceExpression,
 } from "../../generated/ast.js";
-import { isMeasurementKind } from "../custom-types/measurement/isMeasurementKind.js";
 import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 import { getOrCreateTypeNull } from "../typir-types/createPrimitives.js";
 
@@ -40,25 +39,6 @@ export function createReferenceExpressionInferenceRules(
             );
             return parent.right;
           }
-        } else if (
-          parent.operator === "*" &&
-          isReferenceExpression(parent.left) &&
-          isReferenceExpression(parent.right) &&
-          parent.left.element.ref &&
-          parent.right.element.ref
-        ) {
-          const leftType = typir.Inference.inferType(parent.left.element.ref);
-          const rightType = typir.Inference.inferType(parent.right.element.ref);
-
-          if (isMeasurementKind(leftType) && isMeasurementKind(rightType)) {
-            // typir.caching.LanguageNodeInference.cacheSet(
-            //   node.element.ref,
-            //   rightType
-            // );
-            return parent.right.element.ref ?? InferenceRuleNotApplicable;
-          }
-
-          return parent.left.element.ref ?? InferenceRuleNotApplicable;
         }
       } else if (isParameterDeclaration(node.element.ref)) {
         return node.element.ref.type;
