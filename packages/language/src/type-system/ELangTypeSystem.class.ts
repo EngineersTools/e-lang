@@ -7,7 +7,7 @@ import {
 } from "../generated/ast.js";
 import { ElangTypirServices } from "./ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "./ELangSpecifics.interface.js";
-import { createDimensionType } from "./custom-types/dimension/createDimensionType.js";
+import { createDimensionTypeFromDeclaration } from "./custom-types/dimension/createDimensionType.js";
 import { createMeasurementType } from "./custom-types/measurement/createMeasurementType.js";
 import { createModelType } from "./custom-types/model/createModelType.js";
 import { createUnitType } from "./custom-types/unit/createUnitType.js";
@@ -25,6 +25,7 @@ import {
   getOrCreateTypeNumber,
   getOrCreateTypeText,
 } from "./typir-types/createPrimitives.js";
+import { createDimensionDeclarationValidationRules } from "./validation-rules/createDimensionDeclarationValidationRules.js";
 
 export class ELangTypeSystem
   implements LangiumTypeSystemDefinition<ELangSpecifics>
@@ -42,6 +43,7 @@ export class ELangTypeSystem
     createMeasurementBinaryOperationInferenceRules(typir);
     createBinaryOperationInferenceRules(typir);
     createTypeReferenceInferenceRules(typir);
+    createDimensionDeclarationValidationRules(typir);
   }
 
   onNewAstNode(
@@ -49,7 +51,7 @@ export class ELangTypeSystem
     typir: ElangTypirServices
   ): void {
     if (isDimensionDeclaration(languageNode)) {
-      createDimensionType(languageNode, typir);
+      createDimensionTypeFromDeclaration(languageNode, typir);
     } else if (isUnitDeclaration(languageNode)) {
       createUnitType(languageNode, typir);
     } else if (isMeasurementLiteral(languageNode)) {

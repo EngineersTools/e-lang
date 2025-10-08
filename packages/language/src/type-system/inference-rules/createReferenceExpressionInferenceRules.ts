@@ -2,7 +2,7 @@ import { InferenceRuleNotApplicable, isType } from "typir";
 import {
   isBinaryExpression,
   isParameterDeclaration,
-  isReferenceExpression,
+  isReferenceExpression
 } from "../../generated/ast.js";
 import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 import { getOrCreateTypeNull } from "../typir-types/createPrimitives.js";
