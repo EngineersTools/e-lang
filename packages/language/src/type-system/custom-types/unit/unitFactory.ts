@@ -6,11 +6,13 @@ import { UnitType } from "./Unit.type.js";
 export function unitFactory(typir: ElangTypirServices) {
   return new CustomKind<UnitType, ELangSpecifics>(typir, {
     name: "Unit",
-    calculateTypeName: (properties) =>
-      `Unit:${properties.longName ?? properties.name}`,
-    calculateTypeUserRepresentation: (properties) =>
-      `(unit) ${
-        properties.longName !== "" ? properties.longName : properties.name
-      }${properties.description !== "" ? ` '${properties.description}'` : ""}`,
+    calculateTypeName: (properties) => properties.name,
+    calculateTypeUserRepresentation: (properties) => {
+        // Convert vector to string representation
+        const vecStr = Array.from(properties.vector.entries())
+            .map(([k, v]) => `${k}^${v}`)
+            .join('*');
+        return vecStr ? `${properties.name} (${vecStr})` : properties.name;
+    }
   });
 }

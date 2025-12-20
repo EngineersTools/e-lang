@@ -1,17 +1,18 @@
 import { UnitDeclaration } from "../../../generated/ast.js";
-import {
-  ElangTypirServices
-} from "../../ELangAdditionalTypirServices.type.js";
+import { ElangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
+import { DimensionCalculator } from "../../../dimension-calculator.js";
 
 export function createUnitType(
   languageNode: UnitDeclaration,
-  typir: ElangTypirServices
+  typir: ElangTypirServices,
+  calculator: DimensionCalculator
 ) {
+  const vector = calculator.compute(languageNode);
+
   return typir.factory.Unit.create({
     properties: {
       name: languageNode.name,
-      longName: languageNode.longName ?? "",
-      description: languageNode.description ?? "",
+      vector: vector
     },
   })
     .inferenceRule({

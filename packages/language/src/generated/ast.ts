@@ -28,10 +28,10 @@ export type ELangKeywordNames =
     | ","
     | "-"
     | "--"
-    | "->"
     | "."
     | "/"
     | ":"
+    | ";"
     | "<"
     | "<="
     | "="
@@ -44,10 +44,8 @@ export type ELangKeywordNames =
     | "]"
     | "^"
     | "and"
-    | "base"
     | "boolean"
     | "const"
-    | "conversion"
     | "default"
     | "dimension"
     | "domain"
@@ -157,82 +155,17 @@ export function isConstantDeclaration(item: unknown): item is ConstantDeclaratio
     return reflection.isInstance(item, ConstantDeclaration.$type);
 }
 
-export interface ConversionDeclaration extends langium.AstNode {
-    readonly $container: DimensionDeclaration | ELangProgram | StatementBlock;
-    readonly $type: 'ConversionDeclaration';
-    formula?: langium.Reference<FormulaDeclaration>;
-    from: langium.Reference<UnitDeclaration>;
-    lambda?: LambdaExpression;
-    to: langium.Reference<UnitDeclaration>;
-}
-
-export const ConversionDeclaration = {
-    $type: 'ConversionDeclaration',
-    formula: 'formula',
-    from: 'from',
-    lambda: 'lambda',
-    to: 'to'
-} as const;
-
-export function isConversionDeclaration(item: unknown): item is ConversionDeclaration {
-    return reflection.isInstance(item, ConversionDeclaration.$type);
-}
-
-export interface DimensionBase extends langium.AstNode {
-    readonly $container: DimensionBaseList;
-    readonly $type: 'DimensionBase';
-    base: langium.Reference<DimensionDeclaration>;
-    exponent?: number;
-    negativeExponent: boolean;
-}
-
-export const DimensionBase = {
-    $type: 'DimensionBase',
-    base: 'base',
-    exponent: 'exponent',
-    negativeExponent: 'negativeExponent'
-} as const;
-
-export function isDimensionBase(item: unknown): item is DimensionBase {
-    return reflection.isInstance(item, DimensionBase.$type);
-}
-
-export interface DimensionBaseList extends langium.AstNode {
-    readonly $container: DimensionDeclaration;
-    readonly $type: 'DimensionBaseList';
-    elements: Array<DimensionBase>;
-}
-
-export const DimensionBaseList = {
-    $type: 'DimensionBaseList',
-    elements: 'elements'
-} as const;
-
-export function isDimensionBaseList(item: unknown): item is DimensionBaseList {
-    return reflection.isInstance(item, DimensionBaseList.$type);
-}
-
-export interface DimensionDeclaration extends TypeReference {
+export interface DimensionDeclaration extends langium.AstNode {
+    readonly $container: ELangProgram | StatementBlock;
     readonly $type: 'DimensionDeclaration';
-    base?: DimensionBaseList;
-    conversions: Array<ConversionDeclaration>;
-    description?: string;
     export: boolean;
     name: string;
-    units: Array<UnitDeclaration>;
 }
 
 export const DimensionDeclaration = {
     $type: 'DimensionDeclaration',
-    array: 'array',
-    base: 'base',
-    conversions: 'conversions',
-    description: 'description',
     export: 'export',
-    name: 'name',
-    primitive: 'primitive',
-    reference: 'reference',
-    units: 'units'
+    name: 'name'
 } as const;
 
 export function isDimensionDeclaration(item: unknown): item is DimensionDeclaration {
@@ -404,7 +337,7 @@ export function isIndexedAccess(item: unknown): item is IndexedAccess {
 }
 
 export interface LambdaExpression extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ConversionDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'LambdaExpression';
     body: Expression | StatementBlock;
     parameters: Array<ParameterDeclaration>;
@@ -747,7 +680,7 @@ export function isReturnStatement(item: unknown): item is ReturnStatement {
     return reflection.isInstance(item, ReturnStatement.$type);
 }
 
-export type Statement = ConversionDeclaration | Expression | ForStatement | FormulaDeclaration | IfStatement | ImportStatement | MatchStatement | NamedElement | PrintStatement | StatementBlock | TypeReference | UnitDeclaration;
+export type Statement = DimensionDeclaration | Expression | ForStatement | FormulaDeclaration | IfStatement | ImportStatement | MatchStatement | NamedElement | PrintStatement | StatementBlock | TypeReference;
 
 export const Statement = {
     $type: 'Statement'
@@ -811,7 +744,7 @@ export function isTypeIntersection(item: unknown): item is TypeIntersection {
 }
 
 export interface TypeReference extends langium.AstNode {
-    readonly $type: 'DimensionDeclaration' | 'LambdaType' | 'ModelDeclaration' | 'TypeIntersection' | 'TypeReference' | 'TypeUnion';
+    readonly $type: 'LambdaType' | 'ModelDeclaration' | 'TypeIntersection' | 'TypeReference' | 'TypeUnion' | 'UnitDeclaration';
     array: boolean;
     primitive?: 'boolean' | 'number' | 'text';
     reference?: langium.Reference<TypeReference>;
@@ -849,23 +782,75 @@ export function isTypeUnion(item: unknown): item is TypeUnion {
     return reflection.isInstance(item, TypeUnion.$type);
 }
 
-export interface UnitDeclaration extends langium.AstNode {
-    readonly $container: DimensionDeclaration | ELangProgram | StatementBlock;
+export interface UnitDeclaration extends TypeReference {
     readonly $type: 'UnitDeclaration';
-    description?: string;
-    longName?: string;
+    dimension?: langium.Reference<DimensionDeclaration>;
+    export: boolean;
+    expression?: UnitExpression;
     name: string;
 }
 
 export const UnitDeclaration = {
     $type: 'UnitDeclaration',
-    description: 'description',
-    longName: 'longName',
-    name: 'name'
+    array: 'array',
+    dimension: 'dimension',
+    export: 'export',
+    expression: 'expression',
+    name: 'name',
+    primitive: 'primitive',
+    reference: 'reference'
 } as const;
 
 export function isUnitDeclaration(item: unknown): item is UnitDeclaration {
     return reflection.isInstance(item, UnitDeclaration.$type);
+}
+
+export type UnitExpression = UnitOperation | UnitTerm;
+
+export const UnitExpression = {
+    $type: 'UnitExpression'
+} as const;
+
+export function isUnitExpression(item: unknown): item is UnitExpression {
+    return reflection.isInstance(item, UnitExpression.$type);
+}
+
+export interface UnitOperation extends langium.AstNode {
+    readonly $container: UnitDeclaration;
+    readonly $type: 'UnitOperation';
+    left: UnitTerm;
+    operator: '*' | '/';
+    right: UnitTerm;
+}
+
+export const UnitOperation = {
+    $type: 'UnitOperation',
+    left: 'left',
+    operator: 'operator',
+    right: 'right'
+} as const;
+
+export function isUnitOperation(item: unknown): item is UnitOperation {
+    return reflection.isInstance(item, UnitOperation.$type);
+}
+
+export interface UnitTerm extends langium.AstNode {
+    readonly $container: UnitDeclaration | UnitOperation;
+    readonly $type: 'UnitExpression' | 'UnitOperation' | 'UnitTerm';
+    power?: number;
+    ref: langium.Reference<UnitDeclaration>;
+    value?: number;
+}
+
+export const UnitTerm = {
+    $type: 'UnitTerm',
+    power: 'power',
+    ref: 'ref',
+    value: 'value'
+} as const;
+
+export function isUnitTerm(item: unknown): item is UnitTerm {
+    return reflection.isInstance(item, UnitTerm.$type);
 }
 
 export type ELangAstType = {
@@ -873,9 +858,6 @@ export type ELangAstType = {
     BooleanLiteral: BooleanLiteral
     CallExpression: CallExpression
     ConstantDeclaration: ConstantDeclaration
-    ConversionDeclaration: ConversionDeclaration
-    DimensionBase: DimensionBase
-    DimensionBaseList: DimensionBaseList
     DimensionDeclaration: DimensionDeclaration
     Domain: Domain
     ELangProgram: ELangProgram
@@ -914,6 +896,9 @@ export type ELangAstType = {
     TypeReference: TypeReference
     TypeUnion: TypeUnion
     UnitDeclaration: UnitDeclaration
+    UnitExpression: UnitExpression
+    UnitOperation: UnitOperation
+    UnitTerm: UnitTerm
 }
 
 export class ELangAstReflection extends langium.AbstractAstReflection {
@@ -979,91 +964,18 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
             },
             superTypes: [ExportableElement.$type, NamedElement.$type]
         },
-        ConversionDeclaration: {
-            name: ConversionDeclaration.$type,
-            properties: {
-                formula: {
-                    name: ConversionDeclaration.formula,
-                    referenceType: FormulaDeclaration.$type
-                },
-                from: {
-                    name: ConversionDeclaration.from,
-                    referenceType: UnitDeclaration.$type
-                },
-                lambda: {
-                    name: ConversionDeclaration.lambda
-                },
-                to: {
-                    name: ConversionDeclaration.to,
-                    referenceType: UnitDeclaration.$type
-                }
-            },
-            superTypes: [Statement.$type]
-        },
-        DimensionBase: {
-            name: DimensionBase.$type,
-            properties: {
-                base: {
-                    name: DimensionBase.base,
-                    referenceType: DimensionDeclaration.$type
-                },
-                exponent: {
-                    name: DimensionBase.exponent
-                },
-                negativeExponent: {
-                    name: DimensionBase.negativeExponent,
-                    defaultValue: false
-                }
-            },
-            superTypes: []
-        },
-        DimensionBaseList: {
-            name: DimensionBaseList.$type,
-            properties: {
-                elements: {
-                    name: DimensionBaseList.elements,
-                    defaultValue: []
-                }
-            },
-            superTypes: []
-        },
         DimensionDeclaration: {
             name: DimensionDeclaration.$type,
             properties: {
-                array: {
-                    name: DimensionDeclaration.array,
-                    defaultValue: false
-                },
-                base: {
-                    name: DimensionDeclaration.base
-                },
-                conversions: {
-                    name: DimensionDeclaration.conversions,
-                    defaultValue: []
-                },
-                description: {
-                    name: DimensionDeclaration.description
-                },
                 export: {
                     name: DimensionDeclaration.export,
                     defaultValue: false
                 },
                 name: {
                     name: DimensionDeclaration.name
-                },
-                primitive: {
-                    name: DimensionDeclaration.primitive
-                },
-                reference: {
-                    name: DimensionDeclaration.reference,
-                    referenceType: TypeReference.$type
-                },
-                units: {
-                    name: DimensionDeclaration.units,
-                    defaultValue: []
                 }
             },
-            superTypes: [TypeReference.$type]
+            superTypes: [Statement.$type]
         },
         Domain: {
             name: Domain.$type,
@@ -1580,17 +1492,70 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         UnitDeclaration: {
             name: UnitDeclaration.$type,
             properties: {
-                description: {
-                    name: UnitDeclaration.description
+                array: {
+                    name: UnitDeclaration.array,
+                    defaultValue: false
                 },
-                longName: {
-                    name: UnitDeclaration.longName
+                dimension: {
+                    name: UnitDeclaration.dimension,
+                    referenceType: DimensionDeclaration.$type
+                },
+                export: {
+                    name: UnitDeclaration.export,
+                    defaultValue: false
+                },
+                expression: {
+                    name: UnitDeclaration.expression
                 },
                 name: {
                     name: UnitDeclaration.name
+                },
+                primitive: {
+                    name: UnitDeclaration.primitive
+                },
+                reference: {
+                    name: UnitDeclaration.reference,
+                    referenceType: TypeReference.$type
                 }
             },
-            superTypes: [Statement.$type]
+            superTypes: [TypeReference.$type]
+        },
+        UnitExpression: {
+            name: UnitExpression.$type,
+            properties: {
+            },
+            superTypes: [UnitTerm.$type]
+        },
+        UnitOperation: {
+            name: UnitOperation.$type,
+            properties: {
+                left: {
+                    name: UnitOperation.left
+                },
+                operator: {
+                    name: UnitOperation.operator
+                },
+                right: {
+                    name: UnitOperation.right
+                }
+            },
+            superTypes: [UnitExpression.$type]
+        },
+        UnitTerm: {
+            name: UnitTerm.$type,
+            properties: {
+                power: {
+                    name: UnitTerm.power
+                },
+                ref: {
+                    name: UnitTerm.ref,
+                    referenceType: UnitDeclaration.$type
+                },
+                value: {
+                    name: UnitTerm.value
+                }
+            },
+            superTypes: [UnitExpression.$type]
         }
     } as const satisfies langium.AstMetaData
 }

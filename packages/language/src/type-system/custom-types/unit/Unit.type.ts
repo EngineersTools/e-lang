@@ -1,5 +1,7 @@
+import { DimensionVector } from "../../../dimension-calculator.js";
+
 export type UnitType = {
   name: string;
-  longName?: string;
-  description?: string;
+  vector: DimensionVector;
 };
+

@@ -6,9 +6,9 @@ import {
   MultiMap,
 } from "langium";
 import { ELangServices } from "./ELangServices.type.js";
-import {
-  isUnitDeclaration
-} from "./generated/ast.js";
+// import {
+//   isUnitDeclaration
+// } from "./generated/ast.js";
 
 export class ELangScopeComputation extends DefaultScopeComputation {
   constructor(services: ELangServices) {
@@ -20,18 +20,10 @@ export class ELangScopeComputation extends DefaultScopeComputation {
     document: LangiumDocument,
     symbols: MultiMap<AstNode, AstNodeDescription>
   ): void {
-    if (isUnitDeclaration(node)) {
-      const container = node.$container.$container;
-      if (container) {
-        const name = this.nameProvider.getName(node);
-        if (name) {
-          symbols.add(
-            container,
-            this.descriptions.createDescription(node, name, document)
-          );
-        }
-      }
-    } 
+//     if (isUnitDeclaration(node)) {
+//       // Previous logic was for nested units in DimensionDeclaration
+//       // Now units are top-level and don't need hoisting
+//     } 
     // else if (
     //   isParameterDeclaration(node) &&
     //   isModelDeclaration(node.$container)

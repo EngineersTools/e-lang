@@ -21,7 +21,6 @@ Statement:
     | DimensionDeclaration
     | UnitDeclaration
     | FormulaDeclaration
-    | ConversionDeclaration
     | ModelDeclaration
     | StatementBlock
     | PrintStatement
@@ -65,28 +64,25 @@ FormulaDeclaration:
     (export?='export')? 'formula' name=ID '(' (parameters+=ParameterDeclaration (',' parameters+=ParameterDeclaration)*)? ')' (':' returnType=TypeReference)? body=StatementBlock
 ;
 
-DimensionDeclaration infers TypeReference:
-    {infer DimensionDeclaration} 
-    (export?='export')? 
-    'dimension' name=ID description=STRING? (
-        '{' (base=DimensionBaseList)? (units+=UnitDeclaration | conversions+=ConversionDeclaration)* '}'
-    )?
+DimensionDeclaration:
+    (export?='export')? 'dimension' name=ID ';'
 ;
 
-UnitDeclaration:
-    'unit' name=ID (':' longName=ID)? description=STRING?
+UnitDeclaration infers TypeReference:
+    {infer UnitDeclaration} (export?='export')? 'unit' name=ID 
+    ( ':' dimension=[DimensionDeclaration:ID] )?   // For Base units (unit meter : Length)
+    ( '=' expression=UnitExpression )?              // For Derived units (unit hertz = 1 / second)
+    ';'
 ;
 
-ConversionDeclaration:
-    'conversion' from=[UnitDeclaration:ID] '->' to=[UnitDeclaration:ID] ':' (lambda=LambdaExpression | formula=[FormulaDeclaration:ID])
+UnitExpression:
+    UnitTerm ({infer UnitOperation.left=current} operator=('*'|'/') right=UnitTerm)*
 ;
 
-DimensionBase:
-    base=[DimensionDeclaration:ID] ('^' (negativeExponent?='-')? exponent=INT)?
-;
-
-DimensionBaseList:
-    'base' '[' (elements+=DimensionBase (',' elements+=DimensionBase)*)? ']'
+UnitTerm:
+    ref=[UnitDeclaration:ID] ('^' power=INT)? |
+    '(' UnitExpression ')' |
+    value=INT | value=DEC
 ;
 
 PrintStatement:

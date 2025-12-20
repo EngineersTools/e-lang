@@ -7,7 +7,7 @@ export function measurementFactory(typir: ElangTypirServices) {
   return new CustomKind<MeasurementType, ELangSpecifics>(typir, {
     name: "Measurement",
     calculateTypeName: (properties) =>
-      `Measurement:${properties.unit.longName ?? properties.unit.name}`,
+      `Measurement:${properties.unit.name}`,
     calculateTypeUserRepresentation: (properties) =>
       `(measurement) ${properties.unit.name}`,
   });

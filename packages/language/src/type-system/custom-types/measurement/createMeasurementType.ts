@@ -1,24 +1,34 @@
 import { MeasurementLiteral } from "../../../generated/ast.js";
 import { ElangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
+import { DimensionCalculator } from "../../../dimension-calculator.js";
 
 export function createMeasurementType(
   languageNode: MeasurementLiteral,
-  typir: ElangTypirServices
+  typir: ElangTypirServices,
+  calculator?: DimensionCalculator
 ) {
   if (!languageNode.unit.ref) {
     throw new Error("Unit reference is undefined in MeasurementLiteral");
   }
 
-  const existingMeasurement = typir.factory.Measurement.get({ unit: { name: languageNode.unit.ref.name } });
-
+  const unitName = languageNode.unit.ref.name;
+  
+  // Try to find existing measurement type first
+  const existingMeasurement = typir.factory.Measurement.get({ unit: { name: unitName } as any });
   if (existingMeasurement) {
     return existingMeasurement;
   }
 
+  // Calculate vector. If calculator is not provided, we might fail or need to instantiate one.
+  // Ideally it should be provided.
+  const calc = calculator ?? new DimensionCalculator(); 
+  const vector = calc.compute(languageNode.unit.ref);
+
   return typir.factory.Measurement.create({
     properties: {
       unit: {
-        name: languageNode.unit.ref.name,
+        name: unitName,
+        vector: vector
       },
     },
   })
@@ -31,15 +41,3 @@ export function createMeasurementType(
     .getTypeFinal();
 }
 
-export function createMeasurementTypeForUnit(
-  unitName: string,
-  typir: ElangTypirServices
-) {
-  return typir.factory.Measurement.create({
-    properties: {
-      unit: { name: unitName },
-    },
-  })
-    .finish()
-    .getTypeFinal();
-}
