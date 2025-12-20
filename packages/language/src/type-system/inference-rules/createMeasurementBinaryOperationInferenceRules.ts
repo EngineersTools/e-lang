@@ -23,23 +23,6 @@ export function createMeasurementBinaryOperationInferenceRules(
 
   typir.validation.Collector.addValidationRulesForAstNodes({
     BinaryExpression: [
-      // (node, accept) => {
-      //   if (
-      //     ["+", "-", "="].includes(node.operator) &&
-      //     isMeasurementLiteral(node.left) &&
-      //     isMeasurementLiteral(node.right) &&
-      //     isDimensionDeclaration(node.left.unit.ref?.$container) &&
-      //     isDimensionDeclaration(node.right.unit.ref?.$container) &&
-      //     node.left.unit.ref?.$container.name !==
-      //       node.right.unit.ref?.$container.name
-      //   ) {
-      //     accept({
-      //       message: `You are trying to add, subtract or assign two measurements with units of different dimensions ('${node.left.unit.ref.name}:${node.left.unit.ref?.$container.name}' and '${node.right.unit.ref.name}:${node.right.unit.ref?.$container.name}').`,
-      //       languageNode: node,
-      //       severity: "error",
-      //     });
-      //   }
-      // },
       (node, accept) => {
         if (["+", "-", "="].includes(node.operator)) {
           const leftType = typir.Inference.inferType(node.left);

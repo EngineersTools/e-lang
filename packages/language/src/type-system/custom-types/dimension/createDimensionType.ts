@@ -72,20 +72,8 @@ export function createDimensionTypeFromBase(
           description: "",
         };
 
-        return (
-          typir.factory.Unit.get(unitProps) ?? {
-            name: `${el.base.ref?.name ?? "Unknown Unit"}^${
-              el.exponent
-                ? el.negativeExponent
-                  ? -Math.abs(el.exponent)
-                  : el.exponent
-                : 1
-            }`,
-            longName: "",
-            description: "",
-          }
-        );
-      }),
+        return unitProps;
+      }) ?? [],
       base: languageNode.base
         ? languageNode.base.elements.map((base) => ({
             base: base.base.ref?.name ?? "Unknown Dimension",
