@@ -20,10 +20,6 @@ export class ELangScopeComputation extends DefaultScopeComputation {
     document: LangiumDocument,
     symbols: MultiMap<AstNode, AstNodeDescription>
   ): void {
-//     if (isUnitDeclaration(node)) {
-//       // Previous logic was for nested units in DimensionDeclaration
-//       // Now units are top-level and don't need hoisting
-//     } 
     // else if (
     //   isParameterDeclaration(node) &&
     //   isModelDeclaration(node.$container)

@@ -159,21 +159,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@22"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
               "$ref": "#/rules@5"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@7"
             },
             "arguments": []
           },
@@ -188,6 +174,13 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "$type": "RuleCall",
             "rule": {
               "$ref": "#/rules@13"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@7"
             },
             "arguments": []
           },
@@ -237,6 +230,13 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "$type": "RuleCall",
             "rule": {
               "$ref": "#/rules@21"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@22"
             },
             "arguments": []
           }
@@ -905,10 +905,6 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               },
               "arguments": []
             }
-          },
-          {
-            "$type": "Keyword",
-            "value": ";"
           }
         ]
       },
@@ -919,20 +915,9 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
     {
       "$type": "ParserRule",
       "name": "UnitDeclaration",
-      "inferredType": {
-        "$type": "InferredType",
-        "name": "TypeReference"
-      },
       "definition": {
         "$type": "Group",
         "elements": [
-          {
-            "$type": "Action",
-            "inferredType": {
-              "$type": "InferredType",
-              "name": "UnitDeclaration"
-            }
-          },
           {
             "$type": "Assignment",
             "feature": "export",
@@ -1010,10 +995,6 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               }
             ],
             "cardinality": "?"
-          },
-          {
-            "$type": "Keyword",
-            "value": ";"
           }
         ]
       },
@@ -1101,7 +1082,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@13/definition/elements@0/inferredType"
+                    "$ref": "#/rules@13"
                   },
                   "terminal": {
                     "$type": "RuleCall",
@@ -2421,13 +2402,6 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@35"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
               "$ref": "#/rules@36"
             },
             "arguments": []
@@ -2442,13 +2416,6 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@41"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
               "$ref": "#/rules@38"
             },
             "arguments": []
@@ -2456,7 +2423,14 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@42"
+              "$ref": "#/rules@35"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@39"
             },
             "arguments": []
           },
@@ -2487,6 +2461,64 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               "$ref": "#/rules@47"
             },
             "arguments": []
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "NumericExpression",
+      "inferredType": {
+        "$type": "InferredType",
+        "name": "Expression"
+      },
+      "definition": {
+        "$type": "Group",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@42"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "MeasurementLiteral"
+                },
+                "feature": "value",
+                "operator": "="
+              },
+              {
+                "$type": "Assignment",
+                "feature": "unit",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/rules@13"
+                  },
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@54"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
+              }
+            ],
+            "cardinality": "?"
           }
         ]
       },
@@ -2662,14 +2694,14 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@39"
+              "$ref": "#/rules@40"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@40"
+              "$ref": "#/rules@41"
             },
             "arguments": []
           }
@@ -2690,50 +2722,6 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           "$type": "Keyword",
           "value": "null"
         }
-      },
-      "entry": false,
-      "fragment": false,
-      "parameters": []
-    },
-    {
-      "$type": "ParserRule",
-      "name": "MeasurementLiteral",
-      "definition": {
-        "$type": "Group",
-        "elements": [
-          {
-            "$type": "Assignment",
-            "feature": "value",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@41"
-              },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "unit",
-            "operator": "=",
-            "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@13/definition/elements@0/inferredType"
-              },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@54"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
-            }
-          }
-        ]
       },
       "entry": false,
       "fragment": false,
@@ -3287,7 +3275,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@10/inferredType"
+                    "$ref": "#/types@0"
                   },
                   "terminal": {
                     "$type": "RuleCall",
@@ -3474,6 +3462,12 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "typeRef": {
               "$ref": "#/rules@10/definition/elements@0/inferredType"
             }
+          },
+          {
+            "$type": "SimpleType",
+            "typeRef": {
+              "$ref": "#/rules@13"
+            }
           }
         ]
       }
@@ -3506,6 +3500,12 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "$type": "SimpleType",
             "typeRef": {
               "$ref": "#/rules@10/inferredType"
+            }
+          },
+          {
+            "$type": "SimpleType",
+            "typeRef": {
+              "$ref": "#/rules@13"
             }
           }
         ]

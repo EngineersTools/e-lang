@@ -15,11 +15,10 @@ Import:
 ;
 
 Statement:
-    Expression
-    | ImportStatement
-    | VariableDeclaration
+    ImportStatement
     | DimensionDeclaration
     | UnitDeclaration
+    | VariableDeclaration
     | FormulaDeclaration
     | ModelDeclaration
     | StatementBlock
@@ -27,6 +26,7 @@ Statement:
     | IfStatement
     | MatchStatement
     | ForStatement
+    | Expression
 ;
 
 StatementBlock:
@@ -65,14 +65,13 @@ FormulaDeclaration:
 ;
 
 DimensionDeclaration:
-    (export?='export')? 'dimension' name=ID ';'
+    (export?='export')? 'dimension' name=ID
 ;
 
-UnitDeclaration infers TypeReference:
-    {infer UnitDeclaration} (export?='export')? 'unit' name=ID 
+UnitDeclaration:
+    (export?='export')? 'unit' name=ID 
     ( ':' dimension=[DimensionDeclaration:ID] )?   // For Base units (unit meter : Length)
-    ( '=' expression=UnitExpression )?              // For Derived units (unit hertz = 1 / second)
-    ';'
+    ( '=' expression=UnitExpression )?             // For Derived units (unit hertz = 1 / second)
 ;
 
 UnitExpression:
@@ -178,13 +177,16 @@ PrimitiveExpression infers Expression:
     | PreUnaryExpression
     | ReferenceExpression
     | StringLiteral
-    | NumberLiteral
+    | NumericExpression
     | BooleanLiteral
     | NullLiteral
-    | MeasurementLiteral
     | ModelExpression
     | ListExpression
     | LambdaExpression
+;
+
+NumericExpression infers Expression:
+    NumberLiteral ({infer MeasurementLiteral.value=current} unit=[UnitDeclaration:ID])?
 ;
 
 PreUnaryExpression:
@@ -220,9 +222,7 @@ NullLiteral:
     value='null'
 ;
 
-MeasurementLiteral:
-    value=NumberLiteral unit=[UnitDeclaration:ID]
-;
+
 
 ModelMemberAssignment:
     property=[ParameterDeclaration:ID] ':' value=Expression
@@ -260,7 +260,7 @@ PrimaryTypeReference infers TypeReference:
     (
         '(' TypeReference ')'
         | primitive=('number' | 'text' | 'boolean')
-        | reference=[TypeReference:ID]
+    | reference=[NamedElement:ID]
         | LambdaType
     )
     (array?='list')?
@@ -271,13 +271,15 @@ type NamedElement =
     | MutableDeclaration
     | ParameterDeclaration
     | FormulaDeclaration
-    | ModelDeclaration;
+    | ModelDeclaration
+    | UnitDeclaration;
 
 type ExportableElement =
     ConstantDeclaration
     | MutableDeclaration
     | FormulaDeclaration
-    | TypeReference;
+    | TypeReference
+    | UnitDeclaration;
 
 hidden terminal WS: /\s+/;
 terminal ID: /[_a-zA-Z][\w_]*/;
