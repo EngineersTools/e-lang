@@ -1,4 +1,4 @@
-import { inject, type Module } from "langium";
+import { inject, LangiumSharedCoreServices, type Module } from "langium";
 import {
   createDefaultModule,
   createDefaultSharedModule,
@@ -8,16 +8,11 @@ import {
 } from "langium/lsp";
 import {
   createTypirLangiumServicesWithAdditionalServices,
-  initializeLangiumTypirServices,
+  initializeLangiumTypirServices
 } from "typir-langium";
 import { ELangAddedServices, ELangServices } from "./ELangServices.type.js";
-import { ELangHoverProvider } from "./e-lang-hover-provider.js";
 import { ELangScopeComputation } from "./e-lang-scope-computation.js";
 import { ELangScopeProvider } from "./e-lang-scope-provider.js";
-import {
-  ELangValidator,
-  registerValidationChecks,
-} from "./e-lang-validator.js";
 import { reflection } from "./generated/ast.js";
 import {
   ELangGeneratedModule,
@@ -27,24 +22,17 @@ import { ELangAdditionalTypirServices } from "./type-system/ELangAdditionalTypir
 import { ELangSpecifics } from "./type-system/ELangSpecifics.interface.js";
 import { ELangTypeSystem } from "./type-system/ELangTypeSystem.class.js";
 import { dimensionFactory } from "./type-system/custom-types/dimension/dimensionFactory.js";
-import { measurementFactory } from "./type-system/custom-types/measurement/measurementFactory.js";
 import { modelFactory } from "./type-system/custom-types/model/modelFactory.js";
 import { unitFactory } from "./type-system/custom-types/unit/unitFactory.js";
 
-/**
- * Dependency injection module that overrides Langium default services and contributes the
- * declared custom services. The Langium defaults can be partially specified to override only
- * selected services, while the custom services must be fully specified.
- */
-export const ELangModule: Module<
-  ELangServices,
-  PartialLangiumServices & ELangAddedServices
-> = {
-  validation: {
-    ELangValidator: () => new ELangValidator(),
+
+export function createELangModule(shared: LangiumSharedCoreServices): Module<ELangServices, PartialLangiumServices & ELangAddedServices> {
+  return {
+    validation: {
+    // ELangValidator: () => new ELangValidator(),
   },
   lsp: {
-    HoverProvider: (services) => new ELangHoverProvider(services),
+    // HoverProvider: (services) => new ELangHoverProvider(services),
   },
   references: {
     ScopeProvider: (services) => new ELangScopeProvider(services),
@@ -58,11 +46,11 @@ export const ELangModule: Module<
       factory: {
         Unit: unitFactory,
         Dimension: dimensionFactory,
-        Measurement: measurementFactory,
         Model: modelFactory,
       },
     }),
-};
+  }
+}
 
 /**
  * Create the full set of services required by Langium.
@@ -91,12 +79,10 @@ export function createELangServices(context: DefaultSharedModuleContext): {
   const ELang = inject(
     createDefaultModule({ shared }),
     ELangGeneratedModule,
-    ELangModule
+    createELangModule(shared)
   );
 
   shared.ServiceRegistry.register(ELang);
-
-  registerValidationChecks(ELang);
 
   if (!context.connection) {
     // We don't run inside a language server

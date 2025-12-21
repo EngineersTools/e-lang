@@ -1,17 +1,28 @@
-import { describe, test, expect } from 'vitest';
-import { parseHelper } from "langium/test";
-import { createELangServices } from "../src/e-lang-module.js";
 import { EmptyFileSystem } from "langium";
+import { parseHelper } from "langium/test";
+import { beforeAll, describe, expect, test } from 'vitest';
+import { createELangServices } from "../src/e-lang-module.js";
+import { ELangProgram } from '../src/index.js';
 
-const services = createELangServices(EmptyFileSystem).ELang;
-const parse = parseHelper<any>(services);
+
+let services: ReturnType<typeof createELangServices>;
+let parse:    ReturnType<typeof parseHelper<ELangProgram>>;
+// let document: LangiumDocument<ELangProgram> | undefined;
+
+beforeAll(async () => {
+    services = createELangServices(EmptyFileSystem);
+    parse = parseHelper<ELangProgram>(services.ELang);
+
+    // activate the following if your linking test requires elements from a built-in library, for example
+    // await services.shared.workspace.WorkspaceManager.initializeWorkspace([]);
+});
 
 describe('Dimension Analysis', () => {
 
     test('Parse and Calculate Base Unit Dimensions', async () => {
         const document = await parse(`
-            dimension Length;
-            unit m : Length;
+            dimension Length
+            unit m : Length
         `);
         expect(document.parseResult.parserErrors).toHaveLength(0);
         expect(document.diagnostics ?? []).toHaveLength(0);
@@ -19,11 +30,11 @@ describe('Dimension Analysis', () => {
 
     test('Parse and Calculate Derived Unit Dimensions', async () => {
         const document = await parse(`
-            dimension Length;
-            dimension Time;
-            unit m : Length;
-            unit s : Time;
-            unit Velocity = m / s; // Unit inference
+            dimension Length
+            dimension Time
+            unit m : Length
+            unit s : Time
+            unit Velocity = m / s // Unit inference
         `);
         expect(document.parseResult.parserErrors).toHaveLength(0);
         expect(document.diagnostics ?? []).toHaveLength(0);
@@ -31,8 +42,8 @@ describe('Dimension Analysis', () => {
 
     test('Infer Valid Operations (Matches)', async () => {
         const document = await parse(`
-            dimension Length;
-            unit m : Length;
+            dimension Length
+            unit m : Length
             
             var a = 10 m
             var b = 5 m
@@ -45,10 +56,10 @@ describe('Dimension Analysis', () => {
 
     test('Detect Dimension Mismatch in Addition', async () => {
         const document = await parse(`
-            dimension Length;
-            dimension Time;
-            unit m : Length;
-            unit s : Time;
+            dimension Length
+            dimension Time
+            unit m : Length
+            unit s : Time
             
             var a = 10 m
             var b = 5 s
@@ -65,8 +76,8 @@ describe('Dimension Analysis', () => {
 
     test('Scalar Result from Division', async () => {
         const document = await parse(`
-            dimension Length;
-            unit m : Length;
+            dimension Length
+            unit m : Length
 
             var a = 10 m
             var b = 5 m

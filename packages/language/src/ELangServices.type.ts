@@ -1,7 +1,6 @@
-import { TypirLangiumServices } from "typir-langium";
-import { ELangValidator } from "./e-lang-validator.js";
-import { ELangSpecifics } from "./type-system/ELangSpecifics.interface.js";
 import type { LangiumServices } from "langium/lsp";
+import { TypirLangiumServices } from "typir-langium";
+import { ELangSpecifics } from "./type-system/ELangSpecifics.interface.js";
 
 /**
  * Declaration of custom services
@@ -9,7 +8,7 @@ import type { LangiumServices } from "langium/lsp";
 
 export type ELangAddedServices = {
   validation: {
-    ELangValidator: ELangValidator;
+    // ELangValidator: ELangValidator;
   };
   typir: TypirLangiumServices<ELangSpecifics>;
 };

@@ -2,8 +2,8 @@ grammar ELang
 
 entry ELangProgram:
     Domain?
-    (imports+=Import (imports+=Import)*)?
-    (statements+=Statement (statements+=Statement)*)?
+    (imports+=Import*)?
+    statements+=Statement*
 ;
 
 Domain:
@@ -11,12 +11,11 @@ Domain:
 ;
 
 Import:
-    'import' importSource=STRING
+    'import' source=STRING
 ;
 
 Statement:
-    ImportStatement
-    | DimensionDeclaration
+    DimensionDeclaration
     | UnitDeclaration
     | VariableDeclaration
     | FormulaDeclaration
@@ -30,11 +29,7 @@ Statement:
 ;
 
 StatementBlock:
-    '{' (statements+=Statement (statements+=Statement)*)? returnValue=ReturnStatement? '}'
-;
-
-ImportStatement:
-    'import' source=STRING
+    '{' (statements+=Statement*)? returnValue=ReturnStatement? '}'
 ;
 
 ReturnStatement:
@@ -164,7 +159,7 @@ PostUnaryExpression infers Expression:
 ;
 
 EvaluationExpression infers Expression:
-    PrimitiveExpression
+    NumericExpression
     ( // These can chain: obj.member[index](arg)
         {infer MemberAccess.receiver=current} '.' member=[NamedElement:ID] |
         {infer IndexedAccess.receiver=current} '[' index=Expression ']' |
@@ -172,21 +167,21 @@ EvaluationExpression infers Expression:
     )*
 ;
 
+NumericExpression infers Expression:
+    PrimitiveExpression ({infer Measurement.value=current} unit=[UnitDeclaration:ID])?
+;
+
 PrimitiveExpression infers Expression:
     '(' Expression ')'
     | PreUnaryExpression
     | ReferenceExpression
     | StringLiteral
-    | NumericExpression
+    | NumberLiteral
     | BooleanLiteral
     | NullLiteral
     | ModelExpression
     | ListExpression
     | LambdaExpression
-;
-
-NumericExpression infers Expression:
-    NumberLiteral ({infer MeasurementLiteral.value=current} unit=[UnitDeclaration:ID])?
 ;
 
 PreUnaryExpression:
@@ -202,7 +197,7 @@ StringLiteral:
 ;
 
 BooleanLiteral:
-    value?='true' | 'false'
+    value?=('true' | 'false')
 ;
 
 IntegerLiteral infers NumberLiteral:
@@ -221,8 +216,6 @@ NumberLiteral:
 NullLiteral:
     value='null'
 ;
-
-
 
 ModelMemberAssignment:
     property=[ParameterDeclaration:ID] ':' value=Expression
@@ -260,7 +253,7 @@ PrimaryTypeReference infers TypeReference:
     (
         '(' TypeReference ')'
         | primitive=('number' | 'text' | 'boolean')
-    | reference=[NamedElement:ID]
+        | reference=[NamedElement:ID]
         | LambdaType
     )
     (array?='list')?
@@ -272,6 +265,7 @@ type NamedElement =
     | ParameterDeclaration
     | FormulaDeclaration
     | ModelDeclaration
+    | DimensionDeclaration
     | UnitDeclaration;
 
 type ExportableElement =
@@ -279,6 +273,8 @@ type ExportableElement =
     | MutableDeclaration
     | FormulaDeclaration
     | TypeReference
+    | ModelDeclaration
+    | DimensionDeclaration
     | UnitDeclaration;
 
 hidden terminal WS: /\s+/;
