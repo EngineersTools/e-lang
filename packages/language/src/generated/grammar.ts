@@ -980,12 +980,23 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
     {
       "$type": "ParserRule",
       "name": "UnitTerm",
+      "inferredType": {
+        "$type": "InferredType",
+        "name": "UnitExpression"
+      },
       "definition": {
         "$type": "Alternatives",
         "elements": [
           {
             "$type": "Group",
             "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "UnitReference"
+                }
+              },
               {
                 "$type": "Assignment",
                 "feature": "ref",
@@ -1051,28 +1062,45 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             ]
           },
           {
-            "$type": "Assignment",
-            "feature": "value",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@56"
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "UnitLiteral"
+                }
               },
-              "arguments": []
-            }
-          },
-          {
-            "$type": "Assignment",
-            "feature": "value",
-            "operator": "=",
-            "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@55"
-              },
-              "arguments": []
-            }
+              {
+                "$type": "Alternatives",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "value",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@56"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "value",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@55"
+                      },
+                      "arguments": []
+                    }
+                  }
+                ]
+              }
+            ]
           }
         ]
       },

@@ -787,7 +787,7 @@ export function isUnitDeclaration(item: unknown): item is UnitDeclaration {
     return reflection.isInstance(item, UnitDeclaration.$type);
 }
 
-export type UnitExpression = UnitOperation | UnitTerm;
+export type UnitExpression = UnitLiteral | UnitOperation | UnitReference;
 
 export const UnitExpression = {
     $type: 'UnitExpression'
@@ -797,12 +797,27 @@ export function isUnitExpression(item: unknown): item is UnitExpression {
     return reflection.isInstance(item, UnitExpression.$type);
 }
 
+export interface UnitLiteral extends langium.AstNode {
+    readonly $container: UnitDeclaration | UnitOperation;
+    readonly $type: 'UnitLiteral';
+    value: number;
+}
+
+export const UnitLiteral = {
+    $type: 'UnitLiteral',
+    value: 'value'
+} as const;
+
+export function isUnitLiteral(item: unknown): item is UnitLiteral {
+    return reflection.isInstance(item, UnitLiteral.$type);
+}
+
 export interface UnitOperation extends langium.AstNode {
-    readonly $container: UnitDeclaration;
+    readonly $container: UnitDeclaration | UnitOperation;
     readonly $type: 'UnitOperation';
-    left: UnitTerm;
+    left: UnitExpression;
     operator: '*' | '/';
-    right: UnitTerm;
+    right: UnitExpression;
 }
 
 export const UnitOperation = {
@@ -816,23 +831,21 @@ export function isUnitOperation(item: unknown): item is UnitOperation {
     return reflection.isInstance(item, UnitOperation.$type);
 }
 
-export interface UnitTerm extends langium.AstNode {
+export interface UnitReference extends langium.AstNode {
     readonly $container: UnitDeclaration | UnitOperation;
-    readonly $type: 'UnitExpression' | 'UnitOperation' | 'UnitTerm';
+    readonly $type: 'UnitReference';
     power?: number;
     ref: langium.Reference<UnitDeclaration>;
-    value?: number;
 }
 
-export const UnitTerm = {
-    $type: 'UnitTerm',
+export const UnitReference = {
+    $type: 'UnitReference',
     power: 'power',
-    ref: 'ref',
-    value: 'value'
+    ref: 'ref'
 } as const;
 
-export function isUnitTerm(item: unknown): item is UnitTerm {
-    return reflection.isInstance(item, UnitTerm.$type);
+export function isUnitReference(item: unknown): item is UnitReference {
+    return reflection.isInstance(item, UnitReference.$type);
 }
 
 export type ELangAstType = {
@@ -878,8 +891,9 @@ export type ELangAstType = {
     TypeUnion: TypeUnion
     UnitDeclaration: UnitDeclaration
     UnitExpression: UnitExpression
+    UnitLiteral: UnitLiteral
     UnitOperation: UnitOperation
-    UnitTerm: UnitTerm
+    UnitReference: UnitReference
 }
 
 export class ELangAstReflection extends langium.AbstractAstReflection {
@@ -1485,7 +1499,16 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
             name: UnitExpression.$type,
             properties: {
             },
-            superTypes: [UnitTerm.$type]
+            superTypes: []
+        },
+        UnitLiteral: {
+            name: UnitLiteral.$type,
+            properties: {
+                value: {
+                    name: UnitLiteral.value
+                }
+            },
+            superTypes: [UnitExpression.$type]
         },
         UnitOperation: {
             name: UnitOperation.$type,
@@ -1502,18 +1525,15 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
             },
             superTypes: [UnitExpression.$type]
         },
-        UnitTerm: {
-            name: UnitTerm.$type,
+        UnitReference: {
+            name: UnitReference.$type,
             properties: {
                 power: {
-                    name: UnitTerm.power
+                    name: UnitReference.power
                 },
                 ref: {
-                    name: UnitTerm.ref,
+                    name: UnitReference.ref,
                     referenceType: UnitDeclaration.$type
-                },
-                value: {
-                    name: UnitTerm.value
                 }
             },
             superTypes: [UnitExpression.$type]

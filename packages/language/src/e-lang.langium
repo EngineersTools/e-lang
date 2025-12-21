@@ -73,10 +73,10 @@ UnitExpression:
     UnitTerm ({infer UnitOperation.left=current} operator=('*'|'/') right=UnitTerm)*
 ;
 
-UnitTerm:
-    ref=[UnitDeclaration:ID] ('^' power=INT)? |
+UnitTerm infers UnitExpression:
+    {infer UnitReference} ref=[UnitDeclaration:ID] ('^' power=INT)? |
     '(' UnitExpression ')' |
-    value=INT | value=DEC
+    {infer UnitLiteral} (value=INT | value=DEC)
 ;
 
 PrintStatement:
