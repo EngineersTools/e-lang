@@ -6,7 +6,7 @@ import { UnitType } from "./Unit.type.js";
 export function unitFactory(typir: ElangTypirServices) {
   return new CustomKind<UnitType, ELangSpecifics>(typir, {
     name: "Unit",
-    calculateTypeName: (properties) => properties.name,
+    calculateTypeName: (properties) => `Unit:${properties.name}`,
     calculateTypeUserRepresentation: (properties) => {
         // Convert vector to string representation
         const vecStr = Array.from(properties.vector.entries())

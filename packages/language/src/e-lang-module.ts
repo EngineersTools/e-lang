@@ -46,8 +46,8 @@ export function createELangModule(shared: LangiumSharedCoreServices): Module<ELa
       ELangAdditionalTypirServices
     >(services.shared, reflection, new ELangTypeSystem(), {
       factory: {
-        Unit: unitFactory,
         Dimension: dimensionFactory,
+        Unit: unitFactory,
         Model: modelFactory,
       },
     }),

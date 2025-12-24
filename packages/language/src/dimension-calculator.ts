@@ -25,28 +25,28 @@ export class DimensionCalculator {
     }
   }
 
-  private computeUnitDeclaration(def: UnitDeclaration): DimensionVector {
+  private computeUnitDeclaration(def: UnitDeclaration, power?: number): DimensionVector {
     // Check cache first to avoid cycles and redundant work
-    if (this.cache.has(def.name)) {
-      return this.cache.get(def.name)!;
-    }
+    // if (this.cache.has(def.name)) {
+    //   return this.cache.get(def.name)!;
+    // }
 
     const vector = new Map<string, number>();
 
     // Case 1: Base Unit (e.g., unit meter : Length;)
     if (def.dimension && def.dimension.ref) {
       const dimName = def.dimension.ref.name;
-      vector.set(dimName, 1);
+      vector.set(dimName, power ?? 1);
     }
     // Case 2: Derived Unit (e.g., unit Newton = kg * m / s^2;)
     else if (def.expression) {
       // We temporarily set an empty vector to break recursion cycles
       this.cache.set(def.name, new Map());
 
-      const exprVector = this.computeExpression(def.expression);
+      const exprVector = this.computeExpression(def.expression, power);
 
       // Merge results into our main vector
-      exprVector.forEach((val, key) => vector.set(key, val));
+      exprVector.forEach((val, key) => vector.set(key, (vector.get(key) || 0) + val * (power ?? 1)));
     }
 
     // Store result in cache
@@ -54,7 +54,7 @@ export class DimensionCalculator {
     return vector;
   }
 
-  private computeExpression(expr: UnitExpression): DimensionVector {
+  private computeExpression(expr: UnitExpression, power?: number): DimensionVector {
     // Since UnitExpression can be a chain of operations (left op right)
 
     if (isUnitLiteral(expr)) {
@@ -74,7 +74,7 @@ export class DimensionCalculator {
       }
     } else if (isUnitReference(expr)) {
       if (expr.ref && expr.ref.ref) {
-        return this.computeUnitDeclaration(expr.ref.ref);
+        return this.computeUnitDeclaration(expr.ref.ref, power ?? expr.power);
       }
     }
 
