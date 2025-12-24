@@ -1,8 +1,10 @@
 import { InferenceRuleNotApplicable, isType } from "typir";
 import {
   isBinaryExpression,
+  isConstantDeclaration,
+  isMutableDeclaration,
   isParameterDeclaration,
-  isReferenceExpression
+  isReferenceExpression,
 } from "../../generated/ast.js";
 import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 import { getOrCreateTypeNull } from "../typir-types/createPrimitives.js";
@@ -14,7 +16,12 @@ export function createReferenceExpressionInferenceRules(
 
   typir.Inference.addInferenceRulesForAstNodes({
     ReferenceExpression: (node) => {
-      if (isBinaryExpression(node.$container)) {
+      if (
+        isConstantDeclaration(node.element.ref) ||
+        isMutableDeclaration(node.element.ref)
+      ) {
+        return node.element.ref.value ?? InferenceRuleNotApplicable;
+      } else if (isBinaryExpression(node.$container)) {
         const parent = node.$container;
         if (
           parent.operator === "=" &&

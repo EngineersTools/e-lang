@@ -11,8 +11,10 @@ import {
   initializeLangiumTypirServices
 } from "typir-langium";
 import { ELangAddedServices, ELangServices } from "./ELangServices.type.js";
+import { ELangHoverProvider } from "./e-lang-hover-provider.js";
 import { ELangScopeComputation } from "./e-lang-scope-computation.js";
 import { ELangScopeProvider } from "./e-lang-scope-provider.js";
+import { ELangValidator } from "./e-lang-validator.js";
 import { reflection } from "./generated/ast.js";
 import {
   ELangGeneratedModule,
@@ -29,10 +31,10 @@ import { unitFactory } from "./type-system/custom-types/unit/unitFactory.js";
 export function createELangModule(shared: LangiumSharedCoreServices): Module<ELangServices, PartialLangiumServices & ELangAddedServices> {
   return {
     validation: {
-    // ELangValidator: () => new ELangValidator(),
+    ELangValidator: () => new ELangValidator(),
   },
   lsp: {
-    // HoverProvider: (services) => new ELangHoverProvider(services),
+    HoverProvider: (services) => new ELangHoverProvider(services),
   },
   references: {
     ScopeProvider: (services) => new ELangScopeProvider(services),
