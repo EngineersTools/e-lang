@@ -6,6 +6,9 @@ import { createModelType } from "./custom-types/model/createModelType.js";
 import { createUnitType } from "./custom-types/unit/createUnitType.js";
 import { ElangTypirServices } from "./ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "./ELangSpecifics.interface.js";
+import { createConstantDeclarationInferenceRules } from "./inference-rules/createConstantDeclarationInferenceRules.js";
+import { createMeasurementInferenceRules } from "./inference-rules/createMeasurementInferenceRules.js";
+import { createTypeReferenceInferenceRules } from "./inference-rules/createTypeReferenceInferenceRule.js";
 import {
   declarePrimitiveConvertibilityToNull,
   getOrCreateTypeBool,
@@ -24,8 +27,9 @@ export class ELangTypeSystem
     getOrCreateTypeText(typir);
     getOrCreateTypeNull(typir);
     declarePrimitiveConvertibilityToNull(typir);
-    // createMeasurementInferenceRules(typir);
-    // createConstantDeclarationInferenceRules(typir);
+    createTypeReferenceInferenceRules(typir);
+    createMeasurementInferenceRules(typir);
+    createConstantDeclarationInferenceRules(typir);
     // createMutableDeclarationInferenceRules(typir);
     // createReferenceExpressionInferenceRules(typir);
     // createBinaryOperationInferenceRules(typir);

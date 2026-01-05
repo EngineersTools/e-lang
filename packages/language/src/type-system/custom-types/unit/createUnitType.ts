@@ -1,6 +1,6 @@
+import { DimensionCalculator } from "../../../dimension-calculator.js";
 import { UnitDeclaration } from "../../../generated/ast.js";
 import { ElangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
-import { DimensionCalculator } from "../../../dimension-calculator.js";
 
 export function createUnitType(
   languageNode: UnitDeclaration,
