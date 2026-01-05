@@ -58,6 +58,7 @@ export type ELangKeywordNames =
     | "formula"
     | "from"
     | "if"
+    | "im"
     | "import"
     | "list"
     | "match"
@@ -76,12 +77,13 @@ export type ELangKeywordNames =
     | "unit"
     | "var"
     | "{"
-    | "}";
+    | "}"
+    | "~";
 
 export type ELangTokenNames = ELangTerminalNames | ELangKeywordNames;
 
 export interface BinaryExpression extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'BinaryExpression';
     left: Expression;
     operator: '!=' | '*' | '+' | '-' | '/' | '<' | '<=' | '=' | '==' | '>' | '>=' | '^' | 'and' | 'equal' | 'not_equal' | 'or';
@@ -100,7 +102,7 @@ export function isBinaryExpression(item: unknown): item is BinaryExpression {
 }
 
 export interface BooleanLiteral extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'BooleanLiteral';
     value: boolean;
 }
@@ -115,7 +117,7 @@ export function isBooleanLiteral(item: unknown): item is BooleanLiteral {
 }
 
 export interface CallExpression extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'CallExpression';
     arguments: Array<Expression>;
     callee: Expression;
@@ -213,7 +215,7 @@ export function isExportableElement(item: unknown): item is ExportableElement {
     return reflection.isInstance(item, ExportableElement.$type);
 }
 
-export type Expression = BinaryExpression | BooleanLiteral | CallExpression | IndexedAccess | LambdaExpression | ListExpression | Measurement | MemberAccess | ModelExpression | NullLiteral | NumberLiteral | PostUnaryExpression | PreUnaryExpression | ReferenceExpression | StringLiteral;
+export type Expression = BinaryExpression | BooleanLiteral | CallExpression | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | Measurement | MemberAccess | ModelExpression | NullLiteral | NumberLiteral | PostUnaryExpression | PreUnaryExpression | ReferenceExpression | StringLiteral;
 
 export const Expression = {
     $type: 'Expression'
@@ -288,6 +290,21 @@ export function isIfStatement(item: unknown): item is IfStatement {
     return reflection.isInstance(item, IfStatement.$type);
 }
 
+export interface ImaginaryNumber extends langium.AstNode {
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $type: 'ImaginaryNumber';
+    value: Expression;
+}
+
+export const ImaginaryNumber = {
+    $type: 'ImaginaryNumber',
+    value: 'value'
+} as const;
+
+export function isImaginaryNumber(item: unknown): item is ImaginaryNumber {
+    return reflection.isInstance(item, ImaginaryNumber.$type);
+}
+
 export interface Import extends langium.AstNode {
     readonly $container: ELangProgram;
     readonly $type: 'Import';
@@ -304,7 +321,7 @@ export function isImport(item: unknown): item is Import {
 }
 
 export interface IndexedAccess extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'IndexedAccess';
     index: Expression;
     receiver: Expression;
@@ -321,7 +338,7 @@ export function isIndexedAccess(item: unknown): item is IndexedAccess {
 }
 
 export interface LambdaExpression extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'LambdaExpression';
     body: Expression | StatementBlock;
     parameters: Array<ParameterDeclaration>;
@@ -359,7 +376,7 @@ export function isLambdaType(item: unknown): item is LambdaType {
 }
 
 export interface ListExpression extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'ListExpression';
     elements: Array<Expression>;
 }
@@ -414,7 +431,7 @@ export function isMatchStatement(item: unknown): item is MatchStatement {
 }
 
 export interface Measurement extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'Measurement';
     unit: langium.Reference<UnitDeclaration>;
     value: Expression;
@@ -431,7 +448,7 @@ export function isMeasurement(item: unknown): item is Measurement {
 }
 
 export interface MemberAccess extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'MemberAccess';
     member: langium.Reference<NamedElement>;
     receiver: Expression;
@@ -472,7 +489,7 @@ export function isModelDeclaration(item: unknown): item is ModelDeclaration {
 }
 
 export interface ModelExpression extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'ModelExpression';
     members: Array<ModelMemberAssignment>;
 }
@@ -537,7 +554,7 @@ export function isNamedElement(item: unknown): item is NamedElement {
 }
 
 export interface NullLiteral extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'NullLiteral';
     value: 'null';
 }
@@ -552,7 +569,7 @@ export function isNullLiteral(item: unknown): item is NullLiteral {
 }
 
 export interface NumberLiteral extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'NumberLiteral';
     value: number;
 }
@@ -586,7 +603,7 @@ export function isParameterDeclaration(item: unknown): item is ParameterDeclarat
 }
 
 export interface PostUnaryExpression extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'PostUnaryExpression';
     operator: '++' | '--';
     value: Expression;
@@ -603,7 +620,7 @@ export function isPostUnaryExpression(item: unknown): item is PostUnaryExpressio
 }
 
 export interface PreUnaryExpression extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'PreUnaryExpression';
     operator: '-' | 'not';
     value: Expression;
@@ -635,7 +652,7 @@ export function isPrintStatement(item: unknown): item is PrintStatement {
 }
 
 export interface ReferenceExpression extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'ReferenceExpression';
     element: langium.Reference<NamedElement>;
 }
@@ -692,7 +709,7 @@ export function isStatementBlock(item: unknown): item is StatementBlock {
 }
 
 export interface StringLiteral extends langium.AstNode {
-    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | PostUnaryExpression | PreUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'StringLiteral';
     value: string;
 }
@@ -861,6 +878,7 @@ export type ELangAstType = {
     ForStatement: ForStatement
     FormulaDeclaration: FormulaDeclaration
     IfStatement: IfStatement
+    ImaginaryNumber: ImaginaryNumber
     Import: Import
     IndexedAccess: IndexedAccess
     LambdaExpression: LambdaExpression
@@ -1075,6 +1093,15 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 }
             },
             superTypes: [Statement.$type]
+        },
+        ImaginaryNumber: {
+            name: ImaginaryNumber.$type,
+            properties: {
+                value: {
+                    name: ImaginaryNumber.value
+                }
+            },
+            superTypes: [Expression.$type]
         },
         Import: {
             name: Import.$type,

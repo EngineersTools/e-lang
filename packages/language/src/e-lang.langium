@@ -159,7 +159,7 @@ PostUnaryExpression infers Expression:
 ;
 
 EvaluationExpression infers Expression:
-    NumericExpression
+    ImaginaryExpression
     ( // These can chain: obj.member[index](arg)
         {infer MemberAccess.receiver=current} '.' member=[NamedElement:ID] |
         {infer IndexedAccess.receiver=current} '[' index=Expression ']' |
@@ -167,8 +167,12 @@ EvaluationExpression infers Expression:
     )*
 ;
 
+ImaginaryExpression infers Expression:
+    NumericExpression ({infer ImaginaryNumber.value=current} 'im')?
+;
+
 NumericExpression infers Expression:
-    PrimitiveExpression ({infer Measurement.value=current} unit=[UnitDeclaration:ID])?
+    PrimitiveExpression ({infer Measurement.value=current} '~' unit=[UnitDeclaration:ID])?
 ;
 
 PrimitiveExpression infers Expression:
