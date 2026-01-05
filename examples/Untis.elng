@@ -1,0 +1,22 @@
+dimension Length
+unit m:Length
+unit km = 1000 * m
+
+dimension Time
+unit s:Time
+unit hr = 3600 * s
+
+dimension Speed
+unit kph:Speed = km / hr
+
+// Implicit dimension for acceleration
+unit kph2 = km / hr^2
+
+const x = 100 ~m
+const y = 1 ~km
+const z = 1 ~hr
+
+print x + y
+print y + z
+
+print 1 ~m + 1 ~hr

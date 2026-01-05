@@ -84,7 +84,7 @@ export function createBinaryOperationInferenceRules(typir: ElangTypirServices) {
       .finish();
   }
 
-  for (const operator of ["==", "equal", "!=", "not_equal"]) {
+  for (const operator of ["==", "equal", "!=", "notequal"]) {
     typir.factory.Operators.createBinary({
       name: operator,
       signature: { left: typeAny, right: typeAny, return: typeBoolean },
