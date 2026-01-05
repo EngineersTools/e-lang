@@ -24,6 +24,9 @@ describe('Dimension Analysis', () => {
             dimension Length
             unit m : Length
         `);
+
+        console.log(document.parseResult.value);
+
         expect(document.parseResult.parserErrors).toHaveLength(0);
         expect(document.diagnostics ?? []).toHaveLength(0);
     });
@@ -36,6 +39,9 @@ describe('Dimension Analysis', () => {
             unit s : Time
             unit Velocity = m / s // Unit inference
         `);
+
+        console.log(document.parseResult.value);
+
         expect(document.parseResult.parserErrors).toHaveLength(0);
         expect(document.diagnostics ?? []).toHaveLength(0);
     });
@@ -45,8 +51,8 @@ describe('Dimension Analysis', () => {
             dimension Length
             unit m : Length
             
-            var a = 10 m
-            var b = 5 m
+            var a = 10 ~m
+            var b = 5 ~m
             var c = a + b // Should be valid
             var d = a - b // Should be valid
         `);
@@ -61,8 +67,8 @@ describe('Dimension Analysis', () => {
             unit m : Length
             unit s : Time
             
-            var a = 10 m
-            var b = 5 s
+            var a = 10 ~m
+            var b = 5 ~s
             var c = a + b // Error: Length + Time
         `);
         expect(document.parseResult.parserErrors).toHaveLength(0);
@@ -79,8 +85,8 @@ describe('Dimension Analysis', () => {
             dimension Length
             unit m : Length
 
-            var a = 10 m
-            var b = 5 m
+            var a = 10 ~m
+            var b = 5 ~m
             var ratio = a / b // Should be scalar (number)
             
             var num = 2

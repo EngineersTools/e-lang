@@ -1,11 +1,13 @@
 import {
+    DimensionDeclaration,
+    isDimensionDeclaration,
     isUnitDeclaration,
     isUnitLiteral,
     isUnitOperation,
     isUnitReference,
     UnitDeclaration,
     UnitExpression,
-} from "./generated/ast.js";
+} from "../../generated/ast.js";
 
 // The canonical representation of a dimension: { "Length": 1, "Time": -2 }
 export type DimensionVector = Map<string, number>;
@@ -17,12 +19,23 @@ export class DimensionCalculator {
   /**
    * Entry point: Computes the dimension vector for a given Unit Declaration or Expression.
    */
-  public compute(node: UnitDeclaration | UnitExpression): DimensionVector {
-    if (isUnitDeclaration(node)) {
+  public compute(node: DimensionDeclaration | UnitDeclaration | UnitExpression): DimensionVector {
+    if (isDimensionDeclaration(node)) {
+      return this.computeDimensionDeclaration(node);
+    } else if (isUnitDeclaration(node)) {
       return this.computeUnitDeclaration(node);
     } else {
       return this.computeExpression(node);
     }
+  }
+
+  private computeDimensionDeclaration(def: DimensionDeclaration): DimensionVector {
+    const vector = new Map<string, number>();
+
+    vector.set(def.name, 1);
+    this.cache.set(def.name, vector);
+
+    return vector;
   }
 
   private computeUnitDeclaration(def: UnitDeclaration, power?: number): DimensionVector {
@@ -81,6 +94,21 @@ export class DimensionCalculator {
     // Default: dimensionless
 
     return new Map<string, number>();
+  }
+
+  public static areVectorsEqual(
+    v1: DimensionVector,
+    v2: DimensionVector
+  ): boolean {
+    if (v1.size !== v2.size) {
+      return false;
+    }
+    for (const [dim, exp] of v1) {
+      if (v2.get(dim) !== exp) {
+        return false;
+      }
+    }
+    return true;
   }
 
   // --- Vector Math Helpers ---
