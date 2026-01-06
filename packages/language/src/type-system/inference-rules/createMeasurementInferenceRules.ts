@@ -1,7 +1,7 @@
 import { InferenceRuleNotApplicable, isType } from "typir";
-import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
+import { ELangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 
-export function createMeasurementInferenceRules(typir: ElangTypirServices) {
+export function createMeasurementInferenceRules(typir: ELangTypirServices) {
   typir.Inference.addInferenceRulesForAstNodes({
     Measurement: (languageNode) => {
       if (languageNode.unit.ref) {

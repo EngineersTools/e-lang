@@ -1,14 +1,10 @@
 import {
-  InferenceRuleNotApplicable,
-  TypirServices,
-  ValidationProblemAcceptor
-} from "typir";
-import { ConstantDeclaration } from "../../generated/ast.js";
-import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
-import { ELangSpecifics } from "../ELangSpecifics.interface.js";
+  InferenceRuleNotApplicable} from "typir";
+import { ELangTypirServices } from "../ELangAdditionalTypirServices.type.js";
+import { validateVariableDeclaration } from "../utils/validateVariableDeclaration.js";
 
 export function createConstantDeclarationInferenceRules(
-  typir: ElangTypirServices
+  typir: ELangTypirServices
 ) {
   typir.Inference.addInferenceRulesForAstNodes({
     ConstantDeclaration: (languageNode) => {
@@ -27,18 +23,4 @@ export function createConstantDeclarationInferenceRules(
   });
 }
 
-function validateVariableDeclaration(
-  node: ConstantDeclaration,
-  accept: ValidationProblemAcceptor<ELangSpecifics>,
-  typir: TypirServices<ELangSpecifics>
-): void {
-  typir.validation.Constraints.ensureNodeIsAssignable(
-    node.value,
-    node,
-    accept,
-    (actual, expected) => ({
-      message: `The expression '${node.value?.$cstNode?.text}' of type '${actual.name}' is not assignable to '${node.name}' with type '${expected.name}'`,
-      languageProperty: "value",
-    })
-  );
-}
+

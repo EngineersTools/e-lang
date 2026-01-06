@@ -6,11 +6,11 @@ import {
   isParameterDeclaration,
   isReferenceExpression,
 } from "../../generated/ast.js";
-import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
+import { ELangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 import { getOrCreateTypeNull } from "../typir-types/createPrimitives.js";
 
 export function createReferenceExpressionInferenceRules(
-  typir: ElangTypirServices
+  typir: ELangTypirServices
 ) {
   const typeNull = getOrCreateTypeNull(typir);
 

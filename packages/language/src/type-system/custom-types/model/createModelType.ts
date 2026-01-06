@@ -1,11 +1,11 @@
 import { ModelDeclaration } from "../../../index.js";
 import {
-  ElangTypirServices
+  ELangTypirServices
 } from "../../ELangAdditionalTypirServices.type.js";
 
 export function createModelType(
   languageNode: ModelDeclaration,
-  typir: ElangTypirServices
+  typir: ELangTypirServices
 ) {
   return typir.factory.Model.create({
     properties: {

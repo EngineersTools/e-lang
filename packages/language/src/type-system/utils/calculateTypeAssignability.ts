@@ -1,7 +1,7 @@
 import { ConversionMode, Type } from "typir";
 import { isDimensionType } from "../custom-types/dimension/Dimension.type.js";
 import { isUnitType } from "../custom-types/unit/Unit.type.js";
-import { DimensionCalculator, DimensionVector } from "./dimension-calculator.js";
+import { DimensionCalculator, DimensionVector } from "./DimensionCalculator.js";
 
 
 export function calculateTypeAssignability(

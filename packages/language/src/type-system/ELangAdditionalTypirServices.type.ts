@@ -13,5 +13,5 @@ export type ELangAdditionalTypirServices = {
   };
 };
 
-export type ElangTypirServices = TypirLangiumServices<ELangSpecifics> &
+export type ELangTypirServices = TypirLangiumServices<ELangSpecifics> &
   ELangAdditionalTypirServices;

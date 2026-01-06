@@ -1,10 +1,10 @@
 import { CustomKind } from "typir";
-import { ElangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
+import { ELangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "../../ELangSpecifics.interface.js";
 import { calculateTypeAssignability } from "../../utils/calculateTypeAssignability.js";
 import { UnitType } from "./Unit.type.js";
 
-export function unitFactory(typir: ElangTypirServices) {
+export function unitFactory(typir: ELangTypirServices) {
   return new CustomKind<UnitType, ELangSpecifics>(typir, {
     name: "Unit",
     calculateTypeName: (properties) => `Unit:${properties.name}`,
@@ -17,6 +17,6 @@ export function unitFactory(typir: ElangTypirServices) {
     },
     isNewCustomTypeConvertibleToType: (source, target) => {
       return calculateTypeAssignability(source, target);
-    }
+    },
   });
 }

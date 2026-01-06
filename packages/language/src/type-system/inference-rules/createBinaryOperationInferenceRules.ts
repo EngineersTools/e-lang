@@ -5,7 +5,7 @@ import {
   isConstantDeclaration,
   isReferenceExpression
 } from "../../generated/ast.js";
-import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
+import { ELangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "../ELangSpecifics.interface.js";
 import {
   createTypeAny,
@@ -14,7 +14,7 @@ import {
   getOrCreateTypeText,
 } from "../typir-types/createPrimitives.js";
 
-export function createBinaryOperationInferenceRules(typir: ElangTypirServices) {
+export function createBinaryOperationInferenceRules(typir: ELangTypirServices) {
   const typeAny = createTypeAny(typir);
   const typeNumber = getOrCreateTypeNumber(typir);
   const typeText = getOrCreateTypeText(typir);
@@ -97,13 +97,10 @@ export function createBinaryOperationInferenceRules(typir: ElangTypirServices) {
             node.right,
             accept,
             (actual, expected) => ({
-              message: `This comparison will always return '${
-                node.operator === "equal" ? "false" : "true"
-              }' as '${node.left.$cstNode?.text}' and '${
-                node.right.$cstNode?.text
-              }' have the different types '${actual.name}' and '${
-                expected.name
-              }'.`,
+              message: `This comparison will always return '${node.operator === "equal" ? "false" : "true"
+                }' as '${node.left.$cstNode?.text}' and '${node.right.$cstNode?.text
+                }' have the different types '${actual.name}' and '${expected.name
+                }'.`,
               languageNode: node,
               severity: "warning",
               data: diagnosticData(

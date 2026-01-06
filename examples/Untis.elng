@@ -12,9 +12,9 @@ unit kph:Speed = km / hr
 // Implicit dimension for acceleration
 unit kph2 = km / hr^2
 
-const x = 100 ~m
+const x: Time = 100 ~m
 const y = 1 ~km
-const z = 1 ~hr
+var z = 1 ~hr
 
 print x + y
 print y + z

@@ -5,9 +5,9 @@ import {
   StringLiteral,
   TypeReference
 } from "../../generated/ast.js";
-import { ElangTypirServices } from "../ELangAdditionalTypirServices.type.js";
+import { ELangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 
-export function getOrCreateTypeBool(typir: ElangTypirServices) {
+export function getOrCreateTypeBool(typir: ELangTypirServices) {
   return (
     typir.factory.Primitives.get({
       primitiveName: "boolean",
@@ -24,7 +24,7 @@ export function getOrCreateTypeBool(typir: ElangTypirServices) {
   );
 }
 
-export function getOrCreateTypeNumber(typir: ElangTypirServices) {
+export function getOrCreateTypeNumber(typir: ELangTypirServices) {
   return (
     typir.factory.Primitives.get({ primitiveName: "number" }) ??
     typir.factory.Primitives.create({
@@ -38,7 +38,7 @@ export function getOrCreateTypeNumber(typir: ElangTypirServices) {
       .finish()
   );
 }
-export function getOrCreateTypeText(typir: ElangTypirServices) {
+export function getOrCreateTypeText(typir: ELangTypirServices) {
   return (
     typir.factory.Primitives.get({
       primitiveName: "text",
@@ -55,7 +55,7 @@ export function getOrCreateTypeText(typir: ElangTypirServices) {
   );
 }
 
-export function getOrCreateTypeNull(typir: ElangTypirServices) {
+export function getOrCreateTypeNull(typir: ELangTypirServices) {
   return (
     typir.factory.Primitives.get({
       primitiveName: "null",
@@ -66,12 +66,12 @@ export function getOrCreateTypeNull(typir: ElangTypirServices) {
   );
 }
 
-export function createTypeAny(typir: ElangTypirServices) {
+export function createTypeAny(typir: ELangTypirServices) {
   return typir.factory.Top.create({}).finish();
 }
 
 export function declarePrimitiveConvertibilityToNull(
-  typir: ElangTypirServices
+  typir: ELangTypirServices
 ) {
   // Null can be assigned to any type
   const typeNull = getOrCreateTypeNull(typir);

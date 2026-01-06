@@ -3,7 +3,7 @@ import { isDimensionDeclaration, isModelDeclaration, isUnitDeclaration } from ".
 import { createDimensionType } from "./custom-types/dimension/createDimensionType.js";
 import { createModelType } from "./custom-types/model/createModelType.js";
 import { createUnitType } from "./custom-types/unit/createUnitType.js";
-import { ElangTypirServices } from "./ELangAdditionalTypirServices.type.js";
+import { ELangTypirServices } from "./ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "./ELangSpecifics.interface.js";
 import { createConstantDeclarationInferenceRules } from "./inference-rules/createConstantDeclarationInferenceRules.js";
 import { createMeasurementInferenceRules } from "./inference-rules/createMeasurementInferenceRules.js";
@@ -16,13 +16,16 @@ import {
   getOrCreateTypeNumber,
   getOrCreateTypeText,
 } from "./typir-types/createPrimitives.js";
-import { DimensionCalculator } from "./utils/dimension-calculator.js";
+import { DimensionCalculator } from "./utils/DimensionCalculator.js";
+import { createBinaryOperationInferenceRules } from "./inference-rules/createBinaryOperationInferenceRules.js";
+import { createReferenceExpressionInferenceRules } from "./inference-rules/createReferenceExpressionInferenceRules.js";
+import { createMeasurementBinaryOperationInferenceRules } from "./inference-rules/createMeasurementBinaryOperationInferenceRules.js";
 
 export class ELangTypeSystem
   implements LangiumTypeSystemDefinition<ELangSpecifics> {
   private calculator = new DimensionCalculator();
 
-  onInitialize(typir: ElangTypirServices): void {
+  onInitialize(typir: ELangTypirServices): void {
     getOrCreateTypeBool(typir);
     getOrCreateTypeNumber(typir);
     getOrCreateTypeText(typir);
@@ -32,14 +35,14 @@ export class ELangTypeSystem
     createMeasurementInferenceRules(typir);
     createConstantDeclarationInferenceRules(typir);
     createMutableDeclarationInferenceRules(typir);
-    // createReferenceExpressionInferenceRules(typir);
-    // createBinaryOperationInferenceRules(typir);
-    // createMeasurementBinaryOperationInferenceRules(typir);
+    createReferenceExpressionInferenceRules(typir);
+    createBinaryOperationInferenceRules(typir);
+    createMeasurementBinaryOperationInferenceRules(typir);
   }
 
   onNewAstNode(
     languageNode: ELangSpecifics["LanguageType"],
-    typir: ElangTypirServices
+    typir: ELangTypirServices
   ): void {
     if (isDimensionDeclaration(languageNode)) {
       createDimensionType(languageNode, typir, this.calculator);

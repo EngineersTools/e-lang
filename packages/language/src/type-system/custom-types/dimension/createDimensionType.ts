@@ -1,10 +1,10 @@
 import { DimensionDeclaration } from "../../../generated/ast.js";
-import { ElangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
-import { DimensionCalculator } from "../../utils/dimension-calculator.js";
+import { ELangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
+import { DimensionCalculator } from "../../utils/DimensionCalculator.js";
 
 export function createDimensionType(
     languageNode: DimensionDeclaration,
-    typir: ElangTypirServices,
+    typir: ELangTypirServices,
     calculator: DimensionCalculator
 ) {
 

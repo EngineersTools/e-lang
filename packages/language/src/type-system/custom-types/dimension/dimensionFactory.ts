@@ -1,10 +1,10 @@
 import { CustomKind } from "typir";
-import { ElangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
+import { ELangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "../../ELangSpecifics.interface.js";
 import { calculateTypeAssignability } from "../../utils/calculateTypeAssignability.js";
 import { DimensionType } from "./Dimension.type.js";
 
-export function dimensionFactory(typir: ElangTypirServices) {
+export function dimensionFactory(typir: ELangTypirServices) {
   return new CustomKind<DimensionType, ELangSpecifics>(typir, {
     name: "Dimension",
     calculateTypeName: (properties) => `Dimension:${properties.name}`,
