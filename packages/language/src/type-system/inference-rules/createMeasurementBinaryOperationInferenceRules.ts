@@ -44,12 +44,9 @@ export function createMeasurementBinaryOperationInferenceRules(
             });
           }
         }
-      },
-      (node, accept) => {
-        if (
-          isReferenceExpression(node.left) &&
-          isConstantDeclaration(node.left.element.ref)
-        ) {
+
+        if (["="].includes(node.operator) && isReferenceExpression(node.left) &&
+          isConstantDeclaration(node.left.element.ref)) {
           accept({
             message: `The constant '${node.left.element.ref.name}' value can't be re-assigned.`,
             languageNode: node,

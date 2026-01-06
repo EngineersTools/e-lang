@@ -1,10 +1,10 @@
 import { ConversionMode, Type } from "typir";
 import { isDimensionType } from "../custom-types/dimension/Dimension.type.js";
 import { isUnitType } from "../custom-types/unit/Unit.type.js";
-import { DimensionCalculator, DimensionVector } from "./DimensionCalculator.js";
+import { DimensionCalculator } from "./DimensionCalculator.js";
 
 
-export function calculateTypeAssignability(
+export function calculateDimensionTypeAssignability(
   source: Type,
   target: Type
 ): ConversionMode {
@@ -15,10 +15,9 @@ export function calculateTypeAssignability(
     return "NONE";
   }
 
-  const sourceVector = source.properties.vector as DimensionVector;
-  const targetVector = target.properties.vector as DimensionVector;
+  console.log("Comparing dimension vectors:", source.properties.vector, target.properties.vector);
 
-  return DimensionCalculator.areVectorsEqual(sourceVector, targetVector)
+  return DimensionCalculator.areVectorsEqual(source.properties.vector, target.properties.vector)
     ? "IMPLICIT_EXPLICIT"
     : "NONE";
 }

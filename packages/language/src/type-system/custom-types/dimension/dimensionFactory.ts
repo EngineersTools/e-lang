@@ -1,7 +1,8 @@
 import { CustomKind } from "typir";
 import { ELangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "../../ELangSpecifics.interface.js";
-import { calculateTypeAssignability } from "../../utils/calculateTypeAssignability.js";
+import { calculateDimensionTypeAssignability } from "../../utils/calculateDimensionTypeAssignability.js";
+import { DimensionCalculator, DimensionVector } from "../../utils/DimensionCalculator.js";
 import { DimensionType } from "./Dimension.type.js";
 
 export function dimensionFactory(typir: ELangTypirServices) {
@@ -9,14 +10,11 @@ export function dimensionFactory(typir: ELangTypirServices) {
     name: "Dimension",
     calculateTypeName: (properties) => `Dimension:${properties.name}`,
     calculateTypeUserRepresentation: (properties) => {
-      // Convert vector to string representation
-      const vecStr = Array.from(properties.vector.entries())
-        .map(([k, v]) => `${k}^${v}`)
-        .join("*");
+      const vecStr = DimensionCalculator.toString(properties.vector as DimensionVector);
       return vecStr ? `${properties.name} [${vecStr}]` : properties.name;
     },
     isNewCustomTypeConvertibleToType: (source, target) => {
-      return calculateTypeAssignability(source, target);
+      return calculateDimensionTypeAssignability(source, target);
     },
   });
 }

@@ -1,12 +1,12 @@
 import {
-    DimensionDeclaration,
-    isDimensionDeclaration,
-    isUnitDeclaration,
-    isUnitLiteral,
-    isUnitOperation,
-    isUnitReference,
-    UnitDeclaration,
-    UnitExpression,
+  DimensionDeclaration,
+  isDimensionDeclaration,
+  isUnitDeclaration,
+  isUnitLiteral,
+  isUnitOperation,
+  isUnitReference,
+  UnitDeclaration,
+  UnitExpression,
 } from "../../generated/ast.js";
 
 // The canonical representation of a dimension: { "Length": 1, "Time": -2 }
@@ -30,6 +30,10 @@ export class DimensionCalculator {
   }
 
   private computeDimensionDeclaration(def: DimensionDeclaration): DimensionVector {
+    if (this.cache.has(def.name)) {
+      return this.cache.get(def.name)!;
+    }
+
     const vector = new Map<string, number>();
 
     vector.set(def.name, 1);
@@ -39,15 +43,23 @@ export class DimensionCalculator {
   }
 
   private computeUnitDeclaration(def: UnitDeclaration, power?: number): DimensionVector {
-    // Check cache first to avoid cycles and redundant work
-    // if (this.cache.has(def.name)) {
-    //   return this.cache.get(def.name)!;
-    // }
-
     const vector = new Map<string, number>();
 
+    // Case 0: Unit declaration has both dimension and expression. Create a vector for this dimension based on the expression.
+    if (def.dimension && def.dimension.ref && def.expression) {
+      this.cache.set(def.name, new Map());
+      const exprVector = this.computeExpression(def.expression, power);
+      exprVector.forEach((val, key) => vector.set(key, (vector.get(key) || 0) + val * (power ?? 1)));
+      const dimName = def.dimension.ref.name;
+      this.cache.set(dimName, vector);
+      return vector;
+    }
     // Case 1: Base Unit (e.g., unit meter : Length;)
-    if (def.dimension && def.dimension.ref) {
+    else if (def.dimension && def.dimension.ref) {
+      if (this.cache.has(def.name)) {
+        return this.cache.get(def.name)!;
+      }
+
       const dimName = def.dimension.ref.name;
       vector.set(dimName, power ?? 1);
     }
@@ -109,6 +121,13 @@ export class DimensionCalculator {
       }
     }
     return true;
+  }
+
+  public static toString(v: DimensionVector): string {
+    return Array.from(v.entries())
+      .sort((a, b) => a[0].localeCompare(b[0])) // Ensure deterministic order
+      .map(([dim, exp]) => `${dim}:${exp}`)
+      .join(",");
   }
 
   // --- Vector Math Helpers ---
