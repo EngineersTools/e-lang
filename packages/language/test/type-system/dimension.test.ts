@@ -31,4 +31,44 @@ describe("Dimension Analysis", () => {
       3
     );
   });
+
+  test("Dimension inference from assigned unit", async () => {
+    await validateElang(
+      `
+      dimension Length
+      unit m : Length
+      const constantDistance = 10 ~m
+      var variableDistance = 20 ~m
+      `,
+      0
+    );
+  });
+
+  test("Dimension reassignment error", async () => {
+    await validateElang(
+      `
+      dimension Length
+      dimension Time
+      unit m : Length
+      unit s : Time
+      var variableDistance:Length = 20 ~m
+      variableDistance = 30 ~s
+      `,
+      1
+    );
+  });
+
+  test("Operations with compatible dimensions", async () => {
+    await validateElang(
+      `
+      dimension Length
+      unit m : Length
+      const totalDistance:Length = 10 ~m + 20 ~m
+      var differenceDistance:Length = 30 ~m - 5 ~m
+      var scaledDistance:Length = 2 * 15 ~m
+      var dividedDistance:Length = 30 ~m / 2
+      `,
+      0
+    );
+  });
 });
