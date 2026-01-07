@@ -7,16 +7,53 @@ unit s:Time
 unit hr = 3600 * s
 
 dimension Speed
+unit mps = m / s
 unit kph:Speed = km / hr
 
-// Implicit dimension for acceleration
-unit kph2 = km / hr^2
-
-const x: Time = 100 ~m
+const x = 100 ~m
 const y = 1 ~km
-var z = 1 ~hr
+const z = 1 ~hr
+const vel: Speed = 10 ~mps
+const vel2 = 36 ~kph
 
 print x + y
-print y + z
+print vel + vel2
+print vel + 5 ~mps
+print 20 ~mps - 5 ~kph
 
-print 1 ~m + 1 ~hr
+
+// ******************************
+// **** Type checking errors ****
+// ******************************
+
+/** 
+    While validating the AstNode 'y + z', this error is found: 
+    You are trying to add, subtract or assign two measurements 
+    with units of different dimensions 
+    ('Unit:km_[Length:1]' and 'Unit:hr_[Time:1]').
+*/
+// print y + z
+
+/** 
+    While validating the AstNode '1 ~m + 1 ~hr', this error is found: 
+    You are trying to add, subtract or assign two measurements with 
+    units of different dimensions 
+    ('Unit:m_[Length:1]' and 'Unit:hr_[Time:1]').
+*/
+// print 1 ~m + 1 ~hr
+
+/**
+    While validating the AstNode 'vel + x', this error is found: 
+    You are trying to add, subtract or assign two measurements with 
+    units of different dimensions 
+    ('Unit:mps_[Length:1,Time:-1]' and 'Unit:m_[Length:1]').
+*/
+// print vel + x
+
+/**
+    While validating the AstNode '20 ~mps - 5 ~m', this error is found: 
+    You are trying to add, subtract or assign two measurements with 
+    units of different dimensions 
+    ('Unit:mps_[Length:1,Time:-1]' and 'Unit:m_[Length:1]').
+*/
+// print 20 ~mps - 5 ~m
