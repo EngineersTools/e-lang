@@ -52,7 +52,7 @@ fragment ParameterBlock:
 ;
 
 ModelDeclaration infers TypeReference:
-    {infer ModelDeclaration} (export?='export')? 'model' name=ID ('extends' parentTypes+=[TypeReference:ID] (',' parentTypes+=[TypeReference:ID])*)? ParameterBlock
+    {infer ModelDeclaration} (export?='export')? 'model' name=ID ('extends' parentTypes+=[ModelDeclaration:ID] (',' parentTypes+=[ModelDeclaration:ID])*)? ParameterBlock
 ;
 
 FormulaDeclaration:
@@ -240,7 +240,7 @@ LambdaExpression:
 ;
 
 LambdaType:
-    '(' (parameters+=ParameterDeclaration (',' parameters+=ParameterDeclaration)*)? ')' '=>' returnType=TypeReference
+    '(' (parameters+=TypeReference (',' parameters+=TypeReference)*)? ')' '=>' returnType=TypeReference
 ;
 
 TypeReference:

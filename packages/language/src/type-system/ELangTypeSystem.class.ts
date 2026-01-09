@@ -20,6 +20,7 @@ import { DimensionCalculator } from "./utils/DimensionCalculator.js";
 import { createBinaryOperationInferenceRules } from "./inference-rules/createBinaryOperationInferenceRules.js";
 import { createReferenceExpressionInferenceRules } from "./inference-rules/createReferenceExpressionInferenceRules.js";
 import { createMeasurementBinaryOperationInferenceRules } from "./inference-rules/createMeasurementBinaryOperationInferenceRules.js";
+import { createParameterDeclarationInferenceRules } from "./inference-rules/createParameterDeclarationInferenceRules.js";
 
 export class ELangTypeSystem
   implements LangiumTypeSystemDefinition<ELangSpecifics> {
@@ -38,6 +39,7 @@ export class ELangTypeSystem
     createReferenceExpressionInferenceRules(typir);
     createBinaryOperationInferenceRules(typir);
     createMeasurementBinaryOperationInferenceRules(typir);
+    createParameterDeclarationInferenceRules(typir);
   }
 
   onNewAstNode(

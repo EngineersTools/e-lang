@@ -1,13 +1,13 @@
-dimension Length
-unit m:Length
-unit km = 1000 * m
+// dimension Length2
+// unit m2:Length2
+// unit km2 = 1000 * m2
 
 model TestModel {
     numberProp: number
     textProp: text
     booleanProp: boolean
     lengthProp: Length
-    lambdaProp: () => number
+    lambdaProp: (number) => number
 }
 
 const testModel: TestModel = {
@@ -15,8 +15,8 @@ const testModel: TestModel = {
     textProp: "test",
     booleanProp: true,
     lengthProp: 1 ~m,
-    lambdaProp: () => 34
+    lambdaProp: (x: number) => x * 2
 }
 
-print testModel
+print testModel 
 

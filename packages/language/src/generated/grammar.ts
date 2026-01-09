@@ -606,7 +606,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "CrossReference",
                   "type": {
-                    "$ref": "#/rules@9/inferredType"
+                    "$ref": "#/rules@9/definition/elements@0/inferredType"
                   },
                   "terminal": {
                     "$type": "RuleCall",
@@ -633,7 +633,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                     "terminal": {
                       "$type": "CrossReference",
                       "type": {
-                        "$ref": "#/rules@9/inferredType"
+                        "$ref": "#/rules@9/definition/elements@0/inferredType"
                       },
                       "terminal": {
                         "$type": "RuleCall",
@@ -3010,7 +3010,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@7"
+                    "$ref": "#/rules@49"
                   },
                   "arguments": []
                 }
@@ -3029,7 +3029,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@7"
+                        "$ref": "#/rules@49"
                       },
                       "arguments": []
                     }

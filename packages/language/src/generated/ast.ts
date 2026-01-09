@@ -358,7 +358,7 @@ export function isLambdaExpression(item: unknown): item is LambdaExpression {
 
 export interface LambdaType extends TypeReference {
     readonly $type: 'LambdaType';
-    parameters: Array<ParameterDeclaration>;
+    parameters: Array<TypeReference>;
     returnType: TypeReference;
 }
 
@@ -469,7 +469,7 @@ export interface ModelDeclaration extends TypeReference {
     readonly $type: 'ModelDeclaration';
     export: boolean;
     name: string;
-    parentTypes: Array<langium.Reference<TypeReference>>;
+    parentTypes: Array<langium.Reference<ModelDeclaration>>;
     properties: Array<ParameterDeclaration>;
 }
 
@@ -584,7 +584,7 @@ export function isNumberLiteral(item: unknown): item is NumberLiteral {
 }
 
 export interface ParameterDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | FormulaDeclaration | LambdaExpression | LambdaType | ModelDeclaration | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | FormulaDeclaration | LambdaExpression | ModelDeclaration | StatementBlock;
     readonly $type: 'ParameterDeclaration';
     isOptional: boolean;
     name: string;
@@ -1251,7 +1251,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 parentTypes: {
                     name: ModelDeclaration.parentTypes,
                     defaultValue: [],
-                    referenceType: TypeReference.$type
+                    referenceType: ModelDeclaration.$type
                 },
                 primitive: {
                     name: ModelDeclaration.primitive
