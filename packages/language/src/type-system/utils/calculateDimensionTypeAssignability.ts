@@ -1,23 +1,38 @@
-import { ConversionMode, Type } from "typir";
-import { isDimensionType } from "../custom-types/dimension/Dimension.type.js";
-import { isUnitType } from "../custom-types/unit/Unit.type.js";
-import { DimensionCalculator } from "./DimensionCalculator.js";
-
+import { ConversionMode, CustomType, Type } from "typir";
+import {
+  DimensionType,
+  isDimensionType,
+} from "../custom-types/dimension/Dimension.type.js";
+import { isUnitType, UnitType } from "../custom-types/unit/Unit.type.js";
+import { ELangSpecifics } from "../ELangSpecifics.interface.js";
+import { DimensionCalculator, DimensionVector } from "./DimensionCalculator.js";
 
 export function calculateDimensionTypeAssignability(
-  source: Type,
+  source:
+    | CustomType<DimensionType, ELangSpecifics>
+    | CustomType<UnitType, ELangSpecifics>,
   target: Type
 ): ConversionMode {
-  if (!("properties" in source) ||
-    !isUnitType(source.properties) ||
+  //   if (!("properties" in source) ||
+  //     // !isUnitType(source.properties) ||
+  //     !("properties" in target) //||
+  //     // (!isDimensionType(target.properties) && !isUnitType(target.properties))) {
+  // ) {
+  //     return "NONE";
+  //   }
+
+  if (
     !("properties" in target) ||
-    (!isDimensionType(target.properties) && !isUnitType(target.properties))) {
+    !isDimensionType(target.properties) ||
+    !isUnitType(target.properties)
+  ) {
     return "NONE";
   }
 
-  console.log("Comparing dimension vectors:", source.properties.vector, target.properties.vector);
-
-  return DimensionCalculator.areVectorsEqual(source.properties.vector, target.properties.vector)
-    ? "IMPLICIT_EXPLICIT"
+  return DimensionCalculator.areVectorsEqual(
+    source.properties.vector as DimensionVector,
+    target.properties.vector
+  )
+    ? "EXPLICIT"
     : "NONE";
 }

@@ -1,6 +1,6 @@
-// dimension Length2
-// unit m2:Length2
-// unit km2 = 1000 * m2
+dimension Length
+unit m:Length
+unit km = 1000 * m
 
 model TestModel {
     numberProp: number
