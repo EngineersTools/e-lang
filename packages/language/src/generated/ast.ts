@@ -160,17 +160,65 @@ export interface DimensionDeclaration extends langium.AstNode {
     readonly $container: ELangProgram | ForStatement | StatementBlock;
     readonly $type: 'DimensionDeclaration';
     export: boolean;
+    expression?: DimensionExpression;
     name: string;
 }
 
 export const DimensionDeclaration = {
     $type: 'DimensionDeclaration',
     export: 'export',
+    expression: 'expression',
     name: 'name'
 } as const;
 
 export function isDimensionDeclaration(item: unknown): item is DimensionDeclaration {
     return reflection.isInstance(item, DimensionDeclaration.$type);
+}
+
+export type DimensionExpression = DimensionOperation | DimensionReference;
+
+export const DimensionExpression = {
+    $type: 'DimensionExpression'
+} as const;
+
+export function isDimensionExpression(item: unknown): item is DimensionExpression {
+    return reflection.isInstance(item, DimensionExpression.$type);
+}
+
+export interface DimensionOperation extends langium.AstNode {
+    readonly $container: DimensionDeclaration | DimensionOperation;
+    readonly $type: 'DimensionOperation';
+    left: DimensionExpression;
+    operator: '*' | '/';
+    right: DimensionExpression;
+}
+
+export const DimensionOperation = {
+    $type: 'DimensionOperation',
+    left: 'left',
+    operator: 'operator',
+    right: 'right'
+} as const;
+
+export function isDimensionOperation(item: unknown): item is DimensionOperation {
+    return reflection.isInstance(item, DimensionOperation.$type);
+}
+
+export interface DimensionReference extends langium.AstNode {
+    readonly $container: DimensionDeclaration | DimensionOperation;
+    readonly $type: 'DimensionReference';
+    power?: number;
+    ref: langium.Reference<DimensionDeclaration>;
+}
+
+export const DimensionReference = {
+    $type: 'DimensionReference',
+    power: 'power',
+    ref: 'ref'
+} as const;
+
+export function isDimensionReference(item: unknown): item is DimensionReference {
+    return reflection.isInstance(item, DimensionReference.$type);
 }
 
 export interface Domain extends ELangProgram {
@@ -871,6 +919,9 @@ export type ELangAstType = {
     CallExpression: CallExpression
     ConstantDeclaration: ConstantDeclaration
     DimensionDeclaration: DimensionDeclaration
+    DimensionExpression: DimensionExpression
+    DimensionOperation: DimensionOperation
+    DimensionReference: DimensionReference
     Domain: Domain
     ELangProgram: ELangProgram
     ExportableElement: ExportableElement
@@ -984,11 +1035,48 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                     name: DimensionDeclaration.export,
                     defaultValue: false
                 },
+                expression: {
+                    name: DimensionDeclaration.expression
+                },
                 name: {
                     name: DimensionDeclaration.name
                 }
             },
             superTypes: [ExportableElement.$type, NamedElement.$type, Statement.$type]
+        },
+        DimensionExpression: {
+            name: DimensionExpression.$type,
+            properties: {
+            },
+            superTypes: []
+        },
+        DimensionOperation: {
+            name: DimensionOperation.$type,
+            properties: {
+                left: {
+                    name: DimensionOperation.left
+                },
+                operator: {
+                    name: DimensionOperation.operator
+                },
+                right: {
+                    name: DimensionOperation.right
+                }
+            },
+            superTypes: [DimensionExpression.$type]
+        },
+        DimensionReference: {
+            name: DimensionReference.$type,
+            properties: {
+                power: {
+                    name: DimensionReference.power
+                },
+                ref: {
+                    name: DimensionReference.ref,
+                    referenceType: DimensionDeclaration.$type
+                }
+            },
+            superTypes: [DimensionExpression.$type]
         },
         Domain: {
             name: Domain.$type,

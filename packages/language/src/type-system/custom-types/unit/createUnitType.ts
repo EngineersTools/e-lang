@@ -10,12 +10,22 @@ export function createUnitType(
 ) {
   const vector = calculator.compute(languageNode);
 
-  if (languageNode.dimension && languageNode.dimension.ref && languageNode.expression) {
+  if (
+    languageNode.dimension &&
+    languageNode.dimension.ref &&
+    languageNode.expression
+  ) {
     const dimensionType = typir.Inference.inferType(languageNode.dimension.ref);
-    if (isDimensionType(dimensionType) && 'properties' in dimensionType && isDimensionType(dimensionType.properties)) {
+    if (
+      isDimensionType(dimensionType) &&
+      "properties" in dimensionType &&
+      isDimensionType(dimensionType.properties)
+    ) {
       const dimensionVector = dimensionType.properties.vector;
       if (!DimensionCalculator.areVectorsEqual(vector, dimensionVector)) {
-        throw new Error(`The unit '${languageNode.name}' definition is incompatible with its dimension '${languageNode.dimension.ref.name}'.`);
+        throw new Error(
+          `The unit '${languageNode.name}' definition is incompatible with its dimension '${languageNode.dimension.ref.name}'.`
+        );
       }
     }
   }
@@ -23,7 +33,7 @@ export function createUnitType(
   return typir.factory.Unit.create({
     properties: {
       name: languageNode.name,
-      vector: vector
+      vector: vector,
     },
   })
     .inferenceRule({

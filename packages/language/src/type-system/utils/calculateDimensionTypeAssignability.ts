@@ -13,14 +13,6 @@ export function calculateDimensionTypeAssignability(
     | CustomType<UnitType, ELangSpecifics>,
   target: Type
 ): ConversionMode {
-  //   if (!("properties" in source) ||
-  //     // !isUnitType(source.properties) ||
-  //     !("properties" in target) //||
-  //     // (!isDimensionType(target.properties) && !isUnitType(target.properties))) {
-  // ) {
-  //     return "NONE";
-  //   }
-
   if (
     !("properties" in target) ||
     !isDimensionType(target.properties) ||
@@ -33,6 +25,6 @@ export function calculateDimensionTypeAssignability(
     source.properties.vector as DimensionVector,
     target.properties.vector
   )
-    ? "EXPLICIT"
+    ? "IMPLICIT_EXPLICIT"
     : "NONE";
 }

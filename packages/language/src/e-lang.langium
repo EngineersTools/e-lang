@@ -60,13 +60,22 @@ FormulaDeclaration:
 ;
 
 DimensionDeclaration:
-    (export?='export')? 'dimension' name=ID
+    (export?='export')? 'dimension' name=ID ( '=' expression=DimensionExpression )?
+;
+
+DimensionExpression:
+    DimensionTerm ({infer DimensionOperation.left=current} operator=('*'|'/') right=DimensionTerm)*
+;
+
+DimensionTerm infers DimensionExpression:
+    {infer DimensionReference} ref=[DimensionDeclaration:ID] ('^' power=INT)? |
+    '(' DimensionExpression ')'
 ;
 
 UnitDeclaration:
     (export?='export')? 'unit' name=ID 
     ( ':' dimension=[DimensionDeclaration:ID] )?   // For Base units (unit meter : Length)
-    ( '=' expression=UnitExpression )?             // For Derived units (unit hertz = 1 / second)
+    ( '=' expression=UnitExpression )?           // For Derived units (unit hertz = 1 / second)
 ;
 
 UnitExpression:

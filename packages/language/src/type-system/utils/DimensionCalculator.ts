@@ -1,6 +1,10 @@
 import {
   DimensionDeclaration,
+  DimensionExpression,
   isDimensionDeclaration,
+  isDimensionExpression,
+  isDimensionOperation,
+  isDimensionReference,
   isUnitDeclaration,
   isUnitLiteral,
   isUnitOperation,
@@ -15,21 +19,20 @@ export type DimensionVector = Map<string, number>;
 /**
  * The `DimensionCalculator` class provides utilities for calculating and manipulating
  * dimension vectors for physical units and dimensions in a type system.
- * 
+ *
  * It supports:
  * - Computing the dimension vector for a given dimension, unit declaration, or unit expression.
  * - Caching computed vectors to avoid redundant calculations and handle recursion.
  * - Handling base units, derived units, and unit expressions involving multiplication, division, and powers.
  * - Vector math operations such as addition, subtraction, scaling, and cleaning (removing zero exponents).
  * - Comparing vectors for equality and converting vectors to string representations for debugging or unique keys.
- * 
+ *
  * This class is intended to be used as part of a type system for a language that models physical units and dimensions.
  */
 export class DimensionCalculator {
   // Cache to prevent re-calculating the same named unit repeatedly
   private cache = new Map<string, DimensionVector>();
 
-  
   /**
    * Computes the dimension vector for the given node, which can be a
    * DimensionDeclaration, UnitDeclaration, or UnitExpression.
@@ -43,13 +46,21 @@ export class DimensionCalculator {
    * @param node - The AST node representing a dimension declaration, unit declaration, or unit expression.
    * @returns The computed DimensionVector for the provided node.
    */
-  public compute(node: DimensionDeclaration | UnitDeclaration | UnitExpression): DimensionVector {
+  public compute(
+    node:
+      | DimensionDeclaration
+      | DimensionExpression
+      | UnitDeclaration
+      | UnitExpression
+  ): DimensionVector {
     if (isDimensionDeclaration(node)) {
       return this.computeDimensionDeclaration(node);
     } else if (isUnitDeclaration(node)) {
       return this.computeUnitDeclaration(node);
+    } else if (isDimensionExpression(node)) {
+      return this.computeDimensionExpression(node);
     } else {
-      return this.computeExpression(node);
+      return this.computeUnitExpression(node);
     }
   }
 
@@ -61,14 +72,21 @@ export class DimensionCalculator {
    * @param def - The dimension declaration to compute the vector for.
    * @returns The computed or cached dimension vector for the given declaration.
    */
-  private computeDimensionDeclaration(def: DimensionDeclaration): DimensionVector {
-    if (this.cache.has(def.name)) {
-      return this.cache.get(def.name)!;
-    }
-
+  private computeDimensionDeclaration(
+    def: DimensionDeclaration,
+    power: number = 1
+  ): DimensionVector {
     const vector = new Map<string, number>();
 
-    vector.set(def.name, 1);
+    if (def.expression) {
+      const exprVector = this.computeDimensionExpression(def.expression, power);
+      exprVector.forEach((val, key) =>
+        vector.set(key, (vector.get(key) || 0) + val * power)
+      );
+    } else {
+      vector.set(def.name, power);
+    }
+
     this.cache.set(def.name, vector);
 
     return vector;
@@ -88,14 +106,19 @@ export class DimensionCalculator {
    * @param power - (Optional) The exponent to which the unit is raised. Defaults to 1 if not provided.
    * @returns The computed dimension vector as a `Map<string, number>`.
    */
-  private computeUnitDeclaration(def: UnitDeclaration, power?: number): DimensionVector {
+  private computeUnitDeclaration(
+    def: UnitDeclaration,
+    power?: number
+  ): DimensionVector {
     const vector = new Map<string, number>();
 
     // Case 0: Unit declaration has both dimension and expression. Create a vector for this dimension based on the expression.
     if (def.dimension && def.dimension.ref && def.expression) {
       this.cache.set(def.name, new Map());
-      const exprVector = this.computeExpression(def.expression, power);
-      exprVector.forEach((val, key) => vector.set(key, (vector.get(key) || 0) + val * (power ?? 1)));
+      const exprVector = this.computeUnitExpression(def.expression, power);
+      exprVector.forEach((val, key) =>
+        vector.set(key, (vector.get(key) || 0) + val * (power ?? 1))
+      );
       const dimName = def.dimension.ref.name;
       this.cache.set(dimName, vector);
       return vector;
@@ -114,10 +137,12 @@ export class DimensionCalculator {
       // We temporarily set an empty vector to break recursion cycles
       this.cache.set(def.name, new Map());
 
-      const exprVector = this.computeExpression(def.expression, power);
+      const exprVector = this.computeUnitExpression(def.expression, power);
 
       // Merge results into our main vector
-      exprVector.forEach((val, key) => vector.set(key, (vector.get(key) || 0) + val * (power ?? 1)));
+      exprVector.forEach((val, key) =>
+        vector.set(key, (vector.get(key) || 0) + val * (power ?? 1))
+      );
     }
 
     // Store result in cache
@@ -142,7 +167,10 @@ export class DimensionCalculator {
    * @param power - (Optional) The exponent to apply to the unit reference, if any.
    * @returns The computed dimension vector as a `Map<string, number>`.
    */
-  private computeExpression(expr: UnitExpression, power?: number): DimensionVector {
+  private computeUnitExpression(
+    expr: UnitExpression,
+    power?: number
+  ): DimensionVector {
     // Since UnitExpression can be a chain of operations (left op right)
 
     if (isUnitLiteral(expr)) {
@@ -152,8 +180,8 @@ export class DimensionCalculator {
         return new Map<string, number>();
       }
     } else if (isUnitOperation(expr)) {
-      const leftVec = this.computeExpression(expr.left);
-      const rightVec = this.computeExpression(expr.right);
+      const leftVec = this.computeUnitExpression(expr.left);
+      const rightVec = this.computeUnitExpression(expr.right);
 
       if (expr.operator === "*") {
         return DimensionCalculator.addVectors(leftVec, rightVec);
@@ -163,6 +191,35 @@ export class DimensionCalculator {
     } else if (isUnitReference(expr)) {
       if (expr.ref && expr.ref.ref) {
         return this.computeUnitDeclaration(expr.ref.ref, power ?? expr.power);
+      }
+    }
+
+    // Default: dimensionless
+
+    return new Map<string, number>();
+  }
+
+  private computeDimensionExpression(
+    expr: DimensionExpression,
+    power?: number
+  ): DimensionVector {
+    // Since DimensionExpression can be a chain of operations (left op right)
+
+    if (isDimensionOperation(expr)) {
+      const leftVec = this.computeDimensionExpression(expr.left);
+      const rightVec = this.computeDimensionExpression(expr.right);
+
+      if (expr.operator === "*") {
+        return DimensionCalculator.addVectors(leftVec, rightVec);
+      } else if (expr.operator === "/") {
+        return DimensionCalculator.subtractVectors(leftVec, rightVec);
+      }
+    } else if (isDimensionReference(expr)) {
+      if (expr.ref && expr.ref.ref) {
+        return this.computeDimensionDeclaration(
+          expr.ref.ref,
+          power ?? expr.power
+        );
       }
     }
 
@@ -199,7 +256,7 @@ export class DimensionCalculator {
 
   /**
    * Converts a `DimensionVector` to its string representation.
-   * 
+   *
    * The output is a comma-separated list of dimension-exponent pairs,
    * sorted deterministically by dimension name. Each pair is formatted as `dimension:exponent`.
    *
@@ -291,7 +348,7 @@ export class DimensionCalculator {
 
   /**
    * Converts a given `DimensionVector` to its string representation.
-   * 
+   *
    * The output string lists each dimension and its exponent in the format `dim:exp`,
    * separated by commas. The dimensions are sorted alphabetically to ensure a
    * deterministic order.

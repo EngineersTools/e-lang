@@ -1,6 +1,6 @@
-dimension Length
-unit m:Length
-unit km = 1000 * m
+// dimension Length
+// unit m:Length
+// unit km = 1000 * m
 
 model TestModel {
     numberProp: number

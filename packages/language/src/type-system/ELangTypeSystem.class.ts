@@ -1,13 +1,21 @@
 import { LangiumTypeSystemDefinition } from "typir-langium";
-import { isDimensionDeclaration, isModelDeclaration, isUnitDeclaration } from "../generated/ast.js";
+import {
+  isDimensionDeclaration,
+  isModelDeclaration,
+  isUnitDeclaration,
+} from "../generated/ast.js";
 import { createDimensionType } from "./custom-types/dimension/createDimensionType.js";
 import { createModelType } from "./custom-types/model/createModelType.js";
 import { createUnitType } from "./custom-types/unit/createUnitType.js";
 import { ELangTypirServices } from "./ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "./ELangSpecifics.interface.js";
+import { createBinaryOperationInferenceRules } from "./inference-rules/createBinaryOperationInferenceRules.js";
 import { createConstantDeclarationInferenceRules } from "./inference-rules/createConstantDeclarationInferenceRules.js";
+import { createMeasurementBinaryOperationInferenceRules } from "./inference-rules/createMeasurementBinaryOperationInferenceRules.js";
 import { createMeasurementInferenceRules } from "./inference-rules/createMeasurementInferenceRules.js";
 import { createMutableDeclarationInferenceRules } from "./inference-rules/createMutableDeclarationInferenceRules.js";
+import { createParameterDeclarationInferenceRules } from "./inference-rules/createParameterDeclarationInferenceRules.js";
+import { createReferenceExpressionInferenceRules } from "./inference-rules/createReferenceExpressionInferenceRules.js";
 import { createTypeReferenceInferenceRules } from "./inference-rules/createTypeReferenceInferenceRule.js";
 import {
   declarePrimitiveConvertibilityToNull,
@@ -17,13 +25,11 @@ import {
   getOrCreateTypeText,
 } from "./typir-types/createPrimitives.js";
 import { DimensionCalculator } from "./utils/DimensionCalculator.js";
-import { createBinaryOperationInferenceRules } from "./inference-rules/createBinaryOperationInferenceRules.js";
-import { createReferenceExpressionInferenceRules } from "./inference-rules/createReferenceExpressionInferenceRules.js";
-import { createMeasurementBinaryOperationInferenceRules } from "./inference-rules/createMeasurementBinaryOperationInferenceRules.js";
-import { createParameterDeclarationInferenceRules } from "./inference-rules/createParameterDeclarationInferenceRules.js";
+import { createUnitDeclarationValidationRules } from "./validation-rules/createUnitDeclarationValidationRules.js";
 
 export class ELangTypeSystem
-  implements LangiumTypeSystemDefinition<ELangSpecifics> {
+  implements LangiumTypeSystemDefinition<ELangSpecifics>
+{
   private calculator = new DimensionCalculator();
 
   onInitialize(typir: ELangTypirServices): void {
@@ -40,6 +46,7 @@ export class ELangTypeSystem
     createBinaryOperationInferenceRules(typir);
     createMeasurementBinaryOperationInferenceRules(typir);
     createParameterDeclarationInferenceRules(typir);
+    createUnitDeclarationValidationRules(typir);
   }
 
   onNewAstNode(
