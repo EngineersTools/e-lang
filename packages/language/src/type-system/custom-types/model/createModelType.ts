@@ -1,23 +1,28 @@
-import { ModelDeclaration } from "../../../index.js";
-import {
-  ELangTypirServices
-} from "../../ELangAdditionalTypirServices.type.js";
+import { isModelDeclaration, ModelDeclaration } from "../../../index.js";
+import { ELangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
 
 export function createModelType(
   languageNode: ModelDeclaration,
   typir: ELangTypirServices
 ) {
-  // modelType.addListener(type => {
-  //   typir.Conversion.markAsConvertible(typir.factory.Primitives.get({ primitiveName: 'null' })!, type, 'IMPLICIT_EXPLICIT');
-  // });
+  
+  const parentTypes = [];
+
+  
 
   return typir.factory.Model.create({
     properties: {
       name: languageNode.name,
       // parentTypes: languageNode.parentTypes.map((pt: ModelDeclaration) => createModelType(pt.ref, typir)),
       // properties: languageNode.properties.map(p => typir.Inference.inferType(p)).filter(isType).filter(isModelProperty),
-      parentTypes: [],
-      properties: []
+      parentTypes: languageNode.parentTypes.map((modelDeclararion) => {
+        if (isModelDeclaration(modelDeclararion.ref))
+          return typir.Inference.inferType(modelDeclararion.ref);
+        throw new Error(
+          `Invalid parent type reference in model '${languageNode.name}'.`
+        );
+      }),
+      properties: [],
     },
   })
     .inferenceRule({
