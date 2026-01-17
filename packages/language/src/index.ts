@@ -6,3 +6,4 @@ export * from "./e-lang-scope-computation.js";
 export * from "./generated/ast.js";
 export * from "./generated/grammar.js";
 export * from "./generated/module.js";
+export * from "./ELangServices.type.js";
