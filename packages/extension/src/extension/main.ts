@@ -13,15 +13,19 @@ import { ELangNotebookSerializer } from './notebook/serializer.js';
 let client: LanguageClient;
 let notebookKernel: any;
 
+// Output channel for notebook debugging
+const notebookOutput = vscode.window.createOutputChannel("E-Lang Notebook");
+
 // This function is called when the extension is activated.
 export function activate(
   context: vscode.ExtensionContext
 ): void {
+  notebookOutput.appendLine('[Main] Extension activated (synchronous part).');
 
   context.subscriptions.push(
     vscode.workspace.registerNotebookSerializer(
         'e-lang-notebook',
-        new ELangNotebookSerializer(),
+        new ELangNotebookSerializer(notebookOutput),
         { transientOutputs: true }
     )
   );

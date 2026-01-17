@@ -5,7 +5,7 @@
     "displayName": "e-lang",
     "type": "module",
     "engines": {
-        "vscode": "^1.67.0"
+        "vscode": "^1.96.0"
     },
     "categories": [
         "Programming Languages"
@@ -68,7 +68,7 @@
         "@types/glob": "^7.2.0",
         "@types/mocha": "^10.0.10",
         "@types/node": "^16.18.126",
-        "@types/vscode": "~1.67.0",
+        "@types/vscode": "^1.96.0",
         "@vscode/test-electron": "^2.5.2",
         "concurrently": "~8.2.1",
         "esbuild": "~0.25.5",

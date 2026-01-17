@@ -8,10 +8,17 @@ interface RawNotebookCell {
 }
 
 export class ELangNotebookSerializer implements vscode.NotebookSerializer {
-    	deserializeNotebook(
+    private readonly _output: vscode.OutputChannel;
+
+    constructor(output: vscode.OutputChannel) {
+        this._output = output;
+    }
+
+	deserializeNotebook(
 		content: Uint8Array,
 		_token: vscode.CancellationToken
 	): vscode.NotebookData | Thenable<vscode.NotebookData> {
+        this._output.appendLine('[Serializer] deserializeNotebook called');
 		const contents = new TextDecoder().decode(content);
 		let raw: RawNotebookCell[] = [];
 		try {
