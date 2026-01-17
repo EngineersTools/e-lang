@@ -10,18 +10,18 @@ import {
     isReferenceExpression,
     isPrintStatement,
     isStatementBlock,
-    isReturnStatement,
     isIfStatement,
     isForStatement,
     isConstantDeclaration,
     isMutableDeclaration,
     isCallExpression,
-    FormulaDeclaration,
     isFormulaDeclaration,
     isExpression,
     ConstantDeclaration,
-    MutableDeclaration
+    MutableDeclaration,
+    isPreUnaryExpression
 } from 'e-lang-language';
+import { LangiumDocument } from 'langium';
 import { Context } from './context.js';
 
 
@@ -37,7 +37,22 @@ export class Interpreter {
     // Global context to store global variables and functions
     private globalContext = new Context();
 
-    eval(program: ELangProgram): any {
+    eval(programOrDoc: ELangProgram | LangiumDocument<ELangProgram>): any {
+        let program: ELangProgram;
+        if ('$type' in programOrDoc) {
+             program = programOrDoc as ELangProgram;
+        } else {
+             const doc = programOrDoc as LangiumDocument<ELangProgram>;
+             program = doc.parseResult.value;
+             // Static Type Check
+             if (doc.diagnostics) {
+                 const errors = doc.diagnostics.filter(d => d.severity === 1); // 1 is Error
+                 if (errors.length > 0) {
+                     throw new Error(`Static Type Check Failed:\n${errors.map(e => `[${e.range.start.line + 1}:${e.range.start.character + 1}] ${e.message}`).join('\n')}`);
+                 }
+             }
+        }
+
         // Pre-pass: Register all global functions (FormulaDeclarations)
         // This allows for forward references and recursion
         for (const stmt of program.statements) {
@@ -135,10 +150,6 @@ export class Interpreter {
             return;
         }
 
-        if (isReturnStatement(stmt)) {
-            const val = this.evaluateExpression(stmt.value, context);
-            throw new ReturnValue(val);
-        }
 
         // If it's an expression statement
         if (isExpression(stmt)) {
@@ -172,6 +183,7 @@ export class Interpreter {
              // Actually generated AST might have statements list AND returnValue field?
              // Grammar: '{' (statements+=Statement*)? returnValue=ReturnStatement? '}'
              // So if explicit return is at end check it
+             throw new ReturnValue(val);
          }
     }
 
@@ -199,20 +211,55 @@ export class Interpreter {
             const left = this.evaluateExpression(expr.left, context);
             const right = this.evaluateExpression(expr.right, context);
             switch (expr.operator) {
-                case '+': return left + right;
-                case '-': return left - right;
-                case '*': return left * right;
-                case '/': return left / right;
-                case '^': return Math.pow(left, right);
+                case '+': 
+                    if (typeof left === 'number' && typeof right === 'number') return left + right;
+                    if (typeof left === 'string' && typeof right === 'string') return left + right;
+                    throw new Error(`Type Error: Cannot apply operator '+' to types ${typeof left} and ${typeof right}`);
+                case '-': 
+                    if (typeof left !== 'number' || typeof right !== 'number') throw new Error("Type Error: '-' requires number operands");
+                    return left - right;
+                case '*': 
+                    if (typeof left !== 'number' || typeof right !== 'number') throw new Error("Type Error: '*' requires number operands");
+                    return left * right;
+                case '/': 
+                    if (typeof left !== 'number' || typeof right !== 'number') throw new Error("Type Error: '/' requires number operands");
+                    return left / right;
+                case '^': 
+                    if (typeof left !== 'number' || typeof right !== 'number') throw new Error("Type Error: '^' requires number operands");
+                    return Math.pow(left, right);
                 case '==': return left === right;
                 case '!=': return left !== right;
-                case '<': return left < right;
-                case '<=': return left <= right;
-                case '>': return left > right;
-                case '>=': return left >= right;
-                case 'and': return left && right;
-                case 'or': return left || right;
+                case '<': 
+                    if (typeof left !== 'number' || typeof right !== 'number') throw new Error("Type Error: '<' requires number operands");
+                    return left < right;
+                case '<=': 
+                    if (typeof left !== 'number' || typeof right !== 'number') throw new Error("Type Error: '<=' requires number operands");
+                    return left <= right;
+                case '>': 
+                    if (typeof left !== 'number' || typeof right !== 'number') throw new Error("Type Error: '>' requires number operands");
+                    return left > right;
+                case '>=': 
+                    if (typeof left !== 'number' || typeof right !== 'number') throw new Error("Type Error: '>=' requires number operands");
+                    return left >= right;
+                case 'and': 
+                    if (typeof left !== 'boolean' || typeof right !== 'boolean') throw new Error("Type Error: 'and' requires boolean operands");
+                    return left && right;
+                case 'or': 
+                    if (typeof left !== 'boolean' || typeof right !== 'boolean') throw new Error("Type Error: 'or' requires boolean operands");
+                    return left || right;
                 // ...
+            }
+        }
+
+        if (isPreUnaryExpression(expr)) {
+            const value = this.evaluateExpression(expr.value, context);
+            switch (expr.operator) {
+                case 'not':
+                    if (typeof value !== 'boolean') throw new Error("Type Error: 'not' requires boolean operand");
+                    return !value;
+                case '-':
+                    if (typeof value !== 'number') throw new Error("Type Error: unary '-' requires number operand");
+                    return -value;
             }
         }
 
@@ -271,7 +318,7 @@ export class Interpreter {
              // Execute body
              try {
                  this.executeStatement(func.body, fnContext);
-             } catch (e) {
+             } catch (e: any) {
                  if (e instanceof ReturnValue) return e.value;
                  throw e;
              }

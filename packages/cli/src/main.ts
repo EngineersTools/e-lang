@@ -1,23 +1,28 @@
-import type { ELangProgram } from 'e-lang-language';
-import { createELangServices, ELangLanguageMetaData } from 'e-lang-language';
-import chalk from 'chalk';
 import { Command } from 'commander';
-import { extractAstNode } from './util.js';
-import { generateOutput } from './generator.js';
+import { createELangServices, ELangLanguageMetaData, ELangProgram } from 'e-lang-language';
 import { NodeFileSystem } from 'langium/node';
+import { Interpreter } from 'e-lang-interpreter';
+import { extractAstNode } from './util.js';
+import chalk from 'chalk';
 import * as url from 'node:url';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 const packagePath = path.resolve(__dirname, '..', 'package.json');
 const packageContent = await fs.readFile(packagePath, 'utf-8');
 
-export const generateAction = async (source: string, destination: string): Promise<void> => {
+const runAction = async (fileName: string): Promise<void> => {
     const services = createELangServices(NodeFileSystem).ELang;
-    const model = await extractAstNode<ELangProgram>(source, services);
-    const generatedFilePath = generateOutput(model, source, destination);
-    console.log(chalk.green(`Code generated succesfully: ${generatedFilePath}`));
+    const model = await extractAstNode<ELangProgram>(fileName, services);
+    const interpreter = new Interpreter();
+    try {
+        interpreter.eval(model);
+    } catch (e: any) {
+        console.error(chalk.red('Runtime Error: ' + e.message));
+        process.exit(1);
+    }
 };
 
 export default function(): void {
@@ -25,14 +30,13 @@ export default function(): void {
 
     program.version(JSON.parse(packageContent).version);
 
-    // TODO: use Program API to declare the CLI
+    // CLI Commands go here
     const fileExtensions = ELangLanguageMetaData.fileExtensions.join(', ');
     program
-        .command('generate')
+        .command('run')
         .argument('<file>', `source file (possible file extensions: ${fileExtensions})`)
-        .argument('<destination>', 'destination file')
-        .description('Generates code for a provided source file.')
-        .action(generateAction);
+        .description('Runs the provided source file.')
+        .action(runAction);
 
     program.parse(process.argv);
 }

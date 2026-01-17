@@ -13,17 +13,19 @@
         "src"
     ],
     "bin": {
-        "e-lang-cli": "./bin/cli.js"
+        "elang": "./bin/cli.js"
     },
     "scripts": {
         "clean": "shx rm -fr *.tsbuildinfo out",
-        "build": "echo 'No build step'",
-        "build:clean": "npm run clean && npm run build"
+        "build": "tsc -b tsconfig.json",
+        "build:clean": "npm run clean && npm run build",
+        "prepublishOnly": "npm run build"
     },
     "dependencies": {
         "e-lang-language": "0.0.1",
         "chalk": "~5.3.0",
-        "commander": "~11.1.0"
+        "commander": "~11.1.0",
+        "e-lang-interpreter": "0.0.1"
     },
     "volta": {
         "node": "20.19.2",
