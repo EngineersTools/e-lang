@@ -1,25 +1,25 @@
 
 import {
+    ConstantDeclaration,
     ELangProgram,
     Expression,
+    MutableDeclaration,
     Statement,
     isBinaryExpression,
-    isNumberLiteral,
     isBooleanLiteral,
-    isStringLiteral,
-    isReferenceExpression,
-    isPrintStatement,
-    isStatementBlock,
-    isIfStatement,
-    isForStatement,
-    isConstantDeclaration,
-    isMutableDeclaration,
     isCallExpression,
-    isFormulaDeclaration,
+    isConstantDeclaration,
     isExpression,
-    ConstantDeclaration,
-    MutableDeclaration,
-    isPreUnaryExpression
+    isForStatement,
+    isFormulaDeclaration,
+    isIfStatement,
+    isMutableDeclaration,
+    isNumberLiteral,
+    isPreUnaryExpression,
+    isPrintStatement,
+    isReferenceExpression,
+    isStatementBlock,
+    isStringLiteral
 } from 'e-lang-language';
 import { LangiumDocument } from 'langium';
 import { Context } from './context.js';
@@ -36,6 +36,13 @@ class ReturnValue {
 export class Interpreter {
     // Global context to store global variables and functions
     private globalContext = new Context();
+    private logger: (message: any) => void = console.log;
+
+    constructor(logger?: (message: any) => void) {
+        if (logger) {
+            this.logger = logger;
+        }
+    }
 
     eval(programOrDoc: ELangProgram | LangiumDocument<ELangProgram>): any {
         let program: ELangProgram;
@@ -77,15 +84,15 @@ export class Interpreter {
     private executeStatement(stmt: Statement, context: Context): any {
         if (isVariableDeclaration(stmt)) {
             const value = stmt.value ? this.evaluateExpression(stmt.value, context) : undefined;
-            context.define(stmt.name, value);
+            context.define((stmt as any).name, value);
             return;
         }
 
         // Assignment is handled as an Expression Statement
         
         if (isPrintStatement(stmt)) {
-            const value = this.evaluateExpression(stmt.value, context);
-            console.log(value);
+            const value = this.evaluateExpression((stmt as any).value, context);
+            this.logger(value);
             return;
         }
 

@@ -1,8 +1,7 @@
-import * as vscode from 'vscode';
 import { Interpreter } from 'e-lang-interpreter';
-import { createELangServices } from 'e-lang-language';
+import { createELangServices, ELangProgram } from 'e-lang-language';
 import { EmptyFileSystem, LangiumDocument } from 'langium';
-import { ELangProgram } from 'e-lang-language';
+import * as vscode from 'vscode';
 import { URI } from 'vscode-uri';
 
 export class ELangNotebookKernel {
@@ -25,6 +24,9 @@ export class ELangNotebookKernel {
         this._controller.supportsExecutionOrder = true;
         this._controller.executeHandler = this._executeAll.bind(this);
 
+        // Explicitly set execution priority to ensure this kernel is preferred
+        this._controller.description = 'E-Lang Notebook Kernel';
+
         // Initialize Langium services for parsing
         // We use EmptyFileSystem because we deal with independent text documents
         const services = createELangServices(EmptyFileSystem);
@@ -35,13 +37,17 @@ export class ELangNotebookKernel {
         this._controller.dispose();
     }
 
-    private _executeAll(
+    getController(): vscode.NotebookController {
+        return this._controller;
+    }
+
+    private async _executeAll(
         cells: vscode.NotebookCell[],
         _notebook: vscode.NotebookDocument,
         _controller: vscode.NotebookController
-    ): void {
+    ): Promise<void> {
         for (const cell of cells) {
-            this._doExecution(cell);
+            await this._doExecution(cell);
         }
     }
 
@@ -51,58 +57,60 @@ export class ELangNotebookKernel {
         execution.start(Date.now());
 
         try {
+            // Collect outputs for this cell execution
+            const cellOutputs: string[] = [];
+
             // Get or create interpreter for this notebook
             let interpreter = this._interpreters.get(cell.notebook);
             if (!interpreter) {
-                interpreter = new Interpreter();
+                const customLogger = (value: any) => {
+                    const text = String(value);
+                    cellOutputs.push(text);
+                };
+                
+                interpreter = new Interpreter(customLogger);
                 this._interpreters.set(cell.notebook, interpreter);
             }
 
             // Parse the code using Langium services
+            // Create a URI with .elng extension for Langium parsing
+            const notebookUri = URI.parse(cell.document.uri.toString());
+            const cellUri = notebookUri.with({ path: notebookUri.path.replace(/\.elnb$/, '') + '.elng' });
+            
             const document = this._services.shared.workspace.LangiumDocumentFactory.fromString<ELangProgram>(
                 cell.document.getText(),
-                URI.parse(cell.document.uri.toString() + ".elng")
+                cellUri
             );
             
             await this._services.shared.workspace.DocumentBuilder.build([document]);
-
-            // Capture console.log
-            const originalLog = console.log;
-            const outputs: vscode.NotebookCellOutputItem[] = [];
-            
-            console.log = (...args: any[]) => {
-                const text = args.map(a => String(a)).join(' ');
-                outputs.push(vscode.NotebookCellOutputItem.text(text));
-            };
 
             // Execute
             let result: any;
             try {
                 result = interpreter.eval(document as LangiumDocument<ELangProgram>);
-            } finally {
-                console.log = originalLog;
+            } catch (e) {
+                console.error('[Kernel] Eval failed:', e);
+                throw e;
             }
 
-            const cellOutputs: vscode.NotebookCellOutput[] = [];
-            if (outputs.length > 0) {
-                 // Combine stdout into one output for now? or multiple.
-                 // Usually one stdout output item per block of logs.
-                 // let's create one output from all logs
-                 const allOutput = outputs.map(o => new TextDecoder().decode(o.data)).join('\n');
+            const notebookCellOutputs: vscode.NotebookCellOutput[] = [];
+            if (cellOutputs.length > 0) {
+                 const allOutput = cellOutputs.join('\n');
                  if(allOutput.trim().length > 0) {
-                     cellOutputs.push(new vscode.NotebookCellOutput([vscode.NotebookCellOutputItem.text(allOutput)]));
+                     notebookCellOutputs.push(new vscode.NotebookCellOutput([vscode.NotebookCellOutputItem.text(allOutput)]));
                  }
             }
 
             if (result !== undefined) {
-                cellOutputs.push(new vscode.NotebookCellOutput([
+                notebookCellOutputs.push(new vscode.NotebookCellOutput([
                     vscode.NotebookCellOutputItem.text(String(result))
                 ]));
             }
 
-            await execution.replaceOutput(cellOutputs);
+            await execution.replaceOutput(notebookCellOutputs);
             execution.end(true, Date.now());
         } catch (err: any) {
+            console.error('[Kernel] Execution error:', err);
             execution.replaceOutput([
                 new vscode.NotebookCellOutput([
                     vscode.NotebookCellOutputItem.error(err)

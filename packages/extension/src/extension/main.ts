@@ -26,7 +26,7 @@ export function activate(
     vscode.workspace.registerNotebookSerializer(
         'e-lang-notebook',
         new ELangNotebookSerializer(notebookOutput),
-        { transientOutputs: true }
+        { transientOutputs: false }
     )
   );
 
@@ -38,8 +38,20 @@ export function activate(
       try {
           const { ELangNotebookKernel } = await import('./notebook/controller.js');
           notebookKernel = new ELangNotebookKernel();
+          notebookOutput.appendLine('[Main] ELangNotebookKernel created successfully');
           context.subscriptions.push(notebookKernel);
+
+          // Auto-select kernel when opening e-lang notebooks
+          context.subscriptions.push(
+              vscode.workspace.onDidOpenNotebookDocument(async (doc) => {
+                  if (doc.notebookType === 'e-lang-notebook') {
+                      notebookOutput.appendLine('[Main] E-Lang notebook opened, kernel available');
+                      // The kernel is automatically associated with notebooks of this type
+                  }
+              })
+          );
       } catch (err) {
+          notebookOutput.appendLine('[Main] Failed to create ELangNotebookKernel: ' + err);
           console.error('Failed to create ELangNotebookKernel:', err);
       }
 

@@ -2,6 +2,6 @@
   {
     "kind": 2,
     "languageId": "e-lang",
-    "content": "print(10)"
+    "content": "const x = 10\n\nprint x"
   }
 ]
