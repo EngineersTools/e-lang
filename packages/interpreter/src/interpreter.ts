@@ -62,14 +62,16 @@ export class Interpreter {
         }
 
         // Execute statements
+        let lastResult: any = undefined;
         for (const stmt of program.statements) {
             // Skip declarations for now as they are handled or will be executed if they have side effects?
             // Formula declarations are already registered. 
             // Variable declarations need to be executed in order.
             if (!isFormulaDeclaration(stmt)) {
-                 this.executeStatement(stmt, this.globalContext);
+                 lastResult = this.executeStatement(stmt, this.globalContext);
             }
         }
+        return lastResult;
     }
 
     private executeStatement(stmt: Statement, context: Context): any {

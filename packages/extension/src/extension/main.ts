@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import * as path from "node:path";
-import type * as vscode from "vscode";
+import * as vscode from "vscode";
 import type {
   LanguageClientOptions,
   ServerOptions,
@@ -8,13 +8,43 @@ import type {
 import { LanguageClient, TransportKind } from "vscode-languageclient/node.js";
 import { setupLogging } from "../setupLogging.js";
 
+import { ELangNotebookSerializer } from './notebook/serializer.js';
+
 let client: LanguageClient;
+let notebookKernel: any;
 
 // This function is called when the extension is activated.
-export async function activate(
+export function activate(
   context: vscode.ExtensionContext
-): Promise<void> {
-  client = await startLanguageClient(context);
+): void {
+
+  context.subscriptions.push(
+    vscode.workspace.registerNotebookSerializer(
+        'e-lang-notebook',
+        new ELangNotebookSerializer(),
+        { transientOutputs: true }
+    )
+  );
+
+  // Initialize heavy components asynchronously to avoid blocking activation
+  (async () => {
+      // Short delay to ensure activation is truly complete and UI is responsive
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      try {
+          const { ELangNotebookKernel } = await import('./notebook/controller.js');
+          notebookKernel = new ELangNotebookKernel();
+          context.subscriptions.push(notebookKernel);
+      } catch (err) {
+          console.error('Failed to create ELangNotebookKernel:', err);
+      }
+
+      try {
+          client = await startLanguageClient(context);
+      } catch (err) {
+            console.error('Failed to create LanguageClient:', err);
+      }
+  })();
 }
 
 // This function is called when the extension is deactivated.
@@ -32,9 +62,6 @@ async function startLanguageClient(
     path.join("out", "language", "main.cjs")
   );
 
-  // The debug options for the server
-  // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging.
-  // By setting `process.env.DEBUG_BREAK` to a truthy value, the language server will wait until a debugger is attached.
   const debugOptions = {
     execArgv: [
       "--nolazy",
@@ -44,8 +71,6 @@ async function startLanguageClient(
     ],
   };
 
-  // If the extension is launched in debug mode then the debug server options are used
-  // Otherwise the run options are used
   const serverOptions: ServerOptions = {
     run: { module: serverModule, transport: TransportKind.ipc },
     debug: {
@@ -55,12 +80,10 @@ async function startLanguageClient(
     },
   };
 
-  // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     documentSelector: [{ scheme: "*", language: "e-lang" }],
   };
 
-  // Create the language client and start the client.
   const client = new LanguageClient(
     "e-lang",
     "ELang",
