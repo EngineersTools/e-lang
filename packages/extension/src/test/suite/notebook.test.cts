@@ -1,6 +1,6 @@
-import * as vscode from 'vscode';
 import * as assert from 'assert';
 import * as path from 'path';
+import * as vscode from 'vscode';
 
 suite('Notebook Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
@@ -25,9 +25,9 @@ suite('Notebook Test Suite', () => {
         console.log('[TEST] Waiting for kernel load...');
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        // Execute the first cell
-        const cell = doc.cellAt(0);
-        console.log('[TEST] Executing cell 0 with content:', cell.document.getText());
+        // Execute the first code cell (cell 1, since cell 0 is markdown)
+        const cell = doc.cellAt(1);
+        console.log('[TEST] Executing cell 1 with content:', cell.document.getText());
         
         // Find our controller
         console.log('[TEST] Finding controller...');
@@ -61,6 +61,22 @@ suite('Notebook Test Suite', () => {
         // Relaxed check: The kernel might output banners or other info.
         // We ensure our result is present.
         assert.ok(text.includes('10'), 'Output should contain "10"');
+
+        // Test: Execute the cell again to ensure outputs are recalculated
+        console.log('[TEST] Executing cell again to test reusability...');
+        await vscode.commands.executeCommand('notebook.execute');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Check outputs again
+        console.log('[TEST] Checking outputs after second execution...');
+        assert.strictEqual(cell.outputs.length, 1, 'Cell should have 1 output after second execution');
+        const output2 = cell.outputs[0];
+        assert.strictEqual(output2.items.length, 1, 'Output should have 1 item after second execution');
+        const rawText2 = new TextDecoder().decode(output2.items[0].data);
+        const text2 = rawText2.replace(/\x1B\[[0-9;]*[a-zA-Z]/g, '').trim();
+        
+        console.log('[TEST] Cleaned output text (second execution):', text2);
+        assert.ok(text2.includes('10'), 'Output should contain "10" after second execution');
 
         console.log('[TEST] Saving notebook...');
         const saved = await doc.save();

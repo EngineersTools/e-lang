@@ -1,7 +1,22 @@
 [
   {
+    "kind": 1,
+    "languageId": "markdown",
+    "content": "Simple constant declaration and print statement"
+  },
+  {
     "kind": 2,
     "languageId": "e-lang",
-    "content": "const x = 10\n\nprint x"
+    "content": "const x = 10\n\nprint x + 10"
+  },
+  {
+    "kind": 1,
+    "languageId": "markdown",
+    "content": "Units"
+  },
+  {
+    "kind": 2,
+    "languageId": "e-lang",
+    "content": "dimension Length\nunit m: Length\nunit cm = 0.01 * m\nunit km = 1000 * m\n\nconst distance = 1000 ~m\n\nprint distance"
   }
 ]

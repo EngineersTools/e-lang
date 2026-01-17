@@ -10,7 +10,6 @@ export class ELangNotebookKernel {
     private readonly _supportedLanguages = ['e-lang'];
 
     private _controller: vscode.NotebookController;
-    private _interpreters: Map<vscode.NotebookDocument, Interpreter> = new Map();
     private _services;
 
     constructor() {
@@ -60,17 +59,14 @@ export class ELangNotebookKernel {
             // Collect outputs for this cell execution
             const cellOutputs: string[] = [];
 
-            // Get or create interpreter for this notebook
-            let interpreter = this._interpreters.get(cell.notebook);
-            if (!interpreter) {
-                const customLogger = (value: any) => {
-                    const text = String(value);
-                    cellOutputs.push(text);
-                };
-                
-                interpreter = new Interpreter(customLogger);
-                this._interpreters.set(cell.notebook, interpreter);
-            }
+            // Create a fresh interpreter for each cell execution with a custom logger
+            // that captures outputs to cellOutputs
+            const customLogger = (value: any) => {
+                const text = String(value);
+                cellOutputs.push(text);
+            };
+            
+            const interpreter = new Interpreter(customLogger);
 
             // Parse the code using Langium services
             // Create a URI with .elng extension for Langium parsing

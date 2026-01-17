@@ -1,25 +1,25 @@
-dimension Length 
-unit m:Length
-unit km = 1000 * m
+// dimension Length 
+// unit m:Length
+// unit km = 1000 * m
 
-dimension Time
-unit s:Time
-unit hr = 3600 * s
+// dimension Time
+// unit s:Time
+// unit hr = 3600 * s
 
-dimension Speed = Length / Time
-unit mps = m / s
-unit kph:Speed = km / hr
+// dimension Speed = Length / Time
+// unit mps = m / s
+// unit kph:Speed = km / hr
 
-const x = 100 ~m
-const y = 1 ~km
-const z = 1 ~hr
-const vel: Speed = 10 ~kph
-const vel2 = 36 ~kph
+// const x = 100 ~m
+// const y = 1 ~km
+// const z = 1 ~hr
+// const vel: Speed = 10 ~kph
+// const vel2 = 36 ~kph
 
-print x + y
-print vel + vel2
-print vel + 5 ~mps
-print 20 ~mps - 5 ~kph
+// print x + y
+// print vel + vel2
+// print vel + 5 ~mps
+// print 20 ~mps - 5 ~kph
 
 
 // ******************************
