@@ -22,6 +22,6 @@
   {
     "kind": 2,
     "languageId": "e-lang",
-    "content": "model TestModel {\n    numberProp: number\n    textProp: text\n    booleanProp: boolean\n    lengthProp: Length\n    // lambdaProp: (number) => number\n}\n\nconst testModel: TestModel = {\n    numberProp: 1,\n    textProp: \"test\",\n    booleanProp: true,\n    lengthProp: 1 ~m,\n    // lambdaProp: (x: number) => x * 2\n}\n\nprint testModel "
+    "content": "model TestModel {\n    numberProp: number\n    textProp: text\n    booleanProp: boolean\n    // lengthProp: Length\n    // lambdaProp: (number) => number\n}\n\nconst testModel: TestModel = {\n    numberProp: 1,\n    textProp: \"test\",\n    booleanProp: true\n    // lengthProp: 1 ~m,\n    // lambdaProp: (x: number) => x * 2\n}\n\nprint testModel "
   }
 ]

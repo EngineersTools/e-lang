@@ -47,7 +47,7 @@ ParameterDeclaration:
 
 fragment ParameterBlock:
     '{'
-        (properties+=ParameterDeclaration)*
+        (parameters+=ParameterDeclaration (',' parameters+=ParameterDeclaration)*)?
     '}'
 ;
 

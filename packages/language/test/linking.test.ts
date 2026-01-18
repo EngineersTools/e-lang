@@ -66,4 +66,28 @@ describe('Linking tests', () => {
         expect(breedAccess?.member.ref).toBeDefined();
         expect(breedAccess?.member.ref?.name).toBe('breed');
     });
+
+    test('Model expression assignment', async () => {
+        const input = `
+            model Person {
+                name: text
+            }
+                
+            var p: Person = {
+                name: "John"
+            }
+
+            p.name
+        `;
+
+        expect(() => parse(input)).not.toThrow();
+        document = await parse(input);
+        const root = document.parseResult.value;
+        const memberAccess = AstUtils.streamAllContents(root).find(isMemberAccess);
+        expect(memberAccess).toBeDefined();
+        if (memberAccess) {
+            expect(memberAccess.member.ref).toBeDefined();
+            expect(memberAccess.member.ref?.name).toBe('name');
+        }
+    });
 });

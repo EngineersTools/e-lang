@@ -1,7 +1,7 @@
 {
     "name": "vscode-e-lang",
     "description": "The extension specific package",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "displayName": "e-lang",
     "type": "module",
     "engines": {
@@ -60,7 +60,7 @@
         "test-integration": "node out/src/test/runTest.cjs"
     },
     "dependencies": {
-        "e-lang-language": "0.0.1",
+        "e-lang-language": "0.1.0",
         "vscode-languageclient": "~9.0.1",
         "vscode-languageserver": "~9.0.1"
     },

@@ -1,8 +1,14 @@
-import { InferenceRuleNotApplicable } from "typir";
+import { InferenceRuleNotApplicable, isType } from "typir";
 import { ELangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 
 export function createParameterDeclarationInferenceRules(typir: ELangTypirServices) {
   typir.Inference.addInferenceRulesForAstNodes({
-    ParameterDeclaration: (node) => node.type ?? InferenceRuleNotApplicable,
+    ParameterDeclaration: (node) => {
+        if (node.type) {
+            const type = typir.Inference.inferType(node.type);
+            if (isType(type)) return type;
+        }
+        return InferenceRuleNotApplicable;
+    },
   });
 }

@@ -1,7 +1,8 @@
 import { isCustomType, isType } from "typir";
 import { isModelDeclaration, isParameterDeclaration, ModelDeclaration } from "../../../index.js";
 import { ELangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
-import { isModelType } from "./Model.type.js";
+import { getOrCreateTypeNull } from "../../typir-types/createPrimitives.js";
+import { isModelType, ModelType } from "./Model.type.js";
 
 export function createModelType(
   languageNode: ModelDeclaration,
@@ -19,21 +20,25 @@ export function createModelType(
           }
         }
 
-        throw new Error(
-          `Invalid parent type reference in model '${languageNode.name}'.`
-        );
+        return {} as ModelType;
       }),
       properties: languageNode.properties.map((property) => {
-        if (isParameterDeclaration(property)){
+        if (isParameterDeclaration(property)) {
           const propertyType = typir.Inference.inferType(property);
-          if(isType(propertyType)){
-            return propertyType;
+          if (isType(propertyType)) {
+            return {
+              name: property.name,
+              type: propertyType,
+              isOptional: property.isOptional,
+            };
           }
         }
 
-        throw new Error(
-          `Invalid property type reference in model '${languageNode.name}'.`
-        );
+        return {
+          name: property.name,
+          type: getOrCreateTypeNull(typir),
+          isOptional: property.isOptional,
+        };
       }),
     },
   })

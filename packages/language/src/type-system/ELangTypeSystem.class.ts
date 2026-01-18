@@ -13,6 +13,7 @@ import { createBinaryOperationInferenceRules } from "./inference-rules/createBin
 import { createConstantDeclarationInferenceRules } from "./inference-rules/createConstantDeclarationInferenceRules.js";
 import { createMeasurementBinaryOperationInferenceRules } from "./inference-rules/createMeasurementBinaryOperationInferenceRules.js";
 import { createMeasurementInferenceRules } from "./inference-rules/createMeasurementInferenceRules.js";
+import { createModelExpressionInferenceRules } from "./inference-rules/createModelExpressionInferenceRules.js";
 import { createMutableDeclarationInferenceRules } from "./inference-rules/createMutableDeclarationInferenceRules.js";
 import { createParameterDeclarationInferenceRules } from "./inference-rules/createParameterDeclarationInferenceRules.js";
 import { createReferenceExpressionInferenceRules } from "./inference-rules/createReferenceExpressionInferenceRules.js";
@@ -46,6 +47,7 @@ export class ELangTypeSystem
     createBinaryOperationInferenceRules(typir);
     createMeasurementBinaryOperationInferenceRules(typir);
     createParameterDeclarationInferenceRules(typir);
+    createModelExpressionInferenceRules(typir);
     createUnitDeclarationValidationRules(typir);
   }
 
