@@ -6,9 +6,7 @@ suite('Notebook Test Suite', () => {
 	vscode.window.showInformationMessage('Start all tests.');
 
 	test('Can open and execute notebook', async () => {
-        // In CJS, __dirname is available globally
-        // We want /home/cjgb/Programming/e-lang/examples/Notebook.elnb
-        const uri = vscode.Uri.file(path.resolve(__dirname, '../../../../../../examples/Notebook.elnb'));
+        const uri = vscode.Uri.file(path.resolve(__dirname, './Notebook.elnb'));
         console.log('[TEST] Opening notebook at:', uri.fsPath);
         
 		const doc = await vscode.workspace.openNotebookDocument(uri);

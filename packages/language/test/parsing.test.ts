@@ -1,4 +1,4 @@
-import { describe } from "vitest";
+import { describe, test } from "vitest";
 
 /*
 let services: ReturnType<typeof createELangServices>;
@@ -17,4 +17,5 @@ beforeAll(async () => {
 describe('Parsing tests', () => {
 
     // TODO: Add parsing tests
+    test("Empty")
 });
