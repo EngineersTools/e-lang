@@ -2926,19 +2926,11 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "feature": "property",
             "operator": "=",
             "terminal": {
-              "$type": "CrossReference",
-              "type": {
-                "$ref": "#/rules@7"
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@56"
               },
-              "terminal": {
-                "$type": "RuleCall",
-                "rule": {
-                  "$ref": "#/rules@56"
-                },
-                "arguments": []
-              },
-              "deprecatedSyntax": false,
-              "isMulti": false
+              "arguments": []
             }
           },
           {

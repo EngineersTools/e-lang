@@ -554,7 +554,7 @@ export function isModelExpression(item: unknown): item is ModelExpression {
 export interface ModelMemberAssignment extends langium.AstNode {
     readonly $container: ModelExpression;
     readonly $type: 'ModelMemberAssignment';
-    property: langium.Reference<ParameterDeclaration>;
+    property: string;
     value: Expression;
 }
 
@@ -1369,8 +1369,7 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
             name: ModelMemberAssignment.$type,
             properties: {
                 property: {
-                    name: ModelMemberAssignment.property,
-                    referenceType: ParameterDeclaration.$type
+                    name: ModelMemberAssignment.property
                 },
                 value: {
                     name: ModelMemberAssignment.value

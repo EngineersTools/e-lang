@@ -1,7 +1,7 @@
 import {
   InferenceRuleNotApplicable} from "typir";
 import { ELangTypirServices } from "../ELangAdditionalTypirServices.type.js";
-import { validateVariableDeclaration } from "../utils/validateVariableDeclaration.js";
+import { validateVariableDeclaration } from "../validation-rules/validateVariableDeclaration.js";
 
 export function createConstantDeclarationInferenceRules(
   typir: ELangTypirServices

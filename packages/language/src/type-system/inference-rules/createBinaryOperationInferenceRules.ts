@@ -31,8 +31,10 @@ export function createBinaryOperationInferenceRules(typir: ELangTypirServices) {
 
       const isCustomLeftUnit = isCustomType(leftType, "Unit");
       const isCustomRightUnit = isCustomType(rightType, "Unit");
+      const isCustomLeftModel = isCustomType(leftType, "Model");
+      const isCustomRightModel = isCustomType(rightType, "Model");
 
-      if (isCustomLeftUnit || isCustomRightUnit) {
+      if (isCustomLeftUnit || isCustomRightUnit || isCustomLeftModel || isCustomRightModel) {
         return false;
       }
 
@@ -93,8 +95,8 @@ export function createBinaryOperationInferenceRules(typir: ELangTypirServices) {
         ...binaryInferenceRule,
         validation: (node, _operatorName, _operatorType, accept, typir) =>
           typir.validation.Constraints.ensureNodeIsEquals(
-            node.left,
             node.right,
+            node.left,
             accept,
             (actual, expected) => ({
               message: `This comparison will always return '${node.operator === "equal" ? "false" : "true"
@@ -127,8 +129,8 @@ export function createBinaryOperationInferenceRules(typir: ELangTypirServices) {
       validation: [
         (node, _opName, _opType, accept, typir) =>
           typir.validation.Constraints.ensureNodeIsAssignable(
-            node.right,
             node.left,
+            node.right,
             accept,
             (actual, expected) => ({
               message: `The expression '${node.right.$cstNode?.text}' of type '${actual.name}' is not assignable to '${node.left.$cstNode?.text}' with type '${expected.name}'`,

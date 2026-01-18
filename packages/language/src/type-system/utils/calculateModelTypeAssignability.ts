@@ -1,51 +1,54 @@
-import { CustomType, Type } from "typir";
-import { ModelType, isModelType } from "../custom-types/model/Model.type.js";
-import { ELangSpecifics } from "../ELangSpecifics.interface.js";
+import { ConversionMode, CustomType, isCustomType, Type, TypeReference } from "typir";
+import { isModelType, ModelType } from "../custom-types/model/Model.type.js";
 import { ELangTypirServices } from "../ELangAdditionalTypirServices.type.js";
+import { ELangSpecifics } from "../ELangSpecifics.interface.js";
 
 export function calculateModelTypeAssignability(
   source: CustomType<ModelType, ELangSpecifics>,
   target: Type,
   typir: ELangTypirServices
-): boolean {
-  // console.log("Compare", source.properties.name, target.kind); 
-  // Commented out to avoid spam, but I need it now.
-  
+): ConversionMode {
+  const instanceModel = source.getName().includes("Instance") ? source : target;
+  const declaredModel = source.getName().includes("Instance") ? target : source;
+
   if (
-    !("properties" in target) ||
-    !isModelType(target.properties)
+    !isCustomType(instanceModel, "Model") 
+    || !isCustomType(declaredModel, "Model")
+    || !isModelType(instanceModel.properties)
+    || !isModelType(declaredModel.properties)
   ) {
-    return false;
+    return "NONE";
   }
-  
-  console.log("Checking assignability:", source.properties.name, "->", (target.properties as ModelType).name);
 
+  const instancePropertyTypes = instanceModel.properties.properties.map(p => [p.name, isTypirTypeReference(p.type) ? p.type.getType() : p.type]).filter(p => p !== undefined && p[1] !== undefined);
 
-  const targetProps = target.properties.properties;
-  const sourceProps = new Map(source.properties.properties.map(p => [p.name, p]));
+  const declaredPropertyTypes = declaredModel.properties.properties.map(p => [p.name, isTypirTypeReference(p.type) ? p.type.getType() : p.type]).filter(p => p !== undefined && p[1] !== undefined && !p[1].isOptional);
 
-  for (const targetProp of targetProps) {
-    const sourceProp = sourceProps.get(targetProp.name);
+  const declaredModelParentPropertyTypes = declaredModel.properties.parentTypes?.flatMap(p => p.properties.map(p => [p.name, isTypirTypeReference(p.type) ? p.type.getType() : p.type]).filter(p => p !== undefined && p[1] !== undefined && !p[1].isOptional));
 
-    if (!sourceProp) {
-        if (!targetProp.isOptional) {
-            console.log("Missing required property:", targetProp.name);
-            return false;
-        }
-        continue;
-    }
+  if(instancePropertyTypes.length < declaredPropertyTypes.length) {
+    return "NONE";
+  }
 
-    // Check if source property type is assignable to target property type
-    // We strive for implicit assignability here.
-    const sourcePropType = sourceProp.type;
-    const targetPropType = targetProp.type;
-
-    const assignability = typir.Assignability.isAssignable(sourcePropType as unknown as Type, targetPropType as unknown as Type);
-    if (!assignability) {
-        return false;
+  for(const declaredProperty of declaredPropertyTypes){
+    const instanceProperty = instancePropertyTypes.find(p => p[0] === declaredProperty[0]);
+    if(!instanceProperty || !typir.Assignability.isAssignable(instanceProperty[1], declaredProperty[1])) {
+      return "NONE";
     }
   }
 
-  console.log("Returning true for " + source.properties.name + " -> " + (target as any).name);
-  return true;
+  if(declaredModelParentPropertyTypes){
+    for(const declaredProperty of declaredModelParentPropertyTypes){
+      const instanceProperty = instancePropertyTypes.find(p => p[0] === declaredProperty[0]);
+      if(!instanceProperty || !typir.Assignability.isAssignable(instanceProperty[1], declaredProperty[1])) {
+        return "NONE";
+      }
+    }
+  }
+
+  return "IMPLICIT_EXPLICIT";
+}
+
+function isTypirTypeReference(type: unknown): type is TypeReference<any, ELangSpecifics> {
+  return typeof type === "object" && type !== null && "resolvedType" in type;
 }

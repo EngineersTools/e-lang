@@ -71,4 +71,17 @@ describe("Dimension Analysis", () => {
       0
     );
   });
+
+  test('Dimension equality', async () => {
+    await validateElang(
+      `
+      dimension Length
+      unit m : Length
+      const constantDistance:Length = 10 ~m
+      const constantDistance2 = 10 ~m
+      if (constantDistance == constantDistance2) { }
+      `,
+      0
+    );
+  });
 });

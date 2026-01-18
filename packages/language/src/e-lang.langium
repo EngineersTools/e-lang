@@ -231,7 +231,7 @@ NullLiteral:
 ;
 
 ModelMemberAssignment:
-    property=[ParameterDeclaration:ID] ':' value=Expression
+    property=ID ':' value=Expression
 ;
 
 ModelExpression:

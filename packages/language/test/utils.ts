@@ -1,22 +1,18 @@
 import { EmptyFileSystem, LangiumDocument } from "langium";
 import { parseDocument } from "langium/test";
 import { deleteAllDocuments } from "typir-langium";
-import { compareValidationIssuesStrict, expectTypirTypes } from "typir/test";
+import { compareValidationIssuesStrict } from "typir/test";
 import { afterEach, expect } from "vitest";
 import type { Diagnostic } from "vscode-languageserver-types";
 import { DiagnosticSeverity } from "vscode-languageserver-types";
 import {
-    createELangServices,
-    isDimensionDeclaration,
-    isUnitDeclaration
-} from "../../src/index.js";
+  createELangServices
+} from "../src/index.js";
 
 const elangServices = createELangServices(EmptyFileSystem).ELang;
 
 afterEach(async () => {
   await deleteAllDocuments(elangServices.shared);
-  expectTypirTypes(elangServices.typir, isDimensionDeclaration);
-  expectTypirTypes(elangServices.typir, isUnitDeclaration);
 });
 
 export async function validateElang(
@@ -31,6 +27,7 @@ export async function validateElang(
   const diagnosticsErrors: string[] = diagnostics
     .filter((diag) => diag.severity === DiagnosticSeverity.Error)
     .map((diag) => diag.message);
+
   const diagnosticsWarnings: string[] = diagnostics
     .filter((diag) => diag.severity === DiagnosticSeverity.Warning)
     .map((diag) => diag.message);

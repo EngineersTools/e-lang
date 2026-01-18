@@ -44,7 +44,7 @@ export class ELangScopeProvider extends DefaultScopeProvider {
 
   private scopeModelMembers(model: ModelDeclaration): Scope {
     const allMembers = getModelDeclarationChain(model).flatMap(
-      (e) => e.properties
+      (e) => e.parameters
     );
     return this.createScopeForNodes(allMembers);
   }

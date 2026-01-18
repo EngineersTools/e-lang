@@ -12,6 +12,18 @@ describe("Model Inference and Structural Typing", () => {
     );
   });
 
+  test('Assign ModelExpression to ModelDeclaration variable (Structural Typing) with parent', async () => {
+    await validateElang(
+      `
+      model Person { name: text, age: number }
+      model Employee { name: text, age: number, salary: number }
+      var p: Person = { name: "Alice", age: 30 }
+      var e: Employee = { name: "Bob", age: 40, salary: 5000 }
+      `,
+      0
+    );
+  });
+
   test("ModelExpression structural equality (Same structure)", async () => {
     await validateElang(
       `

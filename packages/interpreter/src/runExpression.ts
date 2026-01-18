@@ -3,6 +3,8 @@ import {
   isBinaryExpression,
   isBooleanLiteral,
   isCallExpression,
+  isModelExpression,
+  isNullLiteral,
   isNumberLiteral,
   isPreUnaryExpression,
   isReferenceExpression,
@@ -26,6 +28,7 @@ export async function runExpression(
     if (isNumberLiteral(expression)) return expression.value;
     if (isBooleanLiteral(expression)) return expression.value;
     if (isStringLiteral(expression)) return expression.value;
+    if (isNullLiteral(expression)) return expression.value;
 
     // Assignment
     if (isAssignment(expression)) {
@@ -74,7 +77,9 @@ export async function runExpression(
         return runMemberCall(expression, context);
     }
     
-    // For unit conversion or other main branch features, we can add them here later.
+    if(isModelExpression(expression)) {
+        return expression.members.toString();
+    }
     
     return undefined;
 }

@@ -26,6 +26,7 @@ import { ELangTypeSystem } from "./type-system/ELangTypeSystem.class.js";
 import { dimensionFactory } from "./type-system/custom-types/dimension/dimensionFactory.js";
 import { modelFactory } from "./type-system/custom-types/model/modelFactory.js";
 import { unitFactory } from "./type-system/custom-types/unit/unitFactory.js";
+import { ELangNameProvider } from "./e-lang-name-provider.js";
 
 
 export function createELangModule(shared: LangiumSharedCoreServices): Module<ELangServices, PartialLangiumServices & ELangAddedServices> {
@@ -39,6 +40,7 @@ export function createELangModule(shared: LangiumSharedCoreServices): Module<ELa
   references: {
     ScopeProvider: (services) => new ELangScopeProvider(services),
     ScopeComputation: (services) => new ELangScopeComputation(services),
+    NameProvider: () => new ELangNameProvider(),
   },
   typir: (services) =>
     createTypirLangiumServicesWithAdditionalServices<
