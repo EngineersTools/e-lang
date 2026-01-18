@@ -10,13 +10,13 @@ model TestModel {
     lambdaProp: (number) => number
 }
 
-const testModel: TestModel = {
-    numberProp: 1,
-    textProp: "test",
-    booleanProp: true,
-    lengthProp: 1 ~m,
-    lambdaProp: (x: number) => x * 2
-}
+// const testModel: TestModel = {
+//     numberProp: 1,
+//     textProp: "test",
+//     booleanProp: true,
+//     lengthProp: 1 ~m,
+//     lambdaProp: (x: number) => x * 2
+// }
 
-print testModel 
+// print testModel 
 

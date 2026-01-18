@@ -1,7 +1,9 @@
+import { Type } from "typir";
+
 export type ModelType = {
   name: string;
   parentTypes: ModelType[];
-  properties: ModelProperty[];
+  properties: Type[];
 };
 
 export type ModelProperty = {
@@ -9,3 +11,13 @@ export type ModelProperty = {
   type: string;
   isOptional: boolean;
 };
+
+export function isModelType(type: unknown): type is ModelType {
+  return (
+    typeof type === "object" &&
+    type !== null &&
+    "name" in type &&
+    "parentTypes" in type &&
+    "properties" in type
+  );
+}

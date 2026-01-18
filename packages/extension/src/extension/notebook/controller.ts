@@ -83,7 +83,7 @@ export class ELangNotebookKernel {
             // Execute
             let result: any;
             try {
-                result = interpreter.eval(document as LangiumDocument<ELangProgram>);
+                result = await interpreter.eval(document as LangiumDocument<ELangProgram>);
             } catch (e) {
                 console.error('[Kernel] Eval failed:', e);
                 throw e;

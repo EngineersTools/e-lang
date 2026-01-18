@@ -1,24 +1,40 @@
-import { isModelDeclaration, ModelDeclaration } from "../../../index.js";
+import { isCustomType, isType } from "typir";
+import { isModelDeclaration, isParameterDeclaration, ModelDeclaration } from "../../../index.js";
 import { ELangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
-import { ModelType } from "./Model.type.js";
+import { isModelType } from "./Model.type.js";
 
 export function createModelType(
   languageNode: ModelDeclaration,
   typir: ELangTypirServices
 ) {
   return typir.factory.Model.create({
+    associatedLanguageNode: languageNode,
     properties: {
       name: languageNode.name,
-      // parentTypes: languageNode.parentTypes.map((pt: ModelDeclaration) => createModelType(pt.ref, typir)),
-      // properties: languageNode.properties.map(p => typir.Inference.inferType(p)).filter(isType).filter(isModelProperty),
       parentTypes: languageNode.parentTypes.map((modelDeclararion) => {
-        if (isModelDeclaration(modelDeclararion.ref))
-          return typir.Inference.inferType(modelDeclararion.ref) as unknown as ModelType;
+        if (isModelDeclaration(modelDeclararion.ref)){
+          const parentModelType = typir.Inference.inferType(modelDeclararion.ref);
+          if(isCustomType(parentModelType, "Model") && isModelType(parentModelType.properties)){
+            return parentModelType.properties;
+          }
+        }
+
         throw new Error(
           `Invalid parent type reference in model '${languageNode.name}'.`
         );
       }),
-      properties: [],
+      properties: languageNode.properties.map((property) => {
+        if (isParameterDeclaration(property)){
+          const propertyType = typir.Inference.inferType(property);
+          if(isType(propertyType)){
+            return propertyType;
+          }
+        }
+
+        throw new Error(
+          `Invalid property type reference in model '${languageNode.name}'.`
+        );
+      }),
     },
   })
     .inferenceRule({

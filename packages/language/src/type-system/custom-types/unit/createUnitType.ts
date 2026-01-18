@@ -31,6 +31,7 @@ export function createUnitType(
   }
 
   return typir.factory.Unit.create({
+    associatedLanguageNode: languageNode,
     properties: {
       name: languageNode.name,
       vector: vector,

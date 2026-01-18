@@ -20,7 +20,7 @@ export function createReferenceExpressionInferenceRules(
         isConstantDeclaration(node.element.ref) ||
         isMutableDeclaration(node.element.ref)
       ) {
-        return node.element.ref.value ?? InferenceRuleNotApplicable;
+        return node.element.ref.value ?? node.element.ref.type ?? InferenceRuleNotApplicable;
       } else if (isBinaryExpression(node.$container)) {
         const parent = node.$container;
         if (

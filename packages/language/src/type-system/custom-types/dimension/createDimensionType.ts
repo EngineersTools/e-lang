@@ -11,6 +11,7 @@ export function createDimensionType(
   const vector = calculator.compute(languageNode);
 
     return typir.factory.Dimension.create({
+        associatedLanguageNode: languageNode,
         properties: {
             name: languageNode.name,
             vector
