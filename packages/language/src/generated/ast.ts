@@ -517,8 +517,8 @@ export interface ModelDeclaration extends TypeReference {
     readonly $type: 'ModelDeclaration';
     export: boolean;
     name: string;
+    parameters: Array<ParameterDeclaration>;
     parentTypes: Array<langium.Reference<ModelDeclaration>>;
-    properties: Array<ParameterDeclaration>;
 }
 
 export const ModelDeclaration = {
@@ -526,9 +526,9 @@ export const ModelDeclaration = {
     array: 'array',
     export: 'export',
     name: 'name',
+    parameters: 'parameters',
     parentTypes: 'parentTypes',
     primitive: 'primitive',
-    properties: 'properties',
     reference: 'reference'
 } as const;
 
@@ -554,7 +554,7 @@ export function isModelExpression(item: unknown): item is ModelExpression {
 export interface ModelMemberAssignment extends langium.AstNode {
     readonly $container: ModelExpression;
     readonly $type: 'ModelMemberAssignment';
-    property: string;
+    property: langium.Reference<ParameterDeclaration>;
     value: Expression;
 }
 
@@ -1336,6 +1336,10 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 name: {
                     name: ModelDeclaration.name
                 },
+                parameters: {
+                    name: ModelDeclaration.parameters,
+                    defaultValue: []
+                },
                 parentTypes: {
                     name: ModelDeclaration.parentTypes,
                     defaultValue: [],
@@ -1343,10 +1347,6 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 },
                 primitive: {
                     name: ModelDeclaration.primitive
-                },
-                properties: {
-                    name: ModelDeclaration.properties,
-                    defaultValue: []
                 },
                 reference: {
                     name: ModelDeclaration.reference,
@@ -1369,7 +1369,8 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
             name: ModelMemberAssignment.$type,
             properties: {
                 property: {
-                    name: ModelMemberAssignment.property
+                    name: ModelMemberAssignment.property,
+                    referenceType: ParameterDeclaration.$type
                 },
                 value: {
                     name: ModelMemberAssignment.value

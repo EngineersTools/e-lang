@@ -532,7 +532,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "elements": [
               {
                 "$type": "Assignment",
-                "feature": "properties",
+                "feature": "parameters",
                 "operator": "+=",
                 "terminal": {
                   "$type": "RuleCall",
@@ -551,7 +551,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                   },
                   {
                     "$type": "Assignment",
-                    "feature": "properties",
+                    "feature": "parameters",
                     "operator": "+=",
                     "terminal": {
                       "$type": "RuleCall",
@@ -2926,11 +2926,19 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "feature": "property",
             "operator": "=",
             "terminal": {
-              "$type": "RuleCall",
-              "rule": {
-                "$ref": "#/rules@56"
+              "$type": "CrossReference",
+              "type": {
+                "$ref": "#/rules@7"
               },
-              "arguments": []
+              "terminal": {
+                "$type": "RuleCall",
+                "rule": {
+                  "$ref": "#/rules@56"
+                },
+                "arguments": []
+              },
+              "deprecatedSyntax": false,
+              "isMulti": false
             }
           },
           {
