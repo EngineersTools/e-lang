@@ -11,12 +11,18 @@ function getTime() {
     return `[${`${padZeroes(date.getHours())}:${padZeroes(date.getMinutes())}:${padZeroes(date.getSeconds())}`}] `;
 }
 
+/**
+ * @param {number} i
+ */
 function padZeroes(i) {
     return i.toString().padStart(2, '0');
 }
 
 const plugins = [{
     name: 'watch-plugin',
+    /**
+     * @param {{ onEnd: (arg0: (result: any) => void) => void; }} build
+     */
     setup(build) {
         build.onEnd(result => {
             if (result.errors.length === 0) {
@@ -28,7 +34,7 @@ const plugins = [{
 
 const ctx = await esbuild.context({
     // Entry points for the vscode extension and the language server
-    entryPoints: ['src/extension/main.ts', 'src/language/main.ts', 'src/extension/notebook/controller.ts'],
+    entryPoints: ['src/extension/main.ts', 'src/language/main.ts', 'src/extension/notebook/e-lang-notebook-kernel.ts'],
     outdir: 'out',
     bundle: true,
     target: "ES2017",

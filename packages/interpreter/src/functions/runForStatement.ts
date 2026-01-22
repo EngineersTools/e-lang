@@ -1,5 +1,5 @@
 import { ForStatement } from "e-lang-language";
-import { RunnerContext } from "./RunnerContext.js";
+import { RunnerContext } from "../classes_and_types/Context.js";
 import { runExpression } from "./runExpression.js";
 import { runStatement, ReturnFunction } from "./runStatement.js";
 import { interruptAndCheck } from "langium";
@@ -23,7 +23,7 @@ export async function runForStatement(
 
   let current = from;
   while ((step >= 0 && current <= to) || (step < 0 && current >= to)) {
-      await interruptAndCheck(context.cancellationToken);
+      await interruptAndCheck(context.cancellationToken!);
       context.variables.set(statement, counterName, current);
       await runStatement(statement.block, context, returnFn);
       current += step;

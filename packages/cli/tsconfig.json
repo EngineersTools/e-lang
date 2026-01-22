@@ -7,10 +7,7 @@
     },
     "references": [
         {
-            "path": "../language/tsconfig.src.json"
-        },
-        {
-            "path": "../interpreter/tsconfig.json"
+            "path": "./tsconfig.src.json"
         }
     ],
     "include": [

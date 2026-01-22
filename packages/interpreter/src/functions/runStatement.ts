@@ -10,7 +10,7 @@ import {
   isMutableDeclaration,
   isReturnStatement
 } from "e-lang-language";
-import { RunnerContext } from "./RunnerContext.js";
+import { RunnerContext } from "../classes_and_types/Context.js";
 import { runExpression } from "./runExpression.js";
 import { runForStatement } from "./runForStatement.js";
 import { runVariableDeclaration } from "./runVariableDeclaration.js";
@@ -24,7 +24,7 @@ export async function runStatement(
   context: RunnerContext,
   returnFn: ReturnFunction = () => {}
 ): Promise<void> {
-    await interruptAndCheck(context.cancellationToken);
+    await interruptAndCheck(context.cancellationToken!);
 
     if (isExpression(statement)) {
         await runExpression(statement, context);
@@ -81,7 +81,7 @@ export async function runStatement(
     else if (isPrintStatement(statement)) {
         if (statement.value) { // statement.value from grammar
              const output = await serialiseExpression(statement.value, context);
-             context.log(output);
+             context.log!(output);
         }
     }
     else if (isReturnStatement(statement)) {

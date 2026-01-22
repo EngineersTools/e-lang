@@ -19,6 +19,13 @@
             "default": "./out/index.js"
         }
     },
+    "typesVersions": {
+        "*": {
+            ".": [
+                "out/index"
+            ]
+        }
+    },
     "scripts": {
         "clean": "shx rm -fr *.tsbuildinfo out",
         "build": "tsc -b tsconfig.json",

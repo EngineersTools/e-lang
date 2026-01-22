@@ -8,13 +8,14 @@ import type {
 import { LanguageClient, TransportKind } from "vscode-languageclient/node.js";
 import { setupLogging } from "../setupLogging.js";
 
-import { ELangNotebookSerializer } from './notebook/serializer.js';
+import { ELangNotebookKernel } from "./notebook/e-lang-notebook-kernel.js";
+import { ELangNotebookSerializer } from './notebook/e-lang-notebook-serialiser.js';
 
 let client: LanguageClient;
 let notebookKernel: any;
 
 // Output channel for notebook debugging
-const notebookOutput = vscode.window.createOutputChannel("E-Lang Notebook");
+const notebookOutput = vscode.window.createOutputChannel("ELang Notebook");
 
 // This function is called when the extension is activated.
 export function activate(
@@ -24,42 +25,41 @@ export function activate(
 
   context.subscriptions.push(
     vscode.workspace.registerNotebookSerializer(
-        'e-lang-notebook',
-        new ELangNotebookSerializer(notebookOutput),
-        { transientOutputs: false }
+      'e-lang-notebook',
+      new ELangNotebookSerializer(notebookOutput),
+      { transientOutputs: false }
     )
   );
 
   // Initialize heavy components asynchronously to avoid blocking activation
   (async () => {
-      // Short delay to ensure activation is truly complete and UI is responsive
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      try {
-          const { ELangNotebookKernel } = await import('./notebook/controller.js');
-          notebookKernel = new ELangNotebookKernel();
-          notebookOutput.appendLine('[Main] ELangNotebookKernel created successfully');
-          context.subscriptions.push(notebookKernel);
+    // Short delay to ensure activation is truly complete and UI is responsive
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-          // Auto-select kernel when opening e-lang notebooks
-          context.subscriptions.push(
-              vscode.workspace.onDidOpenNotebookDocument(async (doc) => {
-                  if (doc.notebookType === 'e-lang-notebook') {
-                      notebookOutput.appendLine('[Main] E-Lang notebook opened, kernel available');
-                      // The kernel is automatically associated with notebooks of this type
-                  }
-              })
-          );
-      } catch (err) {
-          notebookOutput.appendLine('[Main] Failed to create ELangNotebookKernel: ' + err);
-          console.error('Failed to create ELangNotebookKernel:', err);
-      }
+    try {
+      notebookKernel = new ELangNotebookKernel(notebookOutput);
+      notebookOutput.appendLine('[Main] ELangNotebookKernel created successfully');
+      context.subscriptions.push(notebookKernel);
 
-      try {
-          client = await startLanguageClient(context);
-      } catch (err) {
-            console.error('Failed to create LanguageClient:', err);
-      }
+      // Auto-select kernel when opening e-lang notebooks
+      context.subscriptions.push(
+        vscode.workspace.onDidOpenNotebookDocument(async (doc) => {
+          if (doc.notebookType === 'e-lang-notebook') {
+            notebookOutput.appendLine('[Main] ELang notebook opened, kernel available');
+            // The kernel is automatically associated with notebooks of this type
+          }
+        })
+      );
+    } catch (err) {
+      notebookOutput.appendLine('[Main] Failed to create ELangNotebookKernel: ' + err);
+      console.error('Failed to create ELangNotebookKernel:', err);
+    }
+
+    try {
+      client = await startLanguageClient(context);
+    } catch (err) {
+      console.error('Failed to create LanguageClient:', err);
+    }
   })();
 }
 
@@ -81,8 +81,7 @@ async function startLanguageClient(
   const debugOptions = {
     execArgv: [
       "--nolazy",
-      `--inspect${process.env.DEBUG_BREAK ? "-brk" : ""}=${
-        process.env.DEBUG_SOCKET || "6009"
+      `--inspect${process.env.DEBUG_BREAK ? "-brk" : ""}=${process.env.DEBUG_SOCKET || "6009"
       }`,
     ],
   };

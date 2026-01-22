@@ -1,9 +1,8 @@
-import { describe, test, expect, beforeAll, beforeEach } from 'vitest';
-import { Interpreter } from '../src/interpreter.js';
+import { createELangServices, ELangProgram } from 'e-lang-language';
 import { EmptyFileSystem, LangiumDocument } from 'langium';
-import { createELangServices } from 'e-lang-language';
 import { parseHelper } from 'langium/test';
-import { ELangProgram } from 'e-lang-language';
+import { beforeAll, beforeEach, describe, test } from 'vitest';
+import { Interpreter } from '../src/classes_and_types/Interpreter.js';
 
 describe('Interpreter Tests', () => {
     let services: any;
@@ -40,7 +39,7 @@ describe('Interpreter Tests', () => {
     });
 
     test('If Statement', async () => {
-         const code = `
+        const code = `
             var x = 0
             if (true) {
                 x = 1
@@ -48,12 +47,12 @@ describe('Interpreter Tests', () => {
                 x = 2
             }
          `;
-         // To verify, we might need a way to return a value or spy on print.
-         // Let's modify Interpreter.eval to return the last evaluated statement value?
-         // Or easier: assert no throw.
-         await evalCode(code);
+        // To verify, we might need a way to return a value or spy on print.
+        // Let's modify Interpreter.eval to return the last evaluated statement value?
+        // Or easier: assert no throw.
+        await evalCode(code);
     });
-    
+
     test('Recursion', async () => {
         const code = `
             formula factorial(n: number): number {

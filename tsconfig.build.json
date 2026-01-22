@@ -8,10 +8,13 @@
             "path": "./packages/language/tsconfig.test.json"
         },
         {
+            "path": "./packages/interpreter/tsconfig.json"
+        },
+        {
             "path": "./packages/cli/tsconfig.json"
         },
         {
             "path": "./packages/extension/tsconfig.json"
-        }
+        },
     ]
 }

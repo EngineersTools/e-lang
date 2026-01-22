@@ -7,7 +7,7 @@
   {
     "kind": 2,
     "languageId": "e-lang",
-    "content": "const x = 10\n\nprint x + 10"
+    "content": "const x = 10\n\nprint x + 10\nprint x"
   },
   {
     "kind": 1,
@@ -17,11 +17,11 @@
   {
     "kind": 2,
     "languageId": "e-lang",
-    "content": "dimension Length\nunit m: Length\nunit cm = 0.01 * m\nunit km = 1000 * m\n\nconst distance = 1000 ~m\n\nprint distance"
+    "content": "dimension Length\nunit m: Length\nunit cm = 0.01 * m\nunit km = 1000 * m\n\ndimension Time\nunit s: Time\nunit min = 60 * s\nunit hr = 60 * min\n\nconst distance = 1000 ~m\nconst shortDistance = 100 ~m\n\nprint distance + shortDistance"
   },
   {
     "kind": 2,
     "languageId": "e-lang",
-    "content": "model TestModel {\n    numberProp: number,\n    textProp: text,\n    booleanProp: boolean\n    // lengthProp: Length\n    // lambdaProp: (number) => number\n}\n\nmodel ChildTestModel extends TestModel {\n    childNumberProp: number,\n    childTextProp: text,\n    childBooleanProp: boolean\n    // lengthProp: Length\n    // lambdaProp: (number) => number\n}\n\nconst testModel: TestModel = {\n    numberProp: 1,\n    textProp: \"test\",\n    booleanProp: true\n    // lengthProp: 1 ~m,\n    // lambdaProp: (x: number) => x * 2\n}\n\nconst testModel2: ChildTestModel = {\n    numberProp: 2,\n    textProp: \"test2\",\n    booleanProp: false,\n    childNumberProp: 3,\n    childTextProp: \"test3\",\n    childBooleanProp: true\n}\n\nprint testModel.textProp\nprint testModel2.childBooleanProp\nprint testModel"
+    "content": "model TestModel {\n    numberProp: number,\n    textProp: text,\n    booleanProp: boolean\n    // lengthProp: Length\n    // lambdaProp: (number) => number\n}\n\nmodel ChildTestModel extends TestModel {\n    childNumberProp: number,\n    childTextProp: text,\n    childBooleanProp: boolean\n    // lengthProp: Length\n    // lambdaProp: (number) => number\n}\n\nconst testModel: TestModel = {\n    numberProp: 1,\n    textProp: \"test\",\n    booleanProp: true\n    // lengthProp: 1 ~m,\n    // lambdaProp: (x: number) => x * 2\n}\n\nconst testModel2: ChildTestModel = {\n    numberProp: 2,\n    textProp: \"test2\",\n    booleanProp: false,\n    childNumberProp: 3,\n    childTextProp: \"test3\",\n    childBooleanProp: true\n}\n\nprint x\nprint testModel.textProp\nprint testModel2.childBooleanProp\nprint testModel"
   }
 ]

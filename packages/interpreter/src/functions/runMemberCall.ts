@@ -1,8 +1,8 @@
 import { CallExpression, isFormulaDeclaration } from "e-lang-language";
-import { RunnerContext } from "./RunnerContext.js";
+import { RunnerContext } from "../classes_and_types/Context.js";
 import { runExpression } from "./runExpression.js";
 import { runStatement } from "./runStatement.js"; // Circular?
-import { AstNodeError } from "./AstNodeError.js";
+import { AstNodeError } from "../classes_and_types/AstNodeError.js";
 
 // Note: In current branch grammar it is CallExpression. In main it was ModelMemberCall?
 // I'll stick to CallExpression (current grammar) for compatibility.

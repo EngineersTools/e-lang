@@ -23,9 +23,9 @@
     },
     "dependencies": {
         "e-lang-language": "0.1.0",
+        "e-lang-interpreter": "0.1.0",
         "chalk": "~5.3.0",
-        "commander": "~11.1.0",
-        "e-lang-interpreter": "0.1.0"
+        "commander": "~11.1.0"
     },
     "volta": {
         "node": "20.19.2",

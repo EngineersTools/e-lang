@@ -8,6 +8,11 @@ import { AstNodeError } from "./AstNodeError.js";
  */
 export class Variables {
   private stack: Record<string, unknown>[] = [];
+  private parentScope?: Variables;
+
+  constructor(parentScope?: Variables) {
+    this.parentScope = parentScope;
+  }
 
   enter(): void {
     this.stack.push({});
@@ -41,6 +46,28 @@ export class Variables {
         return scope[name];
       }
     }
+
+    // Check in parent scope if exists
+    if (this.parentScope) {
+      return this.parentScope.get(node, name);
+    }
+
     throw new AstNodeError(node, `No variable '${name}' defined`);
+  }
+
+  getAll(): Record<string, unknown> {
+    const allVars: Record<string, unknown> = {};
+
+    // Collect from parent scope first
+    if (this.parentScope) {
+      Object.assign(allVars, this.parentScope.getAll());
+    }
+
+    // Collect from current stack
+    for (const scope of this.stack) {
+      Object.assign(allVars, scope);
+    }
+
+    return allVars;
   }
 }

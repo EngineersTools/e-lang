@@ -1,4 +1,4 @@
-import { Interpreter } from 'e-lang-interpreter';
+import { Interpreter, Variables } from 'e-lang-interpreter';
 import { createELangServices, ELangProgram } from 'e-lang-language';
 import { EmptyFileSystem, LangiumDocument } from 'langium';
 import * as vscode from 'vscode';
@@ -11,8 +11,11 @@ export class ELangNotebookKernel {
 
     private _controller: vscode.NotebookController;
     private _services;
+    private readonly _output: vscode.OutputChannel;
+    private _globalVariables: Variables;
 
-    constructor() {
+    constructor(output: vscode.OutputChannel) {
+        this._output = output;
         this._controller = vscode.notebooks.createNotebookController(
             this._id,
             'e-lang-notebook',
@@ -24,16 +27,21 @@ export class ELangNotebookKernel {
         this._controller.executeHandler = this._executeAll.bind(this);
 
         // Explicitly set execution priority to ensure this kernel is preferred
-        this._controller.description = 'E-Lang Notebook Kernel';
+        this._controller.description = 'ELang Notebook Kernel';
 
         // Initialize Langium services for parsing
         // We use EmptyFileSystem because we deal with independent text documents
         const services = createELangServices(EmptyFileSystem);
         this._services = services.ELang;
+
+        this._globalVariables = new Variables();
+        this._globalVariables.enter();
     }
 
     dispose(): void {
         this._controller.dispose();
+        this._output.dispose();
+        this._globalVariables.leave();
     }
 
     getController(): vscode.NotebookController {
@@ -46,7 +54,7 @@ export class ELangNotebookKernel {
         _controller: vscode.NotebookController
     ): Promise<void> {
         for (const cell of cells) {
-            await this._doExecution(cell);
+            await this._doExecution(cell)
         }
     }
 
@@ -54,6 +62,8 @@ export class ELangNotebookKernel {
         const execution = this._controller.createNotebookCellExecution(cell);
         execution.executionOrder = cell.index;
         execution.start(Date.now());
+
+        this._output.appendLine(`[Kernel] Executing cell ${cell.index}...`);
 
         try {
             // Collect outputs for this cell execution
@@ -65,48 +75,53 @@ export class ELangNotebookKernel {
                 const text = String(value);
                 cellOutputs.push(text);
             };
-            
-            const interpreter = new Interpreter(customLogger);
+
+            const interpreter = new Interpreter({ logger: customLogger }, this._globalVariables);
 
             // Parse the code using Langium services
             // Create a URI with .elng extension for Langium parsing
             const notebookUri = URI.parse(cell.document.uri.toString());
             const cellUri = notebookUri.with({ path: notebookUri.path.replace(/\.elnb$/, '') + '.elng' });
-            
+
             const document = this._services.shared.workspace.LangiumDocumentFactory.fromString<ELangProgram>(
                 cell.document.getText(),
                 cellUri
             );
-            
+
             await this._services.shared.workspace.DocumentBuilder.build([document]);
 
-            // Execute
-            let result: any;
+
             try {
-                result = await interpreter.eval(document as LangiumDocument<ELangProgram>);
+                const result = await interpreter.eval(document as LangiumDocument<ELangProgram>);
+
+                if (result) {
+                    const resultVars = Object.entries(result.getAll());
+
+                    for (const [varName, varValue] of resultVars) {
+                        this._globalVariables.push(varName, varValue);
+                    }
+                }
+
+                this._output.appendLine(`[Kernel] Cell output ${JSON.stringify(result)}.`);
+
             } catch (e) {
-                console.error('[Kernel] Eval failed:', e);
+                this._output.appendLine(`[Kernel] Eval failed: ${e}`);
                 throw e;
             }
 
             const notebookCellOutputs: vscode.NotebookCellOutput[] = [];
             if (cellOutputs.length > 0) {
-                 const allOutput = cellOutputs.join('\n');
-                 if(allOutput.trim().length > 0) {
-                     notebookCellOutputs.push(new vscode.NotebookCellOutput([vscode.NotebookCellOutputItem.text(allOutput)]));
-                 }
-            }
-
-            if (result !== undefined) {
-                notebookCellOutputs.push(new vscode.NotebookCellOutput([
-                    vscode.NotebookCellOutputItem.text(String(result))
-                ]));
+                const allOutput = cellOutputs.join('\n');
+                if (allOutput.trim().length > 0) {
+                    notebookCellOutputs.push(new vscode.NotebookCellOutput([vscode.NotebookCellOutputItem.text(allOutput)]));
+                }
             }
 
             await execution.replaceOutput(notebookCellOutputs);
+
             execution.end(true, Date.now());
         } catch (err: any) {
-            console.error('[Kernel] Execution error:', err);
+            this._output.appendLine(`[Kernel] Execution error: ${err}`);
             execution.replaceOutput([
                 new vscode.NotebookCellOutput([
                     vscode.NotebookCellOutputItem.error(err)

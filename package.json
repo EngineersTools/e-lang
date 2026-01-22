@@ -11,14 +11,10 @@
         "build:clean": "npm run clean && npm run build",
         "langium:generate": "npm run --workspace packages/language langium:generate",
         "langium:watch": "npm run --workspace packages/language langium:watch",
-        
         "build:language": "npm run --workspace packages/language build",
         "build:extension": "npm run --workspace packages/extension build",
         "build:interpreter": "npm run --workspace packages/interpreter build",
         "build:cli": "npm run --workspace packages/cli build",
-        "build:all": "npm run build:language && npm run build:extension && npm run build:interpreter && npm run build:cli",
-        
-        
         "test:language": "npm run --workspace packages/language test",
         "test:extension": "npm run --workspace packages/extension test",
         "test:interpreter": "npm run --workspace packages/interpreter test",
@@ -34,9 +30,9 @@
         "npm": "10.8.2"
     },
     "workspaces": [
-        "packages/language",
         "packages/cli",
         "packages/extension",
-        "packages/interpreter"
+        "packages/interpreter",
+        "packages/language"
     ]
 }

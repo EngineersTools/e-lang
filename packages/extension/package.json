@@ -1,5 +1,5 @@
 {
-    "name": "vscode-e-lang",
+    "name": "e-lang-extension",
     "description": "The extension specific package",
     "version": "0.1.0",
     "displayName": "e-lang",
@@ -34,7 +34,7 @@
         "notebooks": [
             {
                 "type": "e-lang-notebook",
-                "displayName": "E-Lang Notebook",
+                "displayName": "ELang Notebook",
                 "selector": [
                     {
                         "filenamePattern": "*.elnb"
@@ -60,6 +60,7 @@
         "test-integration": "node out/src/test/runTest.cjs"
     },
     "dependencies": {
+        "e-lang-interpreter": "0.1.0",
         "e-lang-language": "0.1.0",
         "vscode-languageclient": "~9.0.1",
         "vscode-languageserver": "~9.0.1"
