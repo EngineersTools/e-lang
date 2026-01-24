@@ -7,7 +7,6 @@ import {
     isModelExpression,
     isNullLiteral,
     isNumberLiteral,
-    isPreUnaryExpression,
     isReferenceExpression,
     isStringLiteral
 } from "e-lang-language";
@@ -59,20 +58,20 @@ export async function runExpression(
         return runBinaryExpression(expression, context);
     }
 
-    else if (isPreUnaryExpression(expression)) {
-        const value = await runExpression(expression.value, context);
-        const op = expression.operator;
-        switch (op) {
-            case 'not':
-                if (typeof value !== 'boolean') throw new AstNodeError(expression, "Type Error: 'not' requires boolean operand");
-                return !value;
-            case '-':
-                if (typeof value !== 'number') throw new AstNodeError(expression, "Type Error: unary '-' requires number operand");
-                return -value;
-            default:
-                throw new AstNodeError(expression, `Unknown unary operator: ${op}`);
-        }
-    }
+    // else if (isPreUnaryExpression(expression)) {
+    //     const value = await runExpression(expression.value, context);
+    //     const op = expression.operator;
+    //     switch (op) {
+    //         case 'not':
+    //             if (typeof value !== 'boolean') throw new AstNodeError(expression, "Type Error: 'not' requires boolean operand");
+    //             return !value;
+    //         case '-':
+    //             if (typeof value !== 'number') throw new AstNodeError(expression, "Type Error: unary '-' requires number operand");
+    //             return -value;
+    //         default:
+    //             throw new AstNodeError(expression, `Unknown unary operator: ${op}`);
+    //     }
+    // }
 
     else if (isReferenceExpression(expression)) {
         const decl = expression.element.ref;

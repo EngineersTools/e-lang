@@ -1,5 +1,5 @@
 import { Expression, isMeasurement, isUnitDeclaration } from "e-lang-language";
-import { RunnerContext } from "./RunnerContext.js";
+import { RunnerContext } from "../classes_and_types/Context.js";
 import { runExpression } from "./runExpression.js";
 
 export async function serialiseExpression(
