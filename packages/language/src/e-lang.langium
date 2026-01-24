@@ -159,8 +159,13 @@ DivisionExpression infers Expression:
 ;
 
 ExponentiationExpression infers Expression:
+    UnitConversionExpression
+    ({infer BinaryExpression.left=current} operator='^' right=UnitConversionExpression)*
+;
+
+UnitConversionExpression infers Expression:
     PostUnaryExpression
-    ({infer BinaryExpression.left=current} operator='^' right=PostUnaryExpression)*
+    ({infer BinaryExpression.left=current} operator='->' right=PostUnaryExpression)*
 ;
 
 PostUnaryExpression infers Expression:
@@ -186,7 +191,8 @@ NumericExpression infers Expression:
 
 PrimitiveExpression infers Expression:
     '(' Expression ')'
-    | PreUnaryExpression
+    | LogicalNotExpression
+    | NegativeNumericExpression
     | ReferenceExpression
     | StringLiteral
     | NumberLiteral
@@ -197,8 +203,12 @@ PrimitiveExpression infers Expression:
     | LambdaExpression
 ;
 
-PreUnaryExpression:
-    operator=('not' | '-') value=Expression
+LogicalNotExpression:
+    'not' value=Expression
+;
+
+NegativeNumericExpression:
+    '-' value=PostUnaryExpression
 ;
 
 ReferenceExpression:

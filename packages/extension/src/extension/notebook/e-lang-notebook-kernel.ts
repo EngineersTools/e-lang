@@ -5,9 +5,9 @@ import * as vscode from 'vscode';
 import { URI } from 'vscode-uri';
 
 export class ELangNotebookKernel {
-    private readonly _id = 'e-lang-kernel';
-    private readonly _label = 'E-Lang Kernel';
-    private readonly _supportedLanguages = ['e-lang'];
+  private readonly _id = "e-lang-kernel";
+  private readonly _label = "E-Lang Kernel";
+  private readonly _supportedLanguages = ["e-lang"];
 
     private _controller: vscode.NotebookController;
     private _services;
@@ -22,9 +22,9 @@ export class ELangNotebookKernel {
             this._label
         );
 
-        this._controller.supportedLanguages = this._supportedLanguages;
-        this._controller.supportsExecutionOrder = true;
-        this._controller.executeHandler = this._executeAll.bind(this);
+    this._controller.supportedLanguages = this._supportedLanguages;
+    this._controller.supportsExecutionOrder = true;
+    this._controller.executeHandler = this._executeAll.bind(this);
 
         // Explicitly set execution priority to ensure this kernel is preferred
         this._controller.description = 'ELang Notebook Kernel';
@@ -44,9 +44,9 @@ export class ELangNotebookKernel {
         this._globalVariables.leave();
     }
 
-    getController(): vscode.NotebookController {
-        return this._controller;
-    }
+  getController(): vscode.NotebookController {
+    return this._controller;
+  }
 
     private async _executeAll(
         cells: vscode.NotebookCell[],
@@ -65,9 +65,9 @@ export class ELangNotebookKernel {
 
         this._output.appendLine(`[Kernel] Executing cell ${cell.index}...`);
 
-        try {
-            // Collect outputs for this cell execution
-            const cellOutputs: string[] = [];
+    try {
+      // Collect outputs for this cell execution
+      const cellOutputs: string[] = [];
 
             // Create a fresh interpreter for each cell execution with a custom logger
             // that captures outputs to cellOutputs

@@ -25,6 +25,6 @@ export function calculateDimensionTypeAssignability(
     source.properties.vector as DimensionVector,
     target.properties.vector
   )
-    ? "IMPLICIT_EXPLICIT"
+    ? "EXPLICIT"
     : "NONE";
 }

@@ -15,6 +15,9 @@
         "build:extension": "npm run --workspace packages/extension build",
         "build:interpreter": "npm run --workspace packages/interpreter build",
         "build:cli": "npm run --workspace packages/cli build",
+        "build:all": "npm run build:language && npm run build:interpreter && npm run build:extension && npm run build:cli",
+        
+        
         "test:language": "npm run --workspace packages/language test",
         "test:extension": "npm run --workspace packages/extension test",
         "test:interpreter": "npm run --workspace packages/interpreter test",

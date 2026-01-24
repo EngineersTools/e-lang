@@ -1,8 +1,8 @@
 import { BinaryExpression } from "e-lang-language";
-import { AstNodeError } from "../classes_and_types/AstNodeError.js";
-import { RunnerContext } from "../classes_and_types/Context.js";
-import { isMeasurement } from "../utils/index.js";
+import { AstNodeError } from "./AstNodeError.js";
+import { RunnerContext } from "./RunnerContext.js";
 import { runExpression } from "./runExpression.js";
+import { runUnitConversionExpression } from "./runUnitConversionExpression.js";
 
 export async function runBinaryExpression(
     expr: BinaryExpression,
@@ -60,6 +60,12 @@ export async function runBinaryExpression(
         case 'or':
             if (typeof left !== 'boolean' || typeof right !== 'boolean') throw new AstNodeError(expr, "Type Error: 'or' requires boolean operands");
             return left || right;
+        case 'equal':
+            return left === right;
+        case 'not_equal':
+            return left !== right;
+        case '->':
+            return await runUnitConversionExpression(expr, context)
         case '=':
             // Assignment is handled here? In main branch runExpression might handle assignment or runBinaryExpression.
             // In current interpreter.ts it was in evaluateExpression for '=' check specifically.
