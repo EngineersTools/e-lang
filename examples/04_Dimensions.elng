@@ -1,0 +1,47 @@
+// ============================================
+// Test 04: Dimension Declarations
+// ============================================
+// Tests: dimension declarations,
+// dimension expressions, dimension operations
+
+// Base dimensions
+dimension Length
+dimension Mass
+dimension Time
+dimension Temperature
+
+// Exported dimension
+export dimension Velocity = Length / Time
+
+// Composite dimensions
+dimension Acceleration = Length / (Time ^ 2)
+dimension Force = Mass * Length / (Time ^ 2)
+dimension Energy = Mass * (Length ^ 2) / (Time ^ 2)
+
+// Complex dimension operations
+dimension Power = Energy / Time
+dimension Pressure = Force / (Length ^ 2)
+
+// Dimension with power notation
+dimension Area = Length ^ 2
+dimension Volume = Length ^ 3
+
+// Print the dimension declarations to show they're recognized
+print Length
+print Mass
+print Time
+print Velocity
+print Acceleration
+print Force
+print Energy
+print Power
+print Pressure
+print Area
+print Volume
+
+// Dimensions used in later unit definitions
+dimension Angle
+dimension Frequency = 1 / Time
+dimension ElectricCurrent
+dimension AmountOfSubstance
+print Frequency

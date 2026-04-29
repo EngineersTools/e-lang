@@ -1,0 +1,113 @@
+// ============================================
+// Test 08: Model Declarations and Expressions
+// ============================================
+// Tests: model declarations, model expressions,
+// member access, model inheritance
+
+// Simple model declaration
+model Person {
+    name: text,
+    age: number,
+    email: text
+}
+
+// Model with various types
+model Point {
+    x: number,
+    y: number,
+    z?: number
+}
+
+// Another model
+model Color {
+    r: number,
+    g: number,
+    b: number
+}
+
+// Model with optional parameters
+model Vehicle {
+    brand: text,
+    year: number,
+    owner?: text
+}
+
+// Exported model
+export model Building {
+    address: text,
+    floors: number,
+    built_year: number
+}
+
+// Model with model inheritance
+model Employee extends Person {
+    employee_id: number,
+    department: text
+}
+
+// Create model instances using model expressions
+const person1 = {
+    name: "Alice",
+    age: 30,
+    email: "alice@example.com"
+}
+
+const person2 = {
+    name: "Bob",
+    age: 25,
+    email: "bob@example.com"
+}
+
+const point1 = {
+    x: 10,
+    y: 20,
+    z: 30
+}
+
+const point2 = {
+    x: 5,
+    y: 15
+}
+
+const color = {
+    r: 255,
+    g: 128,
+    b: 64
+}
+
+const vehicle = {
+    brand: "Tesla",
+    year: 2024,
+    owner: "John"
+}
+
+const building = {
+    address: "123 Main Street",
+    floors: 10,
+    built_year: 2020
+}
+
+const employee = {
+    name: "Charlie",
+    age: 35,
+    email: "charlie@example.com",
+    employee_id: 12345,
+    department: "Engineering"
+}
+
+// Print models
+print person1
+print person2
+print point1
+print color
+print vehicle
+print building
+print employee
+
+// Member access with dot notation
+print person1.name
+print person1.age
+print point1.x
+print point1.y
+print color.r
+print employee.department

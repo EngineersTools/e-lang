@@ -1,0 +1,59 @@
+// ============================================
+// Test 06: Measurements and Unit Conversions
+// ============================================
+// Tests: measurement expressions (~),
+// unit conversion operator (->),
+// imaginary numbers (im)
+
+dimension Length
+dimension Mass
+dimension Time
+
+unit meter : Length
+unit kilometer : Length
+unit gram : Mass
+unit kilogram : Mass
+unit second : Time
+
+// Measurement expressions - attaching units to values
+const distance = 100 ~ meter
+const height = 5.5 ~ meter
+const weight = 75 ~ kilogram
+const time = 10 ~ second
+
+print distance
+print height
+print weight
+print time
+
+// Unit conversion operator
+const distance_in_km = 1000 ~ meter -> kilometer
+const weight_in_grams = 5 ~ kilogram -> gram
+const small_time = 60 ~ second -> second
+
+print distance_in_km
+print weight_in_grams
+print small_time
+
+// Measurements in expressions
+const area = (10 ~ meter) * (5 ~ meter)
+const speed = (100 ~ meter) / (10 ~ second)
+const density = (75 ~ kilogram) / (1 ~ meter)
+
+print area
+print speed
+print density
+
+// Imaginary numbers
+const imaginary_i = 1im
+const complex_val = 5im
+const five_plus_3i = 5 + 3im
+
+print imaginary_i
+print complex_val
+print five_plus_3i
+
+// Measurements with imaginary components
+const complex_measurement = (3 + 4im) ~ meter
+
+print complex_measurement

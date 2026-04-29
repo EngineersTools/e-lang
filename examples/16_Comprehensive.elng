@@ -1,0 +1,296 @@
+// ============================================
+// Test 16: Comprehensive Integration Test
+// ============================================
+// Complete program using all major features
+// in realistic engineering scenario
+
+domain engineering_calculations
+
+// Import capability (placeholder)
+// import "external_lib"
+
+// ========== Dimensions and Units ==========
+dimension Length
+dimension Mass
+dimension Time
+dimension Temperature
+dimension Velocity = Length / Time
+dimension Acceleration = Length / (Time ^ 2)
+dimension Force = Mass * Length / (Time ^ 2)
+dimension Energy = Force * Length
+
+unit meter : Length
+unit kilometer : Length
+unit gram : Mass
+unit kilogram : Mass
+unit second : Time
+unit newton : Force
+unit joule : Energy
+
+// Derived units
+unit kilometer_per_hour = kilometer / second
+unit meter_per_second = meter / second
+unit acceleration_unit = meter / (second ^ 2)
+
+print "=== Units Defined ==="
+print meter
+print kilogram
+print newton
+print joule
+
+// ========== Models for Physics ==========
+model Vector3D {
+    x: number,
+    y: number,
+    z: number
+}
+
+model ForceVector extends Vector3D {
+    magnitude: number
+}
+
+model PhysicsObject {
+    name: text,
+    mass: number,
+    velocity: Vector3D,
+    position: Vector3D
+}
+
+print "=== Models Defined ==="
+
+// ========== Constants and Variables ==========
+export const GRAVITY = 9.8
+export const PI = 3.14159
+const SPEED_OF_LIGHT = 299792458
+
+var simulation_running = true
+var time_elapsed = 0
+
+print "=== Constants ==="
+print GRAVITY
+print PI
+print SPEED_OF_LIGHT
+
+// ========== Physics Formulas ==========
+
+export formula calculate_force(mass: number, acceleration: number) : number {
+    return mass * acceleration
+}
+
+export formula calculate_kinetic_energy(mass: number, velocity: number) : number {
+    return 0.5 * mass * (velocity ^ 2)
+}
+
+export formula calculate_distance(initial_velocity: number, acceleration: number, time: number) : number {
+    return initial_velocity * time + 0.5 * acceleration * (time ^ 2)
+}
+
+export formula calculate_final_velocity(initial_velocity: number, acceleration: number, time: number) : number {
+    return initial_velocity + acceleration * time
+}
+
+formula vector_magnitude(v: Vector3D) : number {
+    const x_squared = v.x ^ 2
+    const y_squared = v.y ^ 2
+    const z_squared = v.z ^ 2
+    return x_squared + y_squared + z_squared
+}
+
+formula is_valid_mass(m: number) : boolean {
+    return m > 0 and m < 10000
+}
+
+formula is_valid_velocity(v: number) : boolean {
+    return v >= 0 and v < SPEED_OF_LIGHT
+}
+
+print "=== Formulas Defined ==="
+
+// ========== Calculations and Tests ==========
+
+print "\n=== Force Calculations ==="
+const mass_kg = 50
+const acceleration_ms2 = 2
+const force_n = calculate_force(mass_kg, acceleration_ms2)
+print force_n
+
+print "\n=== Kinetic Energy Calculations ==="
+const obj_mass = 100
+const obj_velocity = 10
+const kinetic_energy = calculate_kinetic_energy(obj_mass, obj_velocity)
+print kinetic_energy
+
+print "\n=== Distance Calculations ==="
+const initial_vel = 5
+const accel = 2
+const time_s = 10
+const distance = calculate_distance(initial_vel, accel, time_s)
+print distance
+
+print "\n=== Velocity Calculations ==="
+const final_vel = calculate_final_velocity(initial_vel, accel, time_s)
+print final_vel
+
+// ========== Measurements ==========
+
+print "\n=== Measurements with Units ==="
+const distance_m = 100 ~ meter
+const distance_km = 10 ~ kilometer
+print distance_m
+print distance_km
+
+const speed_ms = (100 ~ meter) / (10 ~ second)
+print speed_ms
+
+// ========== Control Flow with Real Data ==========
+
+print "\n=== Control Flow Tests ==="
+const object_mass = 75
+if (is_valid_mass(object_mass)) {
+    print "Mass is valid"
+} else {
+    print "Mass is invalid"
+}
+
+const object_velocity = 50
+if (is_valid_velocity(object_velocity)) {
+    if (object_velocity > 20) {
+        print "High speed"
+    } else {
+        print "Low speed"
+    }
+}
+
+// ========== Match Statements ==========
+
+print "\n=== Match Statement Tests ==="
+const simulation_state = 1
+match simulation_state {
+    0 => print "State: Idle"
+    1 => print "State: Running"
+    2 => print "State: Paused"
+    default => print "State: Unknown"
+}
+
+const object_type = "rigid_body"
+match object_type {
+    "rigid_body" => print "Object Type: Rigid Body"
+    "soft_body" => print "Object Type: Soft Body"
+    "fluid" => print "Object Type: Fluid"
+    default => print "Object Type: Unknown"
+}
+
+// ========== Loops and Iterations ==========
+
+print "\n=== Loop Tests ==="
+print "Time steps:"
+for (var t: number = 0 from 0 to 10 step 2) {
+    const distance_at_t = calculate_distance(initial_vel, accel, t)
+    print distance_at_t
+}
+
+// ========== Collections ==========
+
+print "\n=== Collection Tests ==="
+const positions = [
+    { x: 0, y: 0, z: 0 },
+    { x: 10, y: 20, z: 30 },
+    { x: 50, y: 60, z: 70 }
+]
+
+print positions
+print positions[0]
+print positions[1].x
+print positions[2].y
+
+const masses = [10, 20, 30, 40, 50]
+print masses
+print masses[2]
+
+const velocities = [1.5, 2.5, 3.5]
+print velocities
+
+// ========== Lambda Functions ==========
+
+print "\n=== Lambda Tests ==="
+const square = (x: number) => x ^ 2
+print square(5)
+
+const add_numbers = (a: number, b: number) => a + b
+print add_numbers(10, 20)
+
+const create_multiplier = (factor: number) => {
+    return (x: number) => x * factor
+}
+
+const times_ten = create_multiplier(10)
+const times_hundred = create_multiplier(100)
+
+print times_ten(5)
+print times_hundred(3)
+
+// ========== Complex Data Structures ==========
+
+print "\n=== Complex Objects ==="
+const physics_obj = {
+    name: "Test Ball",
+    mass: 10,
+    velocity: { x: 5, y: 10, z: 0 },
+    position: { x: 0, y: 0, z: 0 }
+}
+
+print physics_obj
+print physics_obj.name
+print physics_obj.mass
+print physics_obj.velocity
+print physics_obj.velocity.x
+print physics_obj.position
+
+// ========== Logical Operations ==========
+
+print "\n=== Logical Operations ==="
+const condition1 = true and false
+print condition1
+
+const condition2 = true or false
+print condition2
+
+const condition3 = not false
+print condition3
+
+const combined = (mass_kg > 0) and (object_velocity < 100) and (time_s > 0)
+print combined
+
+// ========== Type Annotations ==========
+
+formula typed_formula(
+    masses: number list,
+    velocities: number list
+) : number {
+    return 0
+}
+
+const result = typed_formula([10, 20], [5, 10])
+print result
+
+// ========== Null Handling ==========
+
+print "\n=== Null Handling ==="
+const maybe_null = null
+if (maybe_null == null) {
+    print "Value is null"
+}
+
+// ========== Export Test ==========
+
+export formula public_calculation(x: number) : number {
+    return x * 2 + 10
+}
+
+print "\n=== Final Results ==="
+print public_calculation(25)
+
+// ========== Final Summary ==========
+
+print "\n=== Test Complete ==="
+print "All language features tested successfully!"

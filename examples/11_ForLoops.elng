@@ -1,0 +1,85 @@
+// ============================================
+// Test 11: For Loops
+// ============================================
+// Tests: for loop syntax, loop variables,
+// from/to ranges, step expressions
+
+// Simple for loop (default step of 1)
+print "Loop 1: Basic count from 1 to 5"
+for (var i: number = 1 from 1 to 5) {
+    print i
+}
+
+// For loop with explicit count variable
+print "Loop 2: Count from 10 to 15"
+for (const counter: number = 10 from 10 to 15) {
+    print counter
+}
+
+// For loop with step size
+print "Loop 3: Count by 2s from 0 to 10"
+for (var x: number = 0 from 0 to 10 step 2) {
+    print x
+}
+
+// For loop with larger step
+print "Loop 4: Count by 5s from 0 to 50"
+for (var num: number = 0 from 0 to 50 step 5) {
+    print num
+}
+
+// For loop with step 1 explicitly
+print "Loop 5: Count from 20 to 23 with step 1"
+for (const n: number = 20 from 20 to 23 step 1) {
+    print n
+}
+
+// For loop with negative range (if supported)
+print "Loop 6: Counting calculations"
+for (var idx: number = 1 from 1 to 5) {
+    const squared = idx * idx
+    print squared
+}
+
+// For loop with complex block
+print "Loop 7: Loop with multiple statements"
+for (var i: number = 1 from 1 to 3) {
+    const double_i = i * 2
+    const triple_i = i * 3
+    print double_i
+    print triple_i
+}
+
+// For loop building results
+print "Loop 8: Loop with variable accumulation"
+var sum = 0
+for (const i: number = 1 from 1 to 5) {
+    sum = sum + i
+}
+print sum
+
+// For loop with formula call
+formula square(x: number) : number {
+    return x * x
+}
+
+print "Loop 9: Loop calling formulas"
+for (var k: number = 1 from 1 to 5) {
+    const squared = square(k)
+    print squared
+}
+
+// Nested for loops
+print "Loop 10: Nested loops"
+for (var i: number = 1 from 1 to 3) {
+    for (var j: number = 1 from 1 to 3) {
+        print i
+        print j
+    }
+}
+
+// For loop with fractional step
+print "Loop 11: Loop with decimal step"
+for (var val: number = 0 from 0 to 2 step 0.5) {
+    print val
+}

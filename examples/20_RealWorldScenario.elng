@@ -1,0 +1,224 @@
+// ============================================
+// Test 20: Real-World Engineering Scenarios
+// ============================================
+// Practical examples combining multiple features
+// for realistic engineering use cases
+
+domain structural_engineering
+
+// Units and dimensions for structural analysis
+dimension Length
+dimension Force
+dimension Pressure
+dimension Moment = Force * Length
+
+unit meter : Length
+unit millimeter : Length
+unit newton : Force
+unit kilonewton = 1000 * newton
+unit pascal : Pressure
+unit megapascal = 1000000 * pascal
+unit newton_meter : Moment
+
+// Export common constants
+export const PI = 3.14159265
+export const GRAVITY = 9.81
+export const STEEL_DENSITY = 7850
+
+// Model for beam properties
+model Material {
+    name: text,
+    density: number,
+    youngs_modulus: number,
+    yield_strength: number
+}
+
+// Model for cross-section
+model CrossSection {
+    area: number,
+    inertia_moment: number,
+    centroid: number
+}
+
+// Model for beam
+model Beam {
+    id: number,
+    material: Material,
+    section: CrossSection,
+    length: number,
+    support_left: text,
+    support_right: text
+}
+
+// Formula for bending stress
+export formula bending_stress(moment: number, inertia: number, distance: number) : number {
+    if (inertia == 0) {
+        return 0
+    }
+    return (moment * distance) / inertia
+}
+
+// Formula for deflection
+export formula max_deflection(load: number, length: number, modulus: number, inertia: number) : number {
+    if (inertia == 0 or modulus == 0) {
+        return 0
+    }
+    const l_squared = length ^ 2
+    return (load * (l_squared ^ 2)) / (48 * modulus * inertia)
+}
+
+// Formula for shear force
+export formula max_shear(total_load: number) : number {
+    return total_load / 2
+}
+
+// Formula for beam weight
+formula beam_weight(length: number, area: number, density: number) : number {
+    return length * area * density / 1000000
+}
+
+// Material database
+const steel = {
+    name: "Steel S355",
+    density: 7850,
+    youngs_modulus: 210000,
+    yield_strength: 355
+}
+
+const aluminum = {
+    name: "Aluminum 6061",
+    density: 2700,
+    youngs_modulus: 69000,
+    yield_strength: 276
+}
+
+const concrete = {
+    name: "Concrete C30",
+    density: 2400,
+    youngs_modulus: 30000,
+    yield_strength: 30
+}
+
+print "=== Materials ==="
+print steel.name
+print aluminum.name
+print concrete.name
+
+// Cross-section definitions
+const ipe_200_section = {
+    area: 2850,
+    inertia_moment: 1943000,
+    centroid: 100
+}
+
+const ipe_300_section = {
+    area: 4260,
+    inertia_moment: 8356000,
+    centroid: 150
+}
+
+// Create beam instances
+const beam1 = {
+    id: 1,
+    material: steel,
+    section: ipe_200_section,
+    length: 5000,
+    support_left: "fixed",
+    support_right: "pin"
+}
+
+const beam2 = {
+    id: 2,
+    material: steel,
+    section: ipe_300_section,
+    length: 8000,
+    support_left: "pin",
+    support_right: "pin"
+}
+
+print "=== Beams ==="
+print beam1
+print beam2
+
+// Analysis calculations
+print "\n=== Structural Analysis ==="
+
+// Beam 1 analysis
+const load1 = 50000
+const moment1 = load1 * (beam1.length / 4)
+const stress1 = bending_stress(moment1, beam1.section.inertia_moment, beam1.section.centroid)
+const deflection1 = max_deflection(load1, beam1.length, beam1.material.youngs_modulus, beam1.section.inertia_moment)
+const shear1 = max_shear(load1)
+const weight1 = beam_weight(beam1.length, beam1.section.area, beam1.material.density)
+
+print "Beam 1 - Load: 50 kN"
+print stress1
+print deflection1
+print shear1
+print weight1
+
+// Beam 2 analysis
+const load2 = 100000
+const moment2 = load2 * (beam2.length / 4)
+const stress2 = bending_stress(moment2, beam2.section.inertia_moment, beam2.section.centroid)
+const deflection2 = max_deflection(load2, beam2.length, beam2.material.youngs_modulus, beam2.section.inertia_moment)
+const shear2 = max_shear(load2)
+const weight2 = beam_weight(beam2.length, beam2.section.area, beam2.material.density)
+
+print "Beam 2 - Load: 100 kN"
+print stress2
+print deflection2
+print shear2
+print weight2
+
+// Safety factor calculation
+formula safety_factor(actual_stress: number, yield_stress: number) : number {
+    if (actual_stress == 0) {
+        return 999
+    }
+    return yield_stress / actual_stress
+}
+
+const sf1 = safety_factor(stress1, beam1.material.yield_strength)
+const sf2 = safety_factor(stress2, beam2.material.yield_strength)
+
+print "\n=== Safety Factors ==="
+print sf1
+print sf2
+
+// Check safety
+print "\n=== Safety Check ==="
+if (sf1 > 1.5) {
+    print "Beam 1: SAFE"
+} else {
+    print "Beam 1: UNSAFE"
+}
+
+if (sf2 > 1.5) {
+    print "Beam 2: SAFE"
+} else {
+    print "Beam 2: UNSAFE"
+}
+
+// Analysis loop for multiple load cases
+print "\n=== Load Case Analysis ==="
+for (var load_case: number = 10000 from 10000 to 50000 step 10000) {
+    const M = load_case * (beam1.length / 4)
+    const stress = bending_stress(M, beam1.section.inertia_moment, beam1.section.centroid)
+    const sf = safety_factor(stress, beam1.material.yield_strength)
+    print load_case
+    print stress
+    print sf
+}
+
+// Measurements with units
+print "\n=== With Unit Measurements ==="
+const beam_length = 5000 ~ millimeter
+const applied_load = 50 ~ kilonewton
+const stress_value = 250 ~ megapascal
+
+print beam_length
+print applied_load
+print stress_value
+
+print "\n=== Analysis Complete ==="

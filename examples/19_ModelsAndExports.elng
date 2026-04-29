@@ -1,0 +1,192 @@
+// ============================================
+// Test 19: Models with Inheritance and Exports
+// ============================================
+// Tests: model inheritance, exported models,
+// exported formulas, exported variables
+
+// Base model
+model Animal {
+    name: text,
+    age: number
+}
+
+// Model extending another model
+model Dog extends Animal {
+    breed: text,
+    trained: boolean
+}
+
+// Multiple inheritance simulation (multiple extends)
+model Vehicle {
+    brand: text,
+    year: number
+}
+
+model Engine {
+    power: number,
+    fuel_type: text
+}
+
+// Model extending multiple models
+model Car extends Vehicle, Engine {
+    doors: number,
+    color: text
+}
+
+// Deep inheritance
+model Mammal extends Animal {
+    warm_blooded: boolean,
+    fur_color: text
+}
+
+model Dog2 extends Mammal {
+    breed: text,
+    trained: boolean
+}
+
+// Exported base model
+export model Product {
+    id: number,
+    name: text,
+    price: number
+}
+
+// Exported model extending another model
+export model DigitalProduct extends Product {
+    download_link: text,
+    file_size: number
+}
+
+// Create instances of inherited models
+const dog = {
+    name: "Buddy",
+    age: 5,
+    breed: "Golden Retriever",
+    trained: true
+}
+
+print dog
+print dog.name
+print dog.breed
+print dog.trained
+
+// Create car instance
+const car = {
+    brand: "Tesla",
+    year: 2024,
+    power: 500,
+    fuel_type: "Electric",
+    doors: 4,
+    color: "Red"
+}
+
+print car
+print car.brand
+print car.power
+print car.doors
+
+// Create mammal instance
+const mammal_dog = {
+    name: "Max",
+    age: 3,
+    warm_blooded: true,
+    fur_color: "Brown",
+    breed: "Labrador",
+    trained: false
+}
+
+print mammal_dog
+
+// Create product instance
+const product = {
+    id: 101,
+    name: "Laptop",
+    price: 999.99
+}
+
+print product
+
+// Create digital product
+const digital_prod = {
+    id: 201,
+    name: "eBook",
+    price: 9.99,
+    download_link: "https://example.com/ebook",
+    file_size: 2.5
+}
+
+print digital_prod
+print digital_prod.price
+print digital_prod.download_link
+
+// Exported formula with inherited model
+export formula describe_product(p: Product) : text {
+    return p.name
+}
+
+print describe_product(product)
+
+// Exported formula with digital product
+export formula describe_digital(dp: DigitalProduct) : text {
+    return dp.name
+}
+
+print describe_digital(digital_prod)
+
+// Exported constants
+export const MAX_DOGS = 10
+export const SYSTEM_VERSION = "2.0"
+export const API_URL = "https://api.example.com"
+
+print MAX_DOGS
+print SYSTEM_VERSION
+print API_URL
+
+// Exported variables
+export var active_sessions = 0
+export var total_users = 100
+
+print active_sessions
+print total_users
+
+// Modify exported variables
+active_sessions = 5
+total_users = 150
+print active_sessions
+print total_users
+
+// Export formula that works with inherited models
+export formula get_animal_age(a: Animal) : number {
+    return a.age
+}
+
+print get_animal_age(dog)
+
+// Formula working with multiple inheritance chain
+formula display_mammal(m: Mammal) : text {
+    return m.name
+}
+
+print display_mammal(mammal_dog)
+
+// Complex model with exported status
+export model Configuration {
+    app_name: text,
+    version: text,
+    settings: {
+        debug: boolean,
+        timeout: number
+    }
+}
+
+const config = {
+    app_name: "MyApp",
+    version: "1.0.0",
+    settings: {
+        debug: true,
+        timeout: 30
+    }
+}
+
+print config
+print config.settings

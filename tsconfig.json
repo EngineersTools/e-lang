@@ -4,7 +4,7 @@
     "module": "NodeNext",
     "moduleResolution": "nodenext",
     "lib": [
-        "ES2022"
+        "ES2022", "DOM"
     ],
     "sourceMap": true,
     "strict": true,
@@ -14,7 +14,10 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
-    "composite": true
+    "composite": true,
+    "types": [
+      "node"
+    ]
   },
   "include": [
      "**/src/**/*",

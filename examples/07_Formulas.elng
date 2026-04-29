@@ -1,0 +1,78 @@
+// ============================================
+// Test 07: Formula (Function) Declarations
+// ============================================
+// Tests: formula declarations, parameters,
+// return types, formula invocation
+
+// Simple formula with no parameters
+formula greet() : text {
+    return "Hello from formula!"
+}
+
+// Formula with single parameter
+formula double(x: number) : number {
+    return x * 2
+}
+
+// Formula with multiple parameters
+formula add(a: number, b: number) : number {
+    return a + b
+}
+
+// Formula with return type annotation
+formula multiply(x: number, y: number) : number {
+    const result = x * y
+    return result
+}
+
+// Formula without explicit return type
+formula subtract(a: number, b: number) {
+    return a - b
+}
+
+// Formula with type annotations on parameters
+formula power(base: number, exponent: number) : number {
+    return base ^ exponent
+}
+
+// Exported formula
+export formula describe(name: text, age: number) : text {
+    const msg = name
+    return msg
+}
+
+// Formula with optional parameters
+formula optional_param(x: number, y?: number) : number {
+    const val = x + 5
+    return val
+}
+
+// Formula with conditional logic
+formula absolute(value: number) : number {
+    if (value >= 0) { return value }
+    else { return -value }
+}
+
+// Formula with local variables
+formula compute(a: number, b: number) : number {
+    var sum = a + b
+    var product = a * b
+    return sum + product
+}
+
+// Formula invocations
+print greet()
+print double(5)
+print add(3, 7)
+print multiply(4, 5)
+print subtract(10, 3)
+print power(2, 8)
+print describe("Alice", 25)
+print absolute(-15)
+print compute(2, 3)
+
+// Store formula results in variables
+const greeting_result = greet()
+const double_result = double(10)
+print greeting_result
+print double_result

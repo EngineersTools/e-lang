@@ -1,0 +1,72 @@
+// ============================================
+// Test 03: Logical and Comparison Operations
+// ============================================
+// Tests: and, or, not operators,
+// comparison operators, boolean logic
+
+const TRUE_VAL = true
+const FALSE_VAL = false
+
+// Boolean literals
+print true
+print false
+
+// Logical AND
+print true and true
+print true and false
+print false and false
+
+// Logical OR
+print true or false
+print false or false
+print true or true
+
+// Logical NOT
+print not true
+print not false
+
+// Comparison operators: <
+print 5 < 10
+print 10 < 5
+print 5 < 5
+
+// Comparison operators: <=
+print 5 <= 10
+print 10 <= 10
+print 10 <= 5
+
+// Comparison operators: >
+print 10 > 5
+print 5 > 10
+print 5 > 5
+
+// Comparison operators: >=
+print 10 >= 5
+print 5 >= 5
+print 5 >= 10
+
+// Comparison operators: == and equal
+print 5 == 5
+print 5 equal 5
+print 5 == 10
+
+// Comparison operators: != and not_equal
+print 5 != 10
+print 5 not_equal 10
+print 5 != 5
+
+// Complex logical expressions
+print (5 > 3) and (10 < 20)
+print (5 > 10) or (3 < 10)
+print not (5 == 10)
+
+// Comparison with variables
+var x = 15
+var y = 25
+print x < y
+print x > y
+print x == y
+
+// Chained comparisons
+print (x < y) and (y > 10) and (x > 0)
+print (x == 15) or (y == 30) or (x == 25)

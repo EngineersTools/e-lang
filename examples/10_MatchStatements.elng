@@ -1,0 +1,98 @@
+// ============================================
+// Test 10: Match Statements (Pattern Matching)
+// ============================================
+// Tests: match statements, multiple options,
+// default case, block vs expression returns
+
+// Simple match with numeric values
+const day = 3
+match day {
+    1 => print "Monday"
+    2 => print "Tuesday"
+    3 => print "Wednesday"
+    4 => print "Thursday"
+    5 => print "Friday"
+    default => print "Weekend"
+}
+
+// Match with comparisons and blocks
+const status = 200
+match status {
+    200 => {
+        print "Success"
+        print "Request completed"
+    }
+    404 => {
+        print "Not found"
+    }
+    500 => {
+        print "Server error"
+    }
+    default => {
+        print "Unknown status"
+    }
+}
+
+// Match with text values
+const color = "red"
+match color {
+    "red" => print "Color is red"
+    "green" => print "Color is green"
+    "blue" => print "Color is blue"
+    default => print "Unknown color"
+}
+
+// Match with complex conditions
+const temperature = 25
+match temperature {
+    10 => print "Cold"
+    20 => print "Cool"
+    25 => print "Comfortable"
+    30 => print "Warm"
+    default => print "Extreme"
+}
+
+// Match with boolean values
+const isActive = true
+match isActive {
+    true => print "System is active"
+    false => print "System is inactive"
+}
+
+// Match returning values to variables
+const category = 5
+const result = match category {
+    1 => "one"
+    2 => "two"
+    3 => "three"
+    default => "other"
+}
+print result
+
+// Match with blocks returning values
+const priority = 2
+const priority_level = match priority {
+    1 => { print "High priority" return "HIGH" }
+    2 => { print "Medium priority" return "MEDIUM" }
+    3 => { print "Low priority" return "LOW" }
+    default => { print "No priority" return "NONE" }
+}
+print priority_level
+
+// Nested match statements
+const input = 15
+match input {
+    10 => {
+        match input {
+            5 => print "Inner: 5"
+            10 => print "Inner: 10"
+        }
+    }
+    15 => {
+        print "Matched 15"
+        match input {
+            15 => print "Inner: 15"
+        }
+    }
+    default => print "Other value"
+}
