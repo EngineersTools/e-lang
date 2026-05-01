@@ -224,7 +224,7 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               },
               "arguments": []
             },
-            "cardinality": "?"
+            "cardinality": "*"
           },
           {
             "$type": "Assignment",
@@ -1017,6 +1017,47 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
               {
                 "$type": "Keyword",
                 "value": ")"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Action",
+                "inferredType": {
+                  "$type": "InferredType",
+                  "name": "DimensionLiteral"
+                }
+              },
+              {
+                "$type": "Alternatives",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "value",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@61"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "value",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@60"
+                      },
+                      "arguments": []
+                    }
+                  }
+                ]
               }
             ]
           }

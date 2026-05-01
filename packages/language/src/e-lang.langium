@@ -29,7 +29,7 @@ Statement:
 ;
 
 StatementBlock:
-    '{' (statements+=Statement*)? returnValue=ReturnStatement? '}'
+    '{' statements+=Statement* returnValue=ReturnStatement? '}'
 ;
 
 ReturnStatement:
@@ -69,7 +69,8 @@ DimensionExpression:
 
 DimensionTerm infers DimensionExpression:
     {infer DimensionReference} ref=[DimensionDeclaration:ID] ('^' power=INT)? |
-    '(' DimensionExpression ')'
+    '(' DimensionExpression ')' |
+    {infer DimensionLiteral} (value=INT | value=DEC)
 ;
 
 UnitDeclaration:

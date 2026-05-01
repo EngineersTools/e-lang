@@ -176,7 +176,7 @@ export function isDimensionDeclaration(item: unknown): item is DimensionDeclarat
     return reflection.isInstance(item, DimensionDeclaration.$type);
 }
 
-export type DimensionExpression = DimensionOperation | DimensionReference;
+export type DimensionExpression = DimensionLiteral | DimensionOperation | DimensionReference;
 
 export const DimensionExpression = {
     $type: 'DimensionExpression'
@@ -184,6 +184,21 @@ export const DimensionExpression = {
 
 export function isDimensionExpression(item: unknown): item is DimensionExpression {
     return reflection.isInstance(item, DimensionExpression.$type);
+}
+
+export interface DimensionLiteral extends langium.AstNode {
+    readonly $container: DimensionDeclaration | DimensionOperation;
+    readonly $type: 'DimensionLiteral';
+    value: number;
+}
+
+export const DimensionLiteral = {
+    $type: 'DimensionLiteral',
+    value: 'value'
+} as const;
+
+export function isDimensionLiteral(item: unknown): item is DimensionLiteral {
+    return reflection.isInstance(item, DimensionLiteral.$type);
 }
 
 export interface DimensionOperation extends langium.AstNode {
@@ -934,6 +949,7 @@ export type ELangAstType = {
     ConstantDeclaration: ConstantDeclaration
     DimensionDeclaration: DimensionDeclaration
     DimensionExpression: DimensionExpression
+    DimensionLiteral: DimensionLiteral
     DimensionOperation: DimensionOperation
     DimensionReference: DimensionReference
     Domain: Domain
@@ -1064,6 +1080,15 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
             properties: {
             },
             superTypes: []
+        },
+        DimensionLiteral: {
+            name: DimensionLiteral.$type,
+            properties: {
+                value: {
+                    name: DimensionLiteral.value
+                }
+            },
+            superTypes: [DimensionExpression.$type]
         },
         DimensionOperation: {
             name: DimensionOperation.$type,
