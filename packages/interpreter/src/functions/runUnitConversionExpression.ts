@@ -1,9 +1,10 @@
 import {
   BinaryExpression,
-  isMeasurement,
   isReferenceExpression,
   isUnitDeclaration,
+  ConversionCalculator
 } from "e-lang-language";
+import { AstNodeError } from "../classes_and_types/AstNodeError.js";
 import { RunnerContext } from "../classes_and_types/Context.js";
 import { runExpression } from "./runExpression.js";
 
@@ -12,20 +13,20 @@ export async function runUnitConversionExpression(
   context: RunnerContext,
 ): Promise<any> {
   if (
-    !isMeasurement(expr.left) ||
     !isReferenceExpression(expr.right) ||
     !isUnitDeclaration(expr.right.element.ref)
   ) {
-    throw new Error("Invalid unit conversion expression");
+    throw new AstNodeError(expr, "Invalid unit conversion expression: Right hand side must be a unit reference");
   }
 
-  // Left should be a measurement value
   const left = await runExpression(expr.left, context);
+  if (typeof left !== "number") {
+    throw new AstNodeError(expr, "Type Error: Unit conversion requires a number on the left hand side");
+  }
 
-  // Right should be a unit reference
   const right = expr.right.element.ref;
+  const calculator = new ConversionCalculator();
+  const factor = calculator.compute(right);
 
-  // Perform unit conversion logic here
-  // This is a placeholder for the actual conversion logic
-  return { value: left.value, unit: right.name  };
+  return left / factor;
 }

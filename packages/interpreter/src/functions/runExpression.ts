@@ -8,7 +8,11 @@ import {
     isNullLiteral,
     isNumberLiteral,
     isReferenceExpression,
-    isStringLiteral
+    isStringLiteral,
+    isUnitDeclaration,
+    isLogicalNotExpression,
+    isNegativeNumericExpression,
+    ConversionCalculator
 } from "e-lang-language";
 import { AstNodeError } from "../classes_and_types/AstNodeError.js";
 import { RunnerContext } from "../classes_and_types/Context.js";
@@ -32,8 +36,11 @@ export async function runExpression(
 
     else if (isMeasurement(expression)) {
         const value = await runExpression(expression.value, context);
-        const unit = expression.unit.ref?.name || 'unknown unit';
-        return { value, unit };
+        const unitDecl = expression.unit.ref;
+        if (!unitDecl) throw new AstNodeError(expression, "Unresolved unit reference");
+        const calculator = new ConversionCalculator();
+        const factor = calculator.compute(unitDecl);
+        return (value as number) * factor;
     }
 
     // Assignment
@@ -58,24 +65,27 @@ export async function runExpression(
         return runBinaryExpression(expression, context);
     }
 
-    // else if (isPreUnaryExpression(expression)) {
-    //     const value = await runExpression(expression.value, context);
-    //     const op = expression.operator;
-    //     switch (op) {
-    //         case 'not':
-    //             if (typeof value !== 'boolean') throw new AstNodeError(expression, "Type Error: 'not' requires boolean operand");
-    //             return !value;
-    //         case '-':
-    //             if (typeof value !== 'number') throw new AstNodeError(expression, "Type Error: unary '-' requires number operand");
-    //             return -value;
-    //         default:
-    //             throw new AstNodeError(expression, `Unknown unary operator: ${op}`);
-    //     }
-    // }
+    else if (isLogicalNotExpression(expression)) {
+        const value = await runExpression(expression.value, context);
+        if (typeof value !== 'boolean') throw new AstNodeError(expression, "Type Error: 'not' requires boolean operand");
+        return !value;
+    }
+
+    else if (isNegativeNumericExpression(expression)) {
+        const value = await runExpression(expression.value, context);
+        if (typeof value !== 'number') throw new AstNodeError(expression, "Type Error: unary '-' requires number operand");
+        return -value;
+    }
 
     else if (isReferenceExpression(expression)) {
         const decl = expression.element.ref;
         if (!decl) throw new AstNodeError(expression, `Unresolved reference to ${expression.element.$refText}`);
+        
+        if (isUnitDeclaration(decl)) {
+            const calculator = new ConversionCalculator();
+            return calculator.compute(decl);
+        }
+        
         return context.variables.get(expression, decl.name);
     }
 

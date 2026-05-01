@@ -32,6 +32,7 @@ export type DimensionVector = Map<string, number>;
 export class DimensionCalculator {
   // Cache to prevent re-calculating the same named unit repeatedly
   private cache = new Map<string, DimensionVector>();
+  private stack = new Set<string>();
 
   /**
    * Computes the dimension vector for the given node, which can be a
@@ -76,6 +77,11 @@ export class DimensionCalculator {
     def: DimensionDeclaration,
     power: number = 1
   ): DimensionVector {
+    if (this.stack.has(def.name)) {
+      throw new Error(`Cycle detected in dimension definitions: ${Array.from(this.stack).join(" -> ")} -> ${def.name}`);
+    }
+    this.stack.add(def.name);
+
     const vector = new Map<string, number>();
 
     if (def.expression) {
@@ -88,6 +94,7 @@ export class DimensionCalculator {
     }
 
     this.cache.set(def.name, vector);
+    this.stack.delete(def.name);
 
     return vector;
   }
@@ -110,6 +117,11 @@ export class DimensionCalculator {
     def: UnitDeclaration,
     power?: number
   ): DimensionVector {
+    if (this.stack.has(def.name)) {
+      throw new Error(`Cycle detected in unit dimension definitions: ${Array.from(this.stack).join(" -> ")} -> ${def.name}`);
+    }
+    this.stack.add(def.name);
+
     const vector = new Map<string, number>();
 
     // Case 0: Unit declaration has both dimension and expression. Create a vector for this dimension based on the expression.
@@ -121,11 +133,13 @@ export class DimensionCalculator {
       );
       const dimName = def.dimension.ref.name;
       this.cache.set(dimName, vector);
+      this.stack.delete(def.name);
       return vector;
     }
     // Case 1: Base Unit (e.g., unit meter : Length;)
     else if (def.dimension && def.dimension.ref) {
       if (this.cache.has(def.name)) {
+        this.stack.delete(def.name);
         return this.cache.get(def.name)!;
       }
 
@@ -147,6 +161,7 @@ export class DimensionCalculator {
 
     // Store result in cache
     this.cache.set(def.name, vector);
+    this.stack.delete(def.name);
     return vector;
   }
 

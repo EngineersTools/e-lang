@@ -1,4 +1,4 @@
-import { BinaryExpression, isMeasurement } from "e-lang-language";
+import { BinaryExpression } from "e-lang-language";
 import { AstNodeError } from "../classes_and_types/AstNodeError.js";
 import { RunnerContext } from "../classes_and_types/Context.js";
 import { runExpression } from "./runExpression.js";
@@ -13,15 +13,7 @@ export async function runBinaryExpression(
 
   switch (expr.operator) {
     case "+":
-      if (isMeasurement(left) && isMeasurement(right)) {
-        if (left.unit !== right.unit) {
-          throw new AstNodeError(
-            expr,
-            `Unit Mismatch: Cannot add measurements with different units (${left.unit} and ${right.unit})`,
-          );
-        }
-        return {}; // { value: left.value + right.value, unit: left.unit };
-      } else if (typeof left === "number" && typeof right === "number") {
+      if (typeof left === "number" && typeof right === "number") {
         return left + right;
       } else if (typeof left === "string" && typeof right === "string") {
         return left + right;
