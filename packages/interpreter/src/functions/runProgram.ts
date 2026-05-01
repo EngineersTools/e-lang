@@ -59,13 +59,9 @@ export async function runProgram(
       }
     }
 
-  const variables = structuredClone(context.variables) as Variables;
-
-  context.variables.leave();
-
   clearTimeout(context.timeout);
 
-  return variables;
+  return context.variables;
 }
 
 

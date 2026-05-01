@@ -8,7 +8,8 @@ import {
   isStatementBlock,
   isConstantDeclaration,
   isMutableDeclaration,
-  isReturnStatement
+  isReturnStatement,
+  isMatchStatement
 } from "e-lang-language";
 import { RunnerContext } from "../classes_and_types/Context.js";
 import { runExpression } from "./runExpression.js";
@@ -73,6 +74,31 @@ export async function runStatement(
         }
         if (statement.elseBlock) {
             await runStatement(statement.elseBlock, context, returnFn);
+        }
+    }
+    else if (isMatchStatement(statement)) {
+        const conditionVal = await runExpression(statement.condition, context);
+        let matched = false;
+        if (statement.options) {
+            for (const option of statement.options) {
+                const optionVal = await runExpression(option.condition, context);
+                if (conditionVal === optionVal) {
+                    if (option.block) {
+                        await runStatement(option.block, context, returnFn);
+                    } else if (option.value) {
+                        await runExpression(option.value, context);
+                    }
+                    matched = true;
+                    break;
+                }
+            }
+        }
+        if (!matched) {
+            if (statement.block) {
+                await runStatement(statement.block, context, returnFn);
+            } else if (statement.value) {
+                await runExpression(statement.value, context);
+            }
         }
     }
     else if (isConstantDeclaration(statement) || isMutableDeclaration(statement)) {
