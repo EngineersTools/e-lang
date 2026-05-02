@@ -3039,12 +3039,22 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
     {
       "$type": "ParserRule",
       "name": "ModelMemberAssignment",
+      "returnType": {
+        "$ref": "#/types@0"
+      },
       "definition": {
         "$type": "Group",
         "elements": [
           {
+            "$type": "Action",
+            "inferredType": {
+              "$type": "InferredType",
+              "name": "ModelMemberAssignment"
+            }
+          },
+          {
             "$type": "Assignment",
-            "feature": "property",
+            "feature": "name",
             "operator": "=",
             "terminal": {
               "$type": "RuleCall",
@@ -3774,6 +3784,12 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "$type": "SimpleType",
             "typeRef": {
               "$ref": "#/rules@14"
+            }
+          },
+          {
+            "$type": "SimpleType",
+            "typeRef": {
+              "$ref": "#/rules@48/definition/elements@0/inferredType"
             }
           }
         ]

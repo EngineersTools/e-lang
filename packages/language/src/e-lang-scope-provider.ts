@@ -2,7 +2,8 @@ import { DefaultScopeProvider, EMPTY_SCOPE, LangiumDocuments, ReferenceInfo, Sco
 import { isCustomType } from "typir";
 import { TypirLangiumServices } from "typir-langium";
 import { ELangServices } from "./ELangServices.type.js";
-import { isMemberAccess, ModelDeclaration } from "./generated/ast.js";
+import { AstNode } from "langium";
+import { isMemberAccess, isModelDeclaration, isModelExpression } from "./generated/ast.js";
 import { isModelType } from "./type-system/custom-types/model/Model.type.js";
 import { ELangSpecifics } from "./type-system/ELangSpecifics.interface.js";
 import { getModelDeclarationChain } from "./utils/getModelChain.js";
@@ -34,7 +35,7 @@ export class ELangScopeProvider extends DefaultScopeProvider {
         previousType.associatedLanguageNode
       ) {
         return this.scopeModelMembers(
-          previousType.associatedLanguageNode as ModelDeclaration
+          previousType.associatedLanguageNode as AstNode
         );
       }
       return EMPTY_SCOPE;
@@ -42,11 +43,16 @@ export class ELangScopeProvider extends DefaultScopeProvider {
     return super.getScope(context);
   }
 
-  private scopeModelMembers(model: ModelDeclaration): Scope {
-    const allMembers = getModelDeclarationChain(model).flatMap(
-      (e) => e.parameters || []
-    );
-    return this.createScopeForNodes(allMembers);
+  private scopeModelMembers(model: AstNode): Scope {
+    if (isModelDeclaration(model)) {
+      const allMembers = getModelDeclarationChain(model).flatMap(
+        (e) => e.parameters || []
+      );
+      return this.createScopeForNodes(allMembers);
+    } else if (isModelExpression(model)) {
+      return this.createScopeForNodes(model.members || []);
+    }
+    return EMPTY_SCOPE;
   }
 }
 

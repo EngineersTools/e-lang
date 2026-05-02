@@ -20,7 +20,8 @@ import {
     isImaginaryNumber,
     isDimensionDeclaration,
     ConversionCalculator,
-    DimensionCalculator
+    DimensionCalculator,
+    ModelMemberAssignment
 } from "e-lang-language";
 import { AstNodeError } from "../classes_and_types/AstNodeError.js";
 import { ComplexNumber } from "../classes_and_types/ComplexNumber.js";
@@ -140,8 +141,9 @@ export async function runExpression(
 
     else if (isModelExpression(expression)) {
         const model: Record<string, any> = {};
-        for (const member of expression.members) {
-            model[member.property] = await runExpression(member.value, context);
+        for (const m of expression.members) {
+            const member = m as ModelMemberAssignment;
+            model[member.name] = await runExpression(member.value, context);
         }
         return model;
     }

@@ -1,5 +1,5 @@
 import { isCustomType, isType } from "typir";
-import { isModelDeclaration, isModelExpression, isParameterDeclaration, ModelDeclaration, ModelExpression } from "../../../index.js";
+import { isModelDeclaration, isModelExpression, isParameterDeclaration, ModelDeclaration, ModelExpression, ModelMemberAssignment } from "../../../index.js";
 import { ELangTypirServices } from "../../ELangAdditionalTypirServices.type.js";
 import { getOrCreateTypeNull } from "../../typir-types/createPrimitives.js";
 import { isModelType, ModelType } from "./Model.type.js";
@@ -63,12 +63,13 @@ export function createModelType(
       properties: {
         name: "Instance",
         parentTypes: [],
-        properties: languageNode.members.map((member) => {
-          if (member.property && member.value) {
+        properties: languageNode.members.map((m) => {
+          const member = m as ModelMemberAssignment;
+          if (member.name && member.value) {
             const propertyType = typir.Inference.inferType(member.value);
             if (isType(propertyType)) {
               return {
-                name: member.property,
+                name: member.name,
                 type: propertyType,
                 isOptional: false,
               };
@@ -76,7 +77,7 @@ export function createModelType(
           }
 
           return {
-            name: member.property,
+            name: member.name,
             type: getOrCreateTypeNull(typir),
             isOptional: false,
           };

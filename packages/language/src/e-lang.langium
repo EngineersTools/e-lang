@@ -241,8 +241,8 @@ NullLiteral:
     value='null'
 ;
 
-ModelMemberAssignment:
-    property=ID ':' value=Expression
+ModelMemberAssignment returns NamedElement:
+    {infer ModelMemberAssignment} name=ID ':' value=Expression
 ;
 
 ModelExpression:
@@ -290,7 +290,8 @@ type NamedElement =
     | FormulaDeclaration
     | ModelDeclaration
     | DimensionDeclaration
-    | UnitDeclaration;
+    | UnitDeclaration
+    | ModelMemberAssignment;
 
 type ExportableElement =
     ConstantDeclaration

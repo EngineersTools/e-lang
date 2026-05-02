@@ -135,7 +135,7 @@ export function isCallExpression(item: unknown): item is CallExpression {
 }
 
 export interface ConstantDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
     readonly $type: 'ConstantDeclaration';
     assignment: boolean;
     export: boolean;
@@ -158,7 +158,7 @@ export function isConstantDeclaration(item: unknown): item is ConstantDeclaratio
 }
 
 export interface DimensionDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
     readonly $type: 'DimensionDeclaration';
     export: boolean;
     expression?: DimensionExpression;
@@ -290,7 +290,7 @@ export function isExpression(item: unknown): item is Expression {
 }
 
 export interface FormulaDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
     readonly $type: 'FormulaDeclaration';
     body: StatementBlock;
     export: boolean;
@@ -544,7 +544,7 @@ export function isMemberAccess(item: unknown): item is MemberAccess {
 }
 
 export interface ModelDeclaration extends TypeReference {
-    readonly $container: ELangProgram | ForStatement | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
     readonly $type: 'ModelDeclaration';
     export: boolean;
     name: string;
@@ -570,7 +570,7 @@ export function isModelDeclaration(item: unknown): item is ModelDeclaration {
 export interface ModelExpression extends langium.AstNode {
     readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | LogicalNotExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | NegativeNumericExpression | PostUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'ModelExpression';
-    members: Array<ModelMemberAssignment>;
+    members: Array<NamedElement>;
 }
 
 export const ModelExpression = {
@@ -583,15 +583,15 @@ export function isModelExpression(item: unknown): item is ModelExpression {
 }
 
 export interface ModelMemberAssignment extends langium.AstNode {
-    readonly $container: ModelExpression;
+    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
     readonly $type: 'ModelMemberAssignment';
-    property: string;
+    name: string;
     value: Expression;
 }
 
 export const ModelMemberAssignment = {
     $type: 'ModelMemberAssignment',
-    property: 'property',
+    name: 'name',
     value: 'value'
 } as const;
 
@@ -600,7 +600,7 @@ export function isModelMemberAssignment(item: unknown): item is ModelMemberAssig
 }
 
 export interface MutableDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
     readonly $type: 'MutableDeclaration';
     assignment: boolean;
     export: boolean;
@@ -622,7 +622,7 @@ export function isMutableDeclaration(item: unknown): item is MutableDeclaration 
     return reflection.isInstance(item, MutableDeclaration.$type);
 }
 
-export type NamedElement = ConstantDeclaration | DimensionDeclaration | FormulaDeclaration | ModelDeclaration | MutableDeclaration | ParameterDeclaration | UnitDeclaration;
+export type NamedElement = ConstantDeclaration | DimensionDeclaration | FormulaDeclaration | ModelDeclaration | ModelMemberAssignment | MutableDeclaration | ParameterDeclaration | UnitDeclaration;
 
 export const NamedElement = {
     $type: 'NamedElement'
@@ -678,7 +678,7 @@ export function isNumberLiteral(item: unknown): item is NumberLiteral {
 }
 
 export interface ParameterDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | FormulaDeclaration | LambdaExpression | ModelDeclaration | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | FormulaDeclaration | LambdaExpression | ModelDeclaration | ModelExpression | StatementBlock;
     readonly $type: 'ParameterDeclaration';
     isOptional: boolean;
     name: string;
@@ -861,7 +861,7 @@ export function isTypeUnion(item: unknown): item is TypeUnion {
 }
 
 export interface UnitDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
     readonly $type: 'UnitDeclaration';
     dimension?: langium.Reference<DimensionDeclaration>;
     export: boolean;
@@ -1417,14 +1417,14 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         ModelMemberAssignment: {
             name: ModelMemberAssignment.$type,
             properties: {
-                property: {
-                    name: ModelMemberAssignment.property
+                name: {
+                    name: ModelMemberAssignment.name
                 },
                 value: {
                     name: ModelMemberAssignment.value
                 }
             },
-            superTypes: []
+            superTypes: [NamedElement.$type]
         },
         MutableDeclaration: {
             name: MutableDeclaration.$type,
