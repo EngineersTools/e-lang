@@ -69,7 +69,7 @@ print times_two(10)
 print times_three(10)
 
 // Lambda with complex parameter types
-const process_text = (text: text) : text => text
+const process_text = (myText: text) : text => myText
 print process_text("test")
 
 // Lambda with union type
