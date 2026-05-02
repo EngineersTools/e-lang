@@ -15,16 +15,15 @@ export function calculateDimensionTypeAssignability(
 ): ConversionMode {
   if (
     !("properties" in target) ||
-    !isDimensionType(target.properties) ||
-    !isUnitType(target.properties)
+    !(isDimensionType(target.properties) || isUnitType(target.properties))
   ) {
     return "NONE";
   }
 
   return DimensionCalculator.areVectorsEqual(
     source.properties.vector as DimensionVector,
-    target.properties.vector
+    target.properties.vector as DimensionVector
   )
-    ? "EXPLICIT"
+    ? "IMPLICIT_EXPLICIT"
     : "NONE";
 }

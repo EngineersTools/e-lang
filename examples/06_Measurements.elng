@@ -16,10 +16,10 @@ unit kilogram : Mass
 unit second : Time
 
 // Measurement expressions - attaching units to values
-const distance = 100 ~ meter
-const height = 5.5 ~ meter
-const weight = 75 ~ kilogram
-const time = 10 ~ second
+const distance: Length = 100 ~ meter
+const height: Length = 5.5 ~ meter
+const weight: Mass = 75 ~ kilogram
+const time: Time = 10 ~ second
 
 print distance
 print height

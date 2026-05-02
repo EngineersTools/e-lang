@@ -3,7 +3,7 @@ import { createELangServices, ELangLanguageMetaData, ELangProgram } from 'e-lang
 import { NodeFileSystem } from 'langium/node';
 import { Interpreter } from 'e-lang-interpreter';
 import { extractAstNode } from './util.js';
-import chalk from 'chalk';
+
 
 
 const runAction = async (fileName: string): Promise<void> => {
@@ -13,7 +13,7 @@ const runAction = async (fileName: string): Promise<void> => {
     try {
         interpreter.eval(model);
     } catch (e: any) {
-        console.error(chalk.red('Runtime Error: ' + e.message));
+        console.error('Runtime Error: ' + e.message);
         process.exit(1);
     }
 };
