@@ -1,0 +1,7 @@
+[
+  {
+    "kind": 2,
+    "languageId": "e-lang",
+    "content": "// ============================================\n// Test 05: Unit Declarations\n// ============================================\n// Tests: base unit declarations,\n// derived unit expressions, unit operations\n\n// Define base dimensions\ndimension Length\ndimension Mass\ndimension Time\n\n// Base units\nunit meter : Length\nunit kilogram : Mass\nunit second : Time\n\n// Exported units\nexport unit kilometer : Length\nexport unit gram : Mass\n\n// Derived units - simple operations\nunit hertz = 1 / second\nunit newton = kilogram * meter / (second ^ 2)\nunit joule = newton * meter\nunit watt = joule / second\n\n// Composite derived units\nunit pascal = newton / (meter ^ 2)\nunit tesla = kilogram / (second ^ 2)\n\n// Complex unit expressions\nunit volt = joule / (newton * meter)\nunit ohm = volt / newton\n\n// Units with numeric literals\nunit decameter = 10 * meter\nunit hectogram = 100 * gram\n\n// More complex expressions\nunit kilometer = 1000 * meter\nunit milligram = gram / 1000\n\n// Print unit references\nprint meter\nprint kilogram\nprint second\nprint hertz\nprint newton\nprint joule\nprint watt\nprint pascal\nprint volt\n"
+  }
+]

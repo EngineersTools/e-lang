@@ -1,0 +1,7 @@
+[
+  {
+    "kind": 2,
+    "languageId": "e-lang",
+    "content": "// ============================================\n// Test 03: Logical and Comparison Operations\n// ============================================\n// Tests: and, or, not operators,\n// comparison operators, boolean logic\n\nconst TRUE_VAL = true\nconst FALSE_VAL = false\n\n// Boolean literals\nprint true\nprint false\n\n// Logical AND\nprint true and true\nprint true and false\nprint false and false\n\n// Logical OR\nprint true or false\nprint false or false\nprint true or true\n\n// Logical NOT\nprint not true\nprint not false\n\n// Comparison operators: <\nprint 5 < 10\nprint 10 < 5\nprint 5 < 5\n\n// Comparison operators: <=\nprint 5 <= 10\nprint 10 <= 10\nprint 10 <= 5\n\n// Comparison operators: >\nprint 10 > 5\nprint 5 > 10\nprint 5 > 5\n\n// Comparison operators: >=\nprint 10 >= 5\nprint 5 >= 5\nprint 5 >= 10\n\n// Comparison operators: == and equal\nprint 5 == 5\nprint 5 equal 5\nprint 5 == 10\n\n// Comparison operators: != and not_equal\nprint 5 != 10\nprint 5 not_equal 10\nprint 5 != 5\n\n// Complex logical expressions\nprint (5 > 3) and (10 < 20)\nprint (5 > 10) or (3 < 10)\nprint not (5 == 10)\n\n// Comparison with variables\nvar x = 15\nvar y = 25\nprint x < y\nprint x > y\nprint x == y\n\n// Chained comparisons\nprint (x < y) and (y > 10) and (x > 0)\nprint (x == 15) or (y == 30) or (x == 25)\n"
+  }
+]

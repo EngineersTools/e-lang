@@ -1,0 +1,7 @@
+[
+  {
+    "kind": 2,
+    "languageId": "e-lang",
+    "content": "// ============================================\n// Test 02: Arithmetic Operations\n// ============================================\n// Tests: +, -, *, /, ^ operators, \n// operator precedence, parentheses\n\nconst a = 10\nconst b = 3\nconst c = 2\n\n// Addition\nprint a + b\n\n// Subtraction\nprint a - b\n\n// Multiplication\nprint a * b\n\n// Division\nprint a / b\n\n// Exponentiation\nprint a ^ c\nprint 2 ^ 10\n\n// Negative numbers\nprint -a\nprint -5\n\n// Complex expressions with precedence\nprint a + b * c\nprint (a + b) * c\n\n// Chained operations\nprint a + b - c + 5\nprint a * b / c\n\n// Operations with decimals\nconst x = 7.5\nconst y = 2.5\nprint x + y\nprint x * y\nprint x / y\nprint x ^ 2\n\n// Mixed integer and decimal\nconst int_val = 5\nconst dec_val = 2.5\nprint int_val + dec_val\nprint int_val * dec_val\nprint int_val ^ dec_val\n\n// Post-unary operations\nvar counter = 5\nprint counter++\nprint counter\nprint counter--\nprint counter\n"
+  }
+]
