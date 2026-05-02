@@ -1,4 +1,4 @@
-import { Interpreter, Variables } from 'e-lang-interpreter';
+import { Interpreter, Variables, serialiseValue } from 'e-lang-interpreter';
 import { createELangServices, ELangProgram } from 'e-lang-language';
 import { EmptyFileSystem, LangiumDocument } from 'langium';
 import * as vscode from 'vscode';
@@ -102,7 +102,7 @@ export class ELangNotebookKernel {
                     }
                 }
 
-                this._output.appendLine(`[Kernel] Cell output ${JSON.stringify(result)}.`);
+                this._output.appendLine(`[Kernel] Cell output ${serialiseValue(result ? result.getAll() : null)}.`);
 
             } catch (e) {
                 this._output.appendLine(`[Kernel] Eval failed: ${e}`);
