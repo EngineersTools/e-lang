@@ -1,12 +1,21 @@
-import { Expression, isMeasurement, isUnitDeclaration } from "e-lang-language";
+import {
+  Expression,
+  isConstantDeclaration,
+  isMeasurement,
+  isMutableDeclaration,
+  isReferenceExpression,
+} from "e-lang-language";
 import { RunnerContext } from "../classes_and_types/Context.js";
 import { runExpression } from "./runExpression.js";
 
-export function serialiseValue(value: any, seen: WeakSet<any> = new WeakSet()): string {
+export function serialiseValue(
+  value: any,
+  seen: WeakSet<any> = new WeakSet(),
+): string {
   if (value === null || value === undefined) {
     return "null";
   }
-  
+
   if (typeof value === "string") {
     return `"${value}"`;
   }
@@ -27,7 +36,10 @@ export function serialiseValue(value: any, seen: WeakSet<any> = new WeakSet()): 
 
   const entries = Object.entries(value)
     // Avoid serializing Langium's internal circular references
-    .filter(([key]) => key !== "$container" && key !== "$document" && key !== "$cstNode")
+    .filter(
+      ([key]) =>
+        key !== "$container" && key !== "$document" && key !== "$cstNode",
+    )
     .map(([key, val]) => `${key}: ${serialiseValue(val, seen)}`);
 
   return `{ ${entries.join(", ")} }`;
@@ -40,8 +52,19 @@ export async function serialiseExpression(
   try {
     const value = await runExpression(expression, context);
 
-    if (isMeasurement(expression) && value && typeof value === 'object' && 'unit' in value && isUnitDeclaration(value.unit)) {
-      return `${value.value} ~${value.unit.name}`;
+    if (isReferenceExpression(expression)) {
+      if (
+        (isConstantDeclaration(expression.element.ref) ||
+          isMutableDeclaration(expression.element.ref)) &&
+        expression.element.ref.value
+      ) {
+        return serialiseExpression(expression.element.ref.value, context);
+      }
+      return "unknown";
+    }
+
+    if (isMeasurement(expression)) {
+      return `${value} ~${expression.unit.ref?.name}`;
     }
 
     if (value === null || value === undefined) {
