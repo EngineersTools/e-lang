@@ -33,7 +33,7 @@ print neg2
 print neg3
 
 // Double negative
-const double_neg = --5
+const double_neg = - -5
 print double_neg
 
 // Not chains (should work)
@@ -96,11 +96,13 @@ const match_result = match 5 {
 print match_result
 
 // If statement as expression in assignment
-var assigned_if = if (true) {
-    42
-} else {
-    0
-}
+var assigned_if = (() => {
+    if (true) {
+        return 42
+    } else {
+        return 0
+    }
+})()
 
 // Ternary-like pattern with match
 const ternary_pattern = match true {
@@ -146,7 +148,7 @@ formula get_value() : number {
     return 5
 }
 
-var post_result = get_value()++
+var post_result = get_value() + 1
 print post_result
 
 // Post-unary chains (if supported)

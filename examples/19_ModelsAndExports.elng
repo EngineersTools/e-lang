@@ -170,13 +170,15 @@ formula display_mammal(m: Mammal) : text {
 print display_mammal(mammal_dog)
 
 // Complex model with exported status
+export model Settings {
+    debug: boolean,
+    timeout: number
+}
+
 export model Configuration {
     app_name: text,
     version: text,
-    settings: {
-        debug: boolean,
-        timeout: number
-    }
+    settings: Settings
 }
 
 const config = {
