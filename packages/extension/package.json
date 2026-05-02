@@ -1,97 +1,97 @@
 {
-    "name": "e-lang",
-    "publisher": "EngineersTools",
-    "description": "The engineering programming language.",
-    "author": {
-        "name": "Carlos Gamez"
-    },
-    "license": "MIT",
-    "icon": "img/elang-social-card.png",
-    "version": "0.1.5",
-    "displayName": "e-lang",
-    "type": "module",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/EngineersTools/e-lang"
-    },
-    "engines": {
-        "vscode": "^1.96.0"
-    },
-    "categories": [
-        "Programming Languages"
+  "name": "e-lang",
+  "publisher": "EngineersTools",
+  "description": "The engineering programming language.",
+  "author": {
+    "name": "Carlos Gamez"
+  },
+  "license": "MIT",
+  "icon": "img/elang-social-card.png",
+  "version": "0.1.5",
+  "displayName": "e-lang",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EngineersTools/e-lang"
+  },
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "e-lang",
+        "aliases": [
+          "ELang",
+          "e-lang"
+        ],
+        "extensions": [
+          ".elng"
+        ],
+        "icon": {
+          "dark": "./img/elang-file-icon-dark.png",
+          "light": "./img/elang-file-icon-light.png"
+        },
+        "configuration": "./language-configuration.json"
+      }
     ],
-    "contributes": {
-        "languages": [
-            {
-                "id": "e-lang",
-                "aliases": [
-                    "ELang",
-                    "e-lang"
-                ],
-                "extensions": [
-                    ".elng"
-                ],
-                "icon": {
-                    "dark": "./img/elang-file-icon-dark.png",
-                    "light": "./img/elang-file-icon-light.png"
-                },
-                "configuration": "./language-configuration.json"
-            }
-        ],
-        "grammars": [
-            {
-                "language": "e-lang",
-                "scopeName": "source.e-lang",
-                "path": "syntaxes/e-lang.tmLanguage.json"
-            }
-        ],
-        "notebooks": [
-            {
-                "type": "e-lang-notebook",
-                "displayName": "ELang Notebook",
-                "selector": [
-                    {
-                        "filenamePattern": "*.elnb"
-                    }
-                ]
-            }
+    "grammars": [
+      {
+        "language": "e-lang",
+        "scopeName": "source.e-lang",
+        "path": "syntaxes/e-lang.tmLanguage.json"
+      }
+    ],
+    "notebooks": [
+      {
+        "type": "e-lang-notebook",
+        "displayName": "ELang Notebook",
+        "selector": [
+          {
+            "filenamePattern": "*.elnb"
+          }
         ]
-    },
-    "activationEvents": [
-        "onLanguage:e-lang",
-        "onNotebook:e-lang-notebook"
-    ],
-    "main": "./out/extension/main.cjs",
-    "scripts": {
-        "clean": "shx rm -fr *.tsbuildinfo out syntaxes img",
-        "vscode:prepublish": "npm run build && npm run --include-workspace-root --workspace=../..",
-        "build:prepare": "shx mkdir -p ./syntaxes/ ./img/ && shx cp -f ../language/syntaxes/e-lang.tmLanguage.json ./syntaxes/e-lang.tmLanguage.json && shx cp -rf ../../img/* ./img/",
-        "build": "npm run build:prepare && tsc -b tsconfig.json && node esbuild.mjs",
-        "build:clean": "npm run clean && npm run build",
-        "watch": "npm run build:prepare && concurrently -n tsc,esbuild -c blue,yellow \"tsc -b tsconfig.json --watch\" \"node esbuild.mjs --watch\"",
-        "test": "npm run build && npm run test-compile && npm run test-integration",
-        "test-compile": "tsc -p tsconfig.test.json",
-        "test-integration": "node out/src/test/runTest.cjs",
-        "pack": "vsce package"
-    },
-    "dependencies": {
-        "e-lang-interpreter": "*",
-        "e-lang-language": "*",
-        "vscode-languageclient": "~9.0.1",
-        "vscode-languageserver": "~9.0.1"
-    },
-    "devDependencies": {
-        "@types/glob": "^7.2.0",
-        "@types/mocha": "^10.0.10",
-        "@types/node": "^16.18.126",
-        "@types/vscode": "^1.96.0",
-        "@vscode/test-electron": "^2.5.2",
-        "concurrently": "~8.2.1",
-        "esbuild": "~0.25.5",
-        "glob": "^7.2.3",
-        "mocha": "^11.7.5"
-    },
-    "vsce": {
-        "dependencies": false
-    }
+      }
+    ]
+  },
+  "activationEvents": [
+    "onLanguage:e-lang",
+    "onNotebook:e-lang-notebook"
+  ],
+  "main": "./out/extension/main.cjs",
+  "scripts": {
+    "clean": "shx rm -fr *.tsbuildinfo out syntaxes img",
+    "vscode:prepublish": "npm run build && npm run --include-workspace-root --workspace=../..",
+    "build:prepare": "shx mkdir -p ./syntaxes/ ./img/ && shx cp -f ../language/syntaxes/e-lang.tmLanguage.json ./syntaxes/e-lang.tmLanguage.json && shx cp -rf ../../img/* ./img/",
+    "build": "npm run build:prepare && tsc -b tsconfig.json && node esbuild.mjs",
+    "build:clean": "npm run clean && npm run build",
+    "watch": "npm run build:prepare && concurrently -n tsc,esbuild -c blue,yellow \"tsc -b tsconfig.json --watch\" \"node esbuild.mjs --watch\"",
+    "test": "npm run build && npm run test-compile && npm run test-integration",
+    "test-compile": "tsc -p tsconfig.test.json",
+    "test-integration": "node out/src/test/runTest.cjs",
+    "pack": "npx @vscode/vsce package"
+  },
+  "dependencies": {
+    "e-lang-interpreter": "*",
+    "e-lang-language": "*",
+    "vscode-languageclient": "~9.0.1",
+    "vscode-languageserver": "~9.0.1"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^16.18.126",
+    "@types/vscode": "^1.96.0",
+    "@vscode/test-electron": "^2.5.2",
+    "concurrently": "~8.2.1",
+    "esbuild": "~0.25.5",
+    "glob": "^7.2.3",
+    "mocha": "^11.7.5"
+  },
+  "vsce": {
+    "dependencies": false
+  }
 }
