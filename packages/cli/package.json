@@ -1,7 +1,7 @@
 {
     "name": "@eng-tools/e-lang",
     "description": "The cli specific package",
-    "version": "0.1.2",
+    "version": "0.1.4",
     "type": "module",
     "engines": {
         "node": ">=20.10.0",
@@ -27,8 +27,8 @@
         "commander": "~11.1.0"
     },
     "devDependencies": {
-        "e-lang-language": "0.1.2",
-        "e-lang-interpreter": "0.1.2"
+        "e-lang-language": "0.1.4",
+        "e-lang-interpreter": "0.1.4"
     },
     "volta": {
         "node": "20.19.2",
