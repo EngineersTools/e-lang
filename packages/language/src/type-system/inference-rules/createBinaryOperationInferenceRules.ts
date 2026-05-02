@@ -49,7 +49,7 @@ export function createBinaryOperationInferenceRules(typir: ELangTypirServices) {
     validateArgumentsOfCalls: true,
   };
 
-  for (const operator of ["-", "*", "/"]) {
+  for (const operator of ["-", "*", "/", "^"]) {
     typir.factory.Operators.createBinary({
       name: operator,
       signatures: [

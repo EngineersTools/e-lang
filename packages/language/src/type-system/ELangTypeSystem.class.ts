@@ -22,6 +22,8 @@ import { createListExpressionInferenceRules } from "./inference-rules/createList
 import { createIndexedAccessInferenceRules } from "./inference-rules/createIndexedAccessInferenceRules.js";
 import { createCallExpressionInferenceRules } from "./inference-rules/createCallExpressionInferenceRules.js";
 import { createLambdaInferenceRules } from "./inference-rules/createLambdaInferenceRules.js";
+import { createUnaryOperationInferenceRules } from "./inference-rules/createUnaryOperationInferenceRules.js";
+import { createMemberAccessInferenceRules } from "./inference-rules/createMemberAccessInferenceRules.js";
 import {
   declarePrimitiveConvertibilityToNull,
   getOrCreateTypeBool,
@@ -50,12 +52,14 @@ export class ELangTypeSystem
     createConstantDeclarationInferenceRules(typir);
     createMutableDeclarationInferenceRules(typir);
     createReferenceExpressionInferenceRules(typir);
+    createUnaryOperationInferenceRules(typir);
     createBinaryOperationInferenceRules(typir);
     createMeasurementBinaryOperationInferenceRules(typir);
     createParameterDeclarationInferenceRules(typir);
     createUnitDeclarationValidationRules(typir);
     createListExpressionInferenceRules(typir);
     createIndexedAccessInferenceRules(typir);
+    createMemberAccessInferenceRules(typir);
     createCallExpressionInferenceRules(typir);
     createLambdaInferenceRules(typir);
 

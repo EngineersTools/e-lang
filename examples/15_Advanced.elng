@@ -119,9 +119,9 @@ print category
 // Higher-order function
 formula create_operator(op: text) : (number, number) => number {
     match op {
-        "add" => return (a: number, b: number) => a + b
-        "mult" => return (a: number, b: number) => a * b
-        default => return (a: number, b: number) => a
+        "add" => { return (a: number, b: number) => a + b }
+        "mult" => { return (a: number, b: number) => a * b }
+        default => { return (a: number, b: number) => a }
     }
 }
 

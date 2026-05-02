@@ -56,24 +56,3 @@ export class ELangScopeProvider extends DefaultScopeProvider {
   }
 }
 
-// function getModelDeclarationChain(model: ModelDeclaration): ModelDeclaration[] {
-//   return collectAllModels(model);
-// }
-
-// function collectAllModels(
-//   model: ModelDeclaration,
-//   visited: Set<ModelDeclaration> = new Set()
-// ): ModelDeclaration[] {
-//   if (visited.has(model)) {
-//     return [];
-//   }
-//   visited.add(model);
-//   let result = [model];
-//   for (const parent of model.parentTypes) {
-//     if (parent.ref) {
-//       result = result.concat(collectAllModels(parent.ref, visited));
-//     }
-//   }
-//   return result;
-// }
-
