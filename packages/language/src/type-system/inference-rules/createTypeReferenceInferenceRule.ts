@@ -4,22 +4,32 @@ import {
   getOrCreateTypeBool,
   getOrCreateTypeNumber,
   getOrCreateTypeText,
+  getOrCreateTypeList,
 } from "../typir-types/createPrimitives.js";
 
 export function createTypeReferenceInferenceRules(typir: ELangTypirServices) {
   typir.Inference.addInferenceRulesForAstNodes({
     TypeReference: (node) => {
+        let inferredType: any = undefined;
         if (node.primitive) {
             switch (node.primitive) {
-                case "number": return getOrCreateTypeNumber(typir);
-                case "text": return getOrCreateTypeText(typir);
-                case "boolean": return getOrCreateTypeBool(typir);
+                case "number": inferredType = getOrCreateTypeNumber(typir); break;
+                case "text": inferredType = getOrCreateTypeText(typir); break;
+                case "boolean": inferredType = getOrCreateTypeBool(typir); break;
+            }
+        } else if (node.reference?.ref) {
+            const type = typir.Inference.inferType(node.reference.ref);
+            if (isType(type)) {
+                inferredType = type;
             }
         }
-        if (node.reference?.ref) {
-            const type = typir.Inference.inferType(node.reference.ref);
-            if (isType(type)) return type;
+        
+        if (inferredType && node.array) {
+            return getOrCreateTypeList(inferredType, typir);
+        } else if (inferredType) {
+            return inferredType;
         }
+
         return InferenceRuleNotApplicable;
     },
   });

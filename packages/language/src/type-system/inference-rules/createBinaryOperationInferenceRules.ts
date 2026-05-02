@@ -8,7 +8,7 @@ import {
 import { ELangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 import { ELangSpecifics } from "../ELangSpecifics.interface.js";
 import {
-  createTypeAny,
+  getOrCreateTypeAny,
   getOrCreateTypeBool,
   getOrCreateTypeNumber,
   getOrCreateTypeText,
@@ -16,7 +16,7 @@ import {
 } from "../typir-types/createPrimitives.js";
 
 export function createBinaryOperationInferenceRules(typir: ELangTypirServices) {
-  const typeAny = createTypeAny(typir);
+  const typeAny = getOrCreateTypeAny(typir);
   const typeNumber = getOrCreateTypeNumber(typir);
   const typeText = getOrCreateTypeText(typir);
   const typeBoolean = getOrCreateTypeBool(typir);

@@ -1,3 +1,4 @@
+import { MultiplicityKind, MultiplicityKindName, MULTIPLICITY_UNLIMITED, Type } from "typir";
 import {
   BooleanLiteral,
   NullLiteral,
@@ -67,8 +68,17 @@ export function getOrCreateTypeNull(typir: ELangTypirServices) {
   );
 }
 
-export function createTypeAny(typir: ELangTypirServices) {
-  return typir.factory.Top.create({}).finish();
+export function getOrCreateTypeAny(typir: ELangTypirServices) {
+  return typir.factory.Top.get({}) ?? typir.factory.Top.create({}).finish();
+}
+
+export function getOrCreateTypeList(elementType: Type, typir: ELangTypirServices) {
+  const kind = typir.infrastructure.Kinds.getOrCreateKind(MultiplicityKindName, (s: any) => new MultiplicityKind(s));
+  let listType = kind.getMultiplicityType({ constrainedType: elementType, lowerBound: 0, upperBound: MULTIPLICITY_UNLIMITED });
+  if (!listType) {
+      listType = kind.createMultiplicityType({ constrainedType: elementType, lowerBound: 0, upperBound: MULTIPLICITY_UNLIMITED });
+  }
+  return listType;
 }
 
 export function getOrCreateTypeComplex(typir: ELangTypirServices) {

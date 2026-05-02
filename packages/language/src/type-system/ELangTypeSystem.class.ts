@@ -18,6 +18,8 @@ import { createMutableDeclarationInferenceRules } from "./inference-rules/create
 import { createParameterDeclarationInferenceRules } from "./inference-rules/createParameterDeclarationInferenceRules.js";
 import { createReferenceExpressionInferenceRules } from "./inference-rules/createReferenceExpressionInferenceRules.js";
 import { createTypeReferenceInferenceRules } from "./inference-rules/createTypeReferenceInferenceRule.js";
+import { createListExpressionInferenceRules } from "./inference-rules/createListExpressionInferenceRules.js";
+import { createIndexedAccessInferenceRules } from "./inference-rules/createIndexedAccessInferenceRules.js";
 import {
   declarePrimitiveConvertibilityToNull,
   getOrCreateTypeBool,
@@ -50,6 +52,8 @@ export class ELangTypeSystem
     createMeasurementBinaryOperationInferenceRules(typir);
     createParameterDeclarationInferenceRules(typir);
     createUnitDeclarationValidationRules(typir);
+    createListExpressionInferenceRules(typir);
+    createIndexedAccessInferenceRules(typir);
   }
 
   onNewAstNode(
