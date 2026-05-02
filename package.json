@@ -1,7 +1,7 @@
 {
     "name": "e-lang-workspace",
     "description": "Base workspace package",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "type": "module",
     "private": true,
     "scripts": {
@@ -21,7 +21,8 @@
         "test:extension": "npm run --workspace packages/extension test",
         "test:interpreter": "npm run --workspace packages/interpreter test",
         "test:all": "npm run test:language && npm run test:extension && npm run test:interpreter",
-        "pack": "npm run --workspace packages/extension pack"
+        "pack": "npm run --workspace packages/extension pack",
+        "npm-publish": "npm publish --workspace packages/cli --access public"
     },
     "devDependencies": {
         "@types/node": "~20.17.48",
