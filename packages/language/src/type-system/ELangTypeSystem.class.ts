@@ -24,6 +24,7 @@ import {
   getOrCreateTypeNull,
   getOrCreateTypeNumber,
   getOrCreateTypeText,
+  getOrCreateTypeComplex,
 } from "./typir-types/createPrimitives.js";
 import { DimensionCalculator } from "./utils/DimensionCalculator.js";
 import { createUnitDeclarationValidationRules } from "./validation-rules/createUnitDeclarationValidationRules.js";
@@ -38,6 +39,7 @@ export class ELangTypeSystem
     getOrCreateTypeNumber(typir);
     getOrCreateTypeText(typir);
     getOrCreateTypeNull(typir);
+    getOrCreateTypeComplex(typir);
     declarePrimitiveConvertibilityToNull(typir);
     createTypeReferenceInferenceRules(typir);
     createMeasurementInferenceRules(typir);

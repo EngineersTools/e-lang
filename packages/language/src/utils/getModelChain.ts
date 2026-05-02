@@ -26,7 +26,7 @@ export function getModelDeclarationChain(
 
     set.add(modelItem);
 
-    modelItem.parentTypes.forEach((pt) => {
+    modelItem.parentTypes?.forEach((pt) => {
         if (pt.ref && !set.has(pt.ref)) {
             getModelDeclarationChain(pt.ref).forEach((m) => set.add(m));
         }
@@ -60,7 +60,7 @@ export function getModelDeclarationParentsChain(
 
     set.add(modelItem);
 
-    modelItem.parentTypes.forEach((pt) => {
+    modelItem.parentTypes?.forEach((pt) => {
         if (pt.ref && !set.has(pt.ref)) {
             getModelDeclarationChain(pt.ref).forEach((m) => set.add(m));
         }

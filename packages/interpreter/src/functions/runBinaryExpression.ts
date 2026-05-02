@@ -3,6 +3,7 @@ import { AstNodeError } from "../classes_and_types/AstNodeError.js";
 import { RunnerContext } from "../classes_and_types/Context.js";
 import { runExpression } from "./runExpression.js";
 import { runUnitConversionExpression } from "./runUnitConversionExpression.js";
+import { ComplexNumber } from "../classes_and_types/ComplexNumber.js";
 
 export async function runBinaryExpression(
   expr: BinaryExpression,
@@ -13,6 +14,8 @@ export async function runBinaryExpression(
 
   switch (expr.operator) {
     case "+":
+      if (left instanceof ComplexNumber) return left.add(right);
+      if (right instanceof ComplexNumber) return new ComplexNumber(left, 0).add(right);
       if (typeof left === "number" && typeof right === "number") {
         return left + right;
       } else if (typeof left === "string" && typeof right === "string") {
@@ -24,6 +27,8 @@ export async function runBinaryExpression(
         `Type Error: Cannot apply operator '+' to types ${typeof left} and ${typeof right}`,
       );
     case "-":
+      if (left instanceof ComplexNumber) return left.sub(right);
+      if (right instanceof ComplexNumber) return new ComplexNumber(left, 0).sub(right);
       if (typeof left !== "number" || typeof right !== "number")
         throw new AstNodeError(
           expr,
@@ -31,6 +36,8 @@ export async function runBinaryExpression(
         );
       return left - right;
     case "*":
+      if (left instanceof ComplexNumber) return left.mul(right);
+      if (right instanceof ComplexNumber) return new ComplexNumber(left, 0).mul(right);
       if (typeof left !== "number" || typeof right !== "number")
         throw new AstNodeError(
           expr,
@@ -38,6 +45,8 @@ export async function runBinaryExpression(
         );
       return left * right;
     case "/":
+      if (left instanceof ComplexNumber) return left.div(right);
+      if (right instanceof ComplexNumber) return new ComplexNumber(left, 0).div(right);
       if (typeof left !== "number" || typeof right !== "number")
         throw new AstNodeError(
           expr,

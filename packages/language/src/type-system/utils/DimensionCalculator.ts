@@ -9,6 +9,7 @@ import {
   isUnitLiteral,
   isUnitOperation,
   isUnitReference,
+  isDimensionLiteral,
   UnitDeclaration,
   UnitExpression,
 } from "../../generated/ast.js";
@@ -220,7 +221,11 @@ export class DimensionCalculator {
   ): DimensionVector {
     // Since DimensionExpression can be a chain of operations (left op right)
 
-    if (isDimensionOperation(expr)) {
+    if (isDimensionLiteral(expr)) {
+      if (expr.value !== undefined) {
+        return new Map<string, number>();
+      }
+    } else if (isDimensionOperation(expr)) {
       const leftVec = this.computeDimensionExpression(expr.left);
       const rightVec = this.computeDimensionExpression(expr.right);
 

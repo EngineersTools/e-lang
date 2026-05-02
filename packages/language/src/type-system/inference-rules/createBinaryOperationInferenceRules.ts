@@ -12,6 +12,7 @@ import {
   getOrCreateTypeBool,
   getOrCreateTypeNumber,
   getOrCreateTypeText,
+  getOrCreateTypeComplex,
 } from "../typir-types/createPrimitives.js";
 
 export function createBinaryOperationInferenceRules(typir: ELangTypirServices) {
@@ -19,6 +20,7 @@ export function createBinaryOperationInferenceRules(typir: ELangTypirServices) {
   const typeNumber = getOrCreateTypeNumber(typir);
   const typeText = getOrCreateTypeText(typir);
   const typeBoolean = getOrCreateTypeBool(typir);
+  const typeComplex = getOrCreateTypeComplex(typir);
 
   const binaryInferenceRule: InferOperatorWithMultipleOperands<
     ELangSpecifics,
@@ -50,7 +52,12 @@ export function createBinaryOperationInferenceRules(typir: ELangTypirServices) {
   for (const operator of ["-", "*", "/"]) {
     typir.factory.Operators.createBinary({
       name: operator,
-      signature: { left: typeNumber, right: typeNumber, return: typeNumber },
+      signatures: [
+        { left: typeNumber, right: typeNumber, return: typeNumber },
+        { left: typeNumber, right: typeComplex, return: typeComplex },
+        { left: typeComplex, right: typeNumber, return: typeComplex },
+        { left: typeComplex, right: typeComplex, return: typeComplex },
+      ],
     })
       .inferenceRule(binaryInferenceRule)
       .finish();
@@ -63,6 +70,9 @@ export function createBinaryOperationInferenceRules(typir: ELangTypirServices) {
       { left: typeText, right: typeText, return: typeText },
       { left: typeNumber, right: typeText, return: typeText },
       { left: typeText, right: typeNumber, return: typeText },
+      { left: typeNumber, right: typeComplex, return: typeComplex },
+      { left: typeComplex, right: typeNumber, return: typeComplex },
+      { left: typeComplex, right: typeComplex, return: typeComplex },
     ],
   })
     .inferenceRule(binaryInferenceRule)

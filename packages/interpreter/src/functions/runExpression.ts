@@ -17,9 +17,13 @@ import {
     isMemberAccess,
     isIndexedAccess,
     isPostUnaryExpression,
-    ConversionCalculator
+    isImaginaryNumber,
+    isDimensionDeclaration,
+    ConversionCalculator,
+    DimensionCalculator
 } from "e-lang-language";
 import { AstNodeError } from "../classes_and_types/AstNodeError.js";
+import { ComplexNumber } from "../classes_and_types/ComplexNumber.js";
 import { RunnerContext } from "../classes_and_types/Context.js";
 import { runBinaryExpression } from "./runBinaryExpression.js";
 import { runMemberCall } from "./runMemberCall.js";
@@ -38,6 +42,11 @@ export async function runExpression(
     else if (isBooleanLiteral(expression)) return expression.$cstNode?.text === 'true';
     else if (isStringLiteral(expression)) return expression.value;
     else if (isNullLiteral(expression)) return expression.value;
+
+    else if (isImaginaryNumber(expression)) {
+        const value = expression.value ? await runExpression(expression.value, context) : 1;
+        return new ComplexNumber(0, value);
+    }
 
     else if (isMeasurement(expression)) {
         const value = await runExpression(expression.value, context);
@@ -104,6 +113,12 @@ export async function runExpression(
         if (isUnitDeclaration(decl)) {
             const calculator = new ConversionCalculator();
             return calculator.compute(decl);
+        }
+
+        if (isDimensionDeclaration(decl)) {
+            const calculator = new DimensionCalculator();
+            const vec = calculator.compute(decl);
+            return DimensionCalculator.toString(vec);
         }
         
         return context.variables.get(expression, decl.name);

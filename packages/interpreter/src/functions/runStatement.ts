@@ -128,12 +128,12 @@ export async function runStatement(
             await runStatement(s, context, blockReturn);
             if (end) break;
         }
-        context.variables.leave();
-        
         // Return block handling?
         if (!end && statement.returnValue) {
              const val = await runExpression(statement.returnValue.value, context);
              returnFn(val);
         }
+
+        context.variables.leave();
     }
 }

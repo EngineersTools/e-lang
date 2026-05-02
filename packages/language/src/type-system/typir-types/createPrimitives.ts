@@ -3,7 +3,8 @@ import {
   NullLiteral,
   NumberLiteral,
   StringLiteral,
-  TypeReference
+  TypeReference,
+  ImaginaryNumber
 } from "../../generated/ast.js";
 import { ELangTypirServices } from "../ELangAdditionalTypirServices.type.js";
 
@@ -70,6 +71,17 @@ export function createTypeAny(typir: ELangTypirServices) {
   return typir.factory.Top.create({}).finish();
 }
 
+export function getOrCreateTypeComplex(typir: ELangTypirServices) {
+  return (
+    typir.factory.Primitives.get({ primitiveName: "complex" }) ??
+    typir.factory.Primitives.create({
+      primitiveName: "complex",
+    })
+      .inferenceRule({ languageKey: ImaginaryNumber.$type })
+      .finish()
+  );
+}
+
 export function declarePrimitiveConvertibilityToNull(
   typir: ELangTypirServices
 ) {
@@ -78,8 +90,10 @@ export function declarePrimitiveConvertibilityToNull(
   const typeBool = getOrCreateTypeBool(typir);
   const typeNumber = getOrCreateTypeNumber(typir);
   const typeText = getOrCreateTypeText(typir);
+  const typeComplex = getOrCreateTypeComplex(typir);
 
   typir.Conversion.markAsConvertible(typeNull, typeBool, "IMPLICIT_EXPLICIT");
   typir.Conversion.markAsConvertible(typeNull, typeNumber, "IMPLICIT_EXPLICIT");
   typir.Conversion.markAsConvertible(typeNull, typeText, "IMPLICIT_EXPLICIT");
+  typir.Conversion.markAsConvertible(typeNull, typeComplex, "IMPLICIT_EXPLICIT");
 }
