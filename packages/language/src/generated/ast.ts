@@ -135,7 +135,7 @@ export function isCallExpression(item: unknown): item is CallExpression {
 }
 
 export interface ConstantDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | MatchOption | MatchStatement | ModelExpression | StatementBlock;
     readonly $type: 'ConstantDeclaration';
     assignment: boolean;
     export: boolean;
@@ -158,7 +158,7 @@ export function isConstantDeclaration(item: unknown): item is ConstantDeclaratio
 }
 
 export interface DimensionDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | MatchOption | MatchStatement | ModelExpression | StatementBlock;
     readonly $type: 'DimensionDeclaration';
     export: boolean;
     expression?: DimensionExpression;
@@ -279,7 +279,7 @@ export function isExportableElement(item: unknown): item is ExportableElement {
     return reflection.isInstance(item, ExportableElement.$type);
 }
 
-export type Expression = BinaryExpression | BooleanLiteral | CallExpression | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | LogicalNotExpression | Measurement | MemberAccess | ModelExpression | NegativeNumericExpression | NullLiteral | NumberLiteral | PostUnaryExpression | ReferenceExpression | StringLiteral;
+export type Expression = BinaryExpression | BooleanLiteral | CallExpression | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | LogicalNotExpression | MatchStatement | Measurement | MemberAccess | ModelExpression | NegativeNumericExpression | NullLiteral | NumberLiteral | PostUnaryExpression | ReferenceExpression | StringLiteral;
 
 export const Expression = {
     $type: 'Expression'
@@ -290,7 +290,7 @@ export function isExpression(item: unknown): item is Expression {
 }
 
 export interface FormulaDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | MatchOption | MatchStatement | ModelExpression | StatementBlock;
     readonly $type: 'FormulaDeclaration';
     body: StatementBlock;
     export: boolean;
@@ -313,7 +313,7 @@ export function isFormulaDeclaration(item: unknown): item is FormulaDeclaration 
 }
 
 export interface ForStatement extends langium.AstNode {
-    readonly $container: ELangProgram | StatementBlock;
+    readonly $container: ELangProgram | MatchOption | MatchStatement | StatementBlock;
     readonly $type: 'ForStatement';
     block: StatementBlock;
     counter: NamedElement;
@@ -336,7 +336,7 @@ export function isForStatement(item: unknown): item is ForStatement {
 }
 
 export interface IfStatement extends langium.AstNode {
-    readonly $container: ELangProgram | StatementBlock;
+    readonly $container: ELangProgram | MatchOption | MatchStatement | StatementBlock;
     readonly $type: 'IfStatement';
     blocks: Array<StatementBlock>;
     conditions: Array<Expression>;
@@ -472,16 +472,14 @@ export function isLogicalNotExpression(item: unknown): item is LogicalNotExpress
 export interface MatchOption extends langium.AstNode {
     readonly $container: MatchStatement;
     readonly $type: 'MatchOption';
-    block?: StatementBlock;
+    action: Statement;
     condition: Expression;
-    value?: Expression;
 }
 
 export const MatchOption = {
     $type: 'MatchOption',
-    block: 'block',
-    condition: 'condition',
-    value: 'value'
+    action: 'action',
+    condition: 'condition'
 } as const;
 
 export function isMatchOption(item: unknown): item is MatchOption {
@@ -489,20 +487,18 @@ export function isMatchOption(item: unknown): item is MatchOption {
 }
 
 export interface MatchStatement extends langium.AstNode {
-    readonly $container: ELangProgram | StatementBlock;
+    readonly $container: BinaryExpression | CallExpression | ConstantDeclaration | ELangProgram | ForStatement | IfStatement | ImaginaryNumber | IndexedAccess | LambdaExpression | ListExpression | LogicalNotExpression | MatchOption | MatchStatement | Measurement | MemberAccess | ModelMemberAssignment | MutableDeclaration | NegativeNumericExpression | PostUnaryExpression | PrintStatement | ReturnStatement | StatementBlock;
     readonly $type: 'MatchStatement';
-    block?: StatementBlock;
     condition: Expression;
+    defaultAction?: Statement;
     options: Array<MatchOption>;
-    value?: Expression;
 }
 
 export const MatchStatement = {
     $type: 'MatchStatement',
-    block: 'block',
     condition: 'condition',
-    options: 'options',
-    value: 'value'
+    defaultAction: 'defaultAction',
+    options: 'options'
 } as const;
 
 export function isMatchStatement(item: unknown): item is MatchStatement {
@@ -544,7 +540,7 @@ export function isMemberAccess(item: unknown): item is MemberAccess {
 }
 
 export interface ModelDeclaration extends TypeReference {
-    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | MatchOption | MatchStatement | ModelExpression | StatementBlock;
     readonly $type: 'ModelDeclaration';
     export: boolean;
     name: string;
@@ -583,7 +579,7 @@ export function isModelExpression(item: unknown): item is ModelExpression {
 }
 
 export interface ModelMemberAssignment extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | MatchOption | MatchStatement | ModelExpression | StatementBlock;
     readonly $type: 'ModelMemberAssignment';
     name: string;
     value: Expression;
@@ -600,7 +596,7 @@ export function isModelMemberAssignment(item: unknown): item is ModelMemberAssig
 }
 
 export interface MutableDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | MatchOption | MatchStatement | ModelExpression | StatementBlock;
     readonly $type: 'MutableDeclaration';
     assignment: boolean;
     export: boolean;
@@ -678,7 +674,7 @@ export function isNumberLiteral(item: unknown): item is NumberLiteral {
 }
 
 export interface ParameterDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | FormulaDeclaration | LambdaExpression | ModelDeclaration | ModelExpression | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | FormulaDeclaration | LambdaExpression | MatchOption | MatchStatement | ModelDeclaration | ModelExpression | StatementBlock;
     readonly $type: 'ParameterDeclaration';
     isOptional: boolean;
     name: string;
@@ -714,7 +710,7 @@ export function isPostUnaryExpression(item: unknown): item is PostUnaryExpressio
 }
 
 export interface PrintStatement extends langium.AstNode {
-    readonly $container: ELangProgram | StatementBlock;
+    readonly $container: ELangProgram | MatchOption | MatchStatement | StatementBlock;
     readonly $type: 'PrintStatement';
     value: Expression;
 }
@@ -758,7 +754,7 @@ export function isReturnStatement(item: unknown): item is ReturnStatement {
     return reflection.isInstance(item, ReturnStatement.$type);
 }
 
-export type Statement = DimensionDeclaration | Expression | ForStatement | FormulaDeclaration | IfStatement | MatchStatement | NamedElement | PrintStatement | StatementBlock | TypeReference | UnitDeclaration;
+export type Statement = DimensionDeclaration | Expression | ForStatement | FormulaDeclaration | IfStatement | NamedElement | PrintStatement | StatementBlock | TypeReference | UnitDeclaration;
 
 export const Statement = {
     $type: 'Statement'
@@ -861,7 +857,7 @@ export function isTypeUnion(item: unknown): item is TypeUnion {
 }
 
 export interface UnitDeclaration extends langium.AstNode {
-    readonly $container: ELangProgram | ForStatement | ModelExpression | StatementBlock;
+    readonly $container: ELangProgram | ForStatement | MatchOption | MatchStatement | ModelExpression | StatementBlock;
     readonly $type: 'UnitDeclaration';
     dimension?: langium.Reference<DimensionDeclaration>;
     export: boolean;
@@ -1314,14 +1310,11 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         MatchOption: {
             name: MatchOption.$type,
             properties: {
-                block: {
-                    name: MatchOption.block
+                action: {
+                    name: MatchOption.action
                 },
                 condition: {
                     name: MatchOption.condition
-                },
-                value: {
-                    name: MatchOption.value
                 }
             },
             superTypes: []
@@ -1329,21 +1322,18 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         MatchStatement: {
             name: MatchStatement.$type,
             properties: {
-                block: {
-                    name: MatchStatement.block
-                },
                 condition: {
                     name: MatchStatement.condition
+                },
+                defaultAction: {
+                    name: MatchStatement.defaultAction
                 },
                 options: {
                     name: MatchStatement.options,
                     defaultValue: []
-                },
-                value: {
-                    name: MatchStatement.value
                 }
             },
-            superTypes: [Statement.$type]
+            superTypes: [Expression.$type]
         },
         Measurement: {
             name: Measurement.$type,

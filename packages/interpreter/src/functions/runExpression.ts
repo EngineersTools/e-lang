@@ -21,13 +21,16 @@ import {
     isDimensionDeclaration,
     ConversionCalculator,
     DimensionCalculator,
-    ModelMemberAssignment
+    ModelMemberAssignment,
+    isMatchStatement,
+    isExpression
 } from "e-lang-language";
 import { AstNodeError } from "../classes_and_types/AstNodeError.js";
 import { ComplexNumber } from "../classes_and_types/ComplexNumber.js";
 import { RunnerContext } from "../classes_and_types/Context.js";
 import { runBinaryExpression } from "./runBinaryExpression.js";
 import { runMemberCall } from "./runMemberCall.js";
+import { runStatement } from "./runStatement.js";
 
 // Helper type guard
 function isAssignment(expr: Expression): boolean {
@@ -130,10 +133,48 @@ export async function runExpression(
     }
 
     else if (isListExpression(expression)) {
-        const elements = await Promise.all(expression.elements.map(e => runExpression(e, context)));
-        return elements;
+        const list = [];
+        for (const el of expression.elements) {
+            list.push(await runExpression(el, context));
+        }
+        return list;
     }
     
+    else if (isMatchStatement(expression)) {
+        const conditionVal = await runExpression(expression.condition, context);
+        let matched = false;
+        let returnValue: any = undefined;
+        
+        if (expression.options) {
+            for (const option of expression.options) {
+                const optionVal = await runExpression(option.condition, context);
+                if (conditionVal === optionVal) {
+                    if (option.action) {
+                        if (isExpression(option.action)) {
+                            returnValue = await runExpression(option.action, context);
+                        } else {
+                            await runStatement(option.action, context, (val) => {
+                                returnValue = val;
+                            });
+                        }
+                    }
+                    matched = true;
+                    break;
+                }
+            }
+        }
+        if (!matched && expression.defaultAction) {
+            if (isExpression(expression.defaultAction)) {
+                returnValue = await runExpression(expression.defaultAction, context);
+            } else {
+                await runStatement(expression.defaultAction, context, (val) => {
+                    returnValue = val;
+                });
+            }
+        }
+        return returnValue;
+    }
+
     else if (isLambdaExpression(expression)) {
         (expression as any)._closure = context.variables.getAll();
         return expression;

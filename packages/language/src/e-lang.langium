@@ -23,7 +23,6 @@ Statement:
     | StatementBlock
     | PrintStatement
     | IfStatement
-    | MatchStatement
     | ForStatement
     | Expression
 ;
@@ -104,14 +103,14 @@ IfStatement:
 ;
 
 MatchOption:
-    condition=Expression '=>' (block=StatementBlock | value=Expression)
+    condition=Expression '=>' action=Statement
 ;
 
-MatchStatement:
-    'match' condition=Expression '{'
+MatchStatement infers Expression:
+    {infer MatchStatement} 'match' condition=Expression '{'
         (options+=MatchOption
         (options+=MatchOption)*)?
-        ('default' '=>' (block=StatementBlock | value=Expression))?
+        ('default' '=>' defaultAction=Statement)?
     '}'
 ;
 
@@ -202,6 +201,7 @@ PrimitiveExpression infers Expression:
     | ModelExpression
     | ListExpression
     | LambdaExpression
+    | MatchStatement
 ;
 
 LogicalNotExpression:
