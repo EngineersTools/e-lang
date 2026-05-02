@@ -194,11 +194,11 @@ PrimitiveExpression infers Expression:
     | '(' Expression ')'
     | LogicalNotExpression
     | NegativeNumericExpression
+    | BooleanLiteral
+    | NullLiteral
     | ReferenceExpression
     | StringLiteral
     | NumberLiteral
-    | BooleanLiteral
-    | NullLiteral
     | ModelExpression
     | ListExpression
     | MatchStatement
@@ -276,11 +276,11 @@ TypeIntersection infers TypeReference:
 PrimaryTypeReference infers TypeReference:
     (
         '(' TypeReference ')'
-        | primitive=('number' | 'text' | 'boolean')
+        | primitive=('number' | 'text' | 'boolean' | 'null')
         | {infer ModelReference} reference=[NamedElement:FeatureName]
         | LambdaType
     )
-    (array?='list')?
+    (arrayDimensions+='list')*
 ;
 
 type NamedElement =
@@ -306,7 +306,7 @@ hidden terminal WS: /\s+/;
 terminal ID: /[_a-zA-Z][\w_]*/;
 
 FeatureName returns string:
-    ID | 'number' | 'text' | 'boolean' | 'null' | 'true' | 'false';
+    ID;
 
 terminal STRING returns string: /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/;
 terminal DEC returns number: INT '.' INT;

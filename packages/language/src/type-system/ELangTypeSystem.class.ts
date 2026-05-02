@@ -58,8 +58,16 @@ export class ELangTypeSystem
     createIndexedAccessInferenceRules(typir);
     createCallExpressionInferenceRules(typir);
     createLambdaInferenceRules(typir);
-  }
 
+    const assignabilityProto = Object.getPrototypeOf(typir.Assignability);
+    const originalGetAssignabilityProblem = assignabilityProto.getAssignabilityProblem.bind(typir.Assignability);
+    assignabilityProto.getAssignabilityProblem = (source: any, target: any) => {
+      if (source && target && source.kind && target.kind && source.kind.$name === "MultiplicityTypeKind" && target.kind.$name === "MultiplicityTypeKind") {
+        return typir.Assignability.getAssignabilityProblem(source.getConstrainedType(), target.getConstrainedType());
+      }
+      return originalGetAssignabilityProblem(source, target);
+    };
+  }
   onNewAstNode(
     languageNode: ELangSpecifics["LanguageType"],
     typir: ELangTypirServices

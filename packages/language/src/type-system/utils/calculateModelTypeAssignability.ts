@@ -46,7 +46,7 @@ export function calculateModelTypeAssignability(
     }
   }
 
-  return "EXPLICIT";
+  return "IMPLICIT_EXPLICIT";
 }
 
 function isTypirTypeReference(type: unknown): type is TypeReference<any, ELangSpecifics> {

@@ -5,6 +5,7 @@ import {
   getOrCreateTypeNumber,
   getOrCreateTypeText,
   getOrCreateTypeList,
+  getOrCreateTypeNull,
 } from "../typir-types/createPrimitives.js";
 
 export function createTypeReferenceInferenceRules(typir: ELangTypirServices) {
@@ -16,6 +17,7 @@ export function createTypeReferenceInferenceRules(typir: ELangTypirServices) {
                 case "number": inferredType = getOrCreateTypeNumber(typir); break;
                 case "text": inferredType = getOrCreateTypeText(typir); break;
                 case "boolean": inferredType = getOrCreateTypeBool(typir); break;
+                case "null": inferredType = getOrCreateTypeNull(typir); break;
             }
         } else if ((node as any).reference?.ref) {
             const type = typir.Inference.inferType((node as any).reference.ref);
@@ -24,8 +26,12 @@ export function createTypeReferenceInferenceRules(typir: ELangTypirServices) {
             }
         }
         
-        if (inferredType && node.array) {
-            return getOrCreateTypeList(inferredType, typir);
+        if (inferredType && (node as any).arrayDimensions?.length > 0) {
+            let currentType = inferredType;
+            for (let i = 0; i < (node as any).arrayDimensions.length; i++) {
+                currentType = getOrCreateTypeList(currentType, typir);
+            }
+            return currentType;
         } else if (inferredType) {
             return inferredType;
         }

@@ -4,7 +4,6 @@ import {
   NullLiteral,
   NumberLiteral,
   StringLiteral,
-  TypeReference,
   ImaginaryNumber
 } from "../../generated/ast.js";
 import { ELangTypirServices } from "../ELangAdditionalTypirServices.type.js";
@@ -18,10 +17,6 @@ export function getOrCreateTypeBool(typir: ELangTypirServices) {
       primitiveName: "boolean",
     })
       .inferenceRule({ languageKey: BooleanLiteral.$type })
-      .inferenceRule({
-        languageKey: TypeReference.$type,
-        matching: (node: TypeReference) => node.primitive === "boolean",
-      })
       .finish()
   );
 }
@@ -33,10 +28,6 @@ export function getOrCreateTypeNumber(typir: ELangTypirServices) {
       primitiveName: "number",
     })
       .inferenceRule({ languageKey: NumberLiteral.$type })
-      .inferenceRule({
-        languageKey: TypeReference.$type,
-        matching: (node: TypeReference) => node.primitive === "number",
-      })
       .finish()
   );
 }
@@ -49,10 +40,6 @@ export function getOrCreateTypeText(typir: ELangTypirServices) {
       primitiveName: "text",
     })
       .inferenceRule({ languageKey: StringLiteral.$type })
-      .inferenceRule({
-        languageKey: TypeReference.$type,
-        matching: (node: TypeReference) => node.primitive === "text",
-      })
       .finish()
   );
 }

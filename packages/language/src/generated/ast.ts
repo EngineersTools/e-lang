@@ -289,10 +289,10 @@ export function isExpression(item: unknown): item is Expression {
     return reflection.isInstance(item, Expression.$type);
 }
 
-export type FeatureName = 'boolean' | 'false' | 'null' | 'number' | 'text' | 'true' | string;
+export type FeatureName = string;
 
 export function isFeatureName(item: unknown): item is FeatureName {
-    return item === 'number' || item === 'text' || item === 'boolean' || item === 'null' || item === 'true' || item === 'false' || (typeof item === 'string' && (/[_a-zA-Z][\w_]*/.test(item)));
+    return (typeof item === 'string' && (/[_a-zA-Z][\w_]*/.test(item)));
 }
 
 export interface FormulaDeclaration extends langium.AstNode {
@@ -434,7 +434,7 @@ export interface LambdaType extends TypeReference {
 
 export const LambdaType = {
     $type: 'LambdaType',
-    array: 'array',
+    arrayDimensions: 'arrayDimensions',
     parameters: 'parameters',
     primitive: 'primitive',
     returnType: 'returnType'
@@ -555,7 +555,7 @@ export interface ModelDeclaration extends TypeReference {
 
 export const ModelDeclaration = {
     $type: 'ModelDeclaration',
-    array: 'array',
+    arrayDimensions: 'arrayDimensions',
     export: 'export',
     name: 'name',
     parameters: 'parameters',
@@ -601,13 +601,13 @@ export function isModelMemberAssignment(item: unknown): item is ModelMemberAssig
 
 export interface ModelReference extends TypeReference {
     readonly $type: 'ModelReference';
-    array: boolean;
+    arrayDimensions: Array<'list'>;
     reference: langium.Reference<NamedElement>;
 }
 
 export const ModelReference = {
     $type: 'ModelReference',
-    array: 'array',
+    arrayDimensions: 'arrayDimensions',
     primitive: 'primitive',
     reference: 'reference'
 } as const;
@@ -826,7 +826,7 @@ export interface TypeIntersection extends TypeReference {
 
 export const TypeIntersection = {
     $type: 'TypeIntersection',
-    array: 'array',
+    arrayDimensions: 'arrayDimensions',
     left: 'left',
     operator: 'operator',
     primitive: 'primitive',
@@ -839,13 +839,13 @@ export function isTypeIntersection(item: unknown): item is TypeIntersection {
 
 export interface TypeReference extends langium.AstNode {
     readonly $type: 'LambdaType' | 'ModelDeclaration' | 'ModelReference' | 'TypeIntersection' | 'TypeReference' | 'TypeUnion';
-    array: boolean;
-    primitive?: 'boolean' | 'number' | 'text';
+    arrayDimensions: Array<'list'>;
+    primitive?: 'boolean' | 'null' | 'number' | 'text';
 }
 
 export const TypeReference = {
     $type: 'TypeReference',
-    array: 'array',
+    arrayDimensions: 'arrayDimensions',
     primitive: 'primitive'
 } as const;
 
@@ -862,7 +862,7 @@ export interface TypeUnion extends TypeReference {
 
 export const TypeUnion = {
     $type: 'TypeUnion',
-    array: 'array',
+    arrayDimensions: 'arrayDimensions',
     left: 'left',
     operator: 'operator',
     primitive: 'primitive',
@@ -1285,9 +1285,9 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         LambdaType: {
             name: LambdaType.$type,
             properties: {
-                array: {
-                    name: LambdaType.array,
-                    defaultValue: false
+                arrayDimensions: {
+                    name: LambdaType.arrayDimensions,
+                    defaultValue: []
                 },
                 parameters: {
                     name: LambdaType.parameters,
@@ -1378,9 +1378,9 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         ModelDeclaration: {
             name: ModelDeclaration.$type,
             properties: {
-                array: {
-                    name: ModelDeclaration.array,
-                    defaultValue: false
+                arrayDimensions: {
+                    name: ModelDeclaration.arrayDimensions,
+                    defaultValue: []
                 },
                 export: {
                     name: ModelDeclaration.export,
@@ -1429,9 +1429,9 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         ModelReference: {
             name: ModelReference.$type,
             properties: {
-                array: {
-                    name: ModelReference.array,
-                    defaultValue: false
+                arrayDimensions: {
+                    name: ModelReference.arrayDimensions,
+                    defaultValue: []
                 },
                 primitive: {
                     name: ModelReference.primitive
@@ -1586,9 +1586,9 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         TypeIntersection: {
             name: TypeIntersection.$type,
             properties: {
-                array: {
-                    name: TypeIntersection.array,
-                    defaultValue: false
+                arrayDimensions: {
+                    name: TypeIntersection.arrayDimensions,
+                    defaultValue: []
                 },
                 left: {
                     name: TypeIntersection.left
@@ -1608,9 +1608,9 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         TypeReference: {
             name: TypeReference.$type,
             properties: {
-                array: {
-                    name: TypeReference.array,
-                    defaultValue: false
+                arrayDimensions: {
+                    name: TypeReference.arrayDimensions,
+                    defaultValue: []
                 },
                 primitive: {
                     name: TypeReference.primitive
@@ -1621,9 +1621,9 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
         TypeUnion: {
             name: TypeUnion.$type,
             properties: {
-                array: {
-                    name: TypeUnion.array,
-                    defaultValue: false
+                arrayDimensions: {
+                    name: TypeUnion.arrayDimensions,
+                    defaultValue: []
                 },
                 left: {
                     name: TypeUnion.left

@@ -2739,6 +2739,20 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           {
             "$type": "RuleCall",
             "rule": {
+              "$ref": "#/rules@43"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@47"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "RuleCall",
+            "rule": {
               "$ref": "#/rules@41"
             },
             "arguments": []
@@ -2754,20 +2768,6 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
             "$type": "RuleCall",
             "rule": {
               "$ref": "#/rules@46"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@43"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@47"
             },
             "arguments": []
           },
@@ -3552,6 +3552,10 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                     {
                       "$type": "Keyword",
                       "value": "boolean"
+                    },
+                    {
+                      "$type": "Keyword",
+                      "value": "null"
                     }
                   ]
                 }
@@ -3599,13 +3603,13 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
           },
           {
             "$type": "Assignment",
-            "feature": "array",
-            "operator": "?=",
+            "feature": "arrayDimensions",
+            "operator": "+=",
             "terminal": {
               "$type": "Keyword",
               "value": "list"
             },
-            "cardinality": "?"
+            "cardinality": "*"
           }
         ]
       },
@@ -3640,40 +3644,11 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
       "name": "FeatureName",
       "dataType": "string",
       "definition": {
-        "$type": "Alternatives",
-        "elements": [
-          {
-            "$type": "RuleCall",
-            "rule": {
-              "$ref": "#/rules@58"
-            },
-            "arguments": []
-          },
-          {
-            "$type": "Keyword",
-            "value": "number"
-          },
-          {
-            "$type": "Keyword",
-            "value": "text"
-          },
-          {
-            "$type": "Keyword",
-            "value": "boolean"
-          },
-          {
-            "$type": "Keyword",
-            "value": "null"
-          },
-          {
-            "$type": "Keyword",
-            "value": "true"
-          },
-          {
-            "$type": "Keyword",
-            "value": "false"
-          }
-        ]
+        "$type": "RuleCall",
+        "rule": {
+          "$ref": "#/rules@58"
+        },
+        "arguments": []
       },
       "entry": false,
       "fragment": false,

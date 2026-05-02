@@ -10,8 +10,8 @@ export function modelFactory(typir: ELangTypirServices) {
     calculateTypeName: (properties) => `${properties.name}-Model`,
     calculateTypeUserRepresentation: (properties) =>
       `(model) ${properties.name}`,
-    isNewCustomTypeConvertibleToType: (source, target) => {
-      return calculateModelTypeAssignability(source, target, typir);
+    isNewCustomTypeSubTypeOf: (source, target) => {
+      return calculateModelTypeAssignability(source, target, typir) !== "NONE";
     },
   });
 }
