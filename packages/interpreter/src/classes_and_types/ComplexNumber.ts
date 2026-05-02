@@ -1,5 +1,8 @@
 export class ComplexNumber {
-  constructor(public real: number, public imag: number) {}
+  constructor(
+    public real: number,
+    public imag: number,
+  ) {}
 
   add(other: ComplexNumber | number): ComplexNumber {
     if (typeof other === "number") {
@@ -21,7 +24,7 @@ export class ComplexNumber {
     }
     return new ComplexNumber(
       this.real * other.real - this.imag * other.imag,
-      this.real * other.imag + this.imag * other.real
+      this.real * other.imag + this.imag * other.real,
     );
   }
 
@@ -32,7 +35,7 @@ export class ComplexNumber {
     const denominator = other.real * other.real + other.imag * other.imag;
     return new ComplexNumber(
       (this.real * other.real + this.imag * other.imag) / denominator,
-      (this.imag * other.real - this.real * other.imag) / denominator
+      (this.imag * other.real - this.real * other.imag) / denominator,
     );
   }
 

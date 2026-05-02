@@ -7,6 +7,8 @@ import {
 } from "e-lang-language";
 import { RunnerContext } from "../classes_and_types/Context.js";
 import { runExpression } from "./runExpression.js";
+import { MeasurementNumber } from "../classes_and_types/MeasurementNumber.js";
+import { ComplexNumber } from "../classes_and_types/ComplexNumber.js";
 
 export function serialiseValue(
   value: any,
@@ -63,8 +65,12 @@ export async function serialiseExpression(
       return "unknown";
     }
 
-    if (isMeasurement(expression)) {
-      return `${value} ~${expression.unit.ref?.name}`;
+    if (value instanceof ComplexNumber) {
+      return `${value}`;
+    }
+
+    if (isMeasurement(expression) || value instanceof MeasurementNumber) {
+      return `${value}`;
     }
 
     if (value === null || value === undefined) {
