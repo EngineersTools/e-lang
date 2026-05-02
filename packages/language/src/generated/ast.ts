@@ -139,7 +139,7 @@ export interface ConstantDeclaration extends langium.AstNode {
     readonly $type: 'ConstantDeclaration';
     assignment: boolean;
     export: boolean;
-    name: string;
+    name: FeatureName;
     type?: TypeReference;
     value?: Expression;
 }
@@ -162,7 +162,7 @@ export interface DimensionDeclaration extends langium.AstNode {
     readonly $type: 'DimensionDeclaration';
     export: boolean;
     expression?: DimensionExpression;
-    name: string;
+    name: FeatureName;
 }
 
 export const DimensionDeclaration = {
@@ -289,12 +289,18 @@ export function isExpression(item: unknown): item is Expression {
     return reflection.isInstance(item, Expression.$type);
 }
 
+export type FeatureName = 'boolean' | 'false' | 'null' | 'number' | 'text' | 'true' | string;
+
+export function isFeatureName(item: unknown): item is FeatureName {
+    return item === 'number' || item === 'text' || item === 'boolean' || item === 'null' || item === 'true' || item === 'false' || (typeof item === 'string' && (/[_a-zA-Z][\w_]*/.test(item)));
+}
+
 export interface FormulaDeclaration extends langium.AstNode {
     readonly $container: ELangProgram | ForStatement | MatchOption | MatchStatement | ModelExpression | StatementBlock;
     readonly $type: 'FormulaDeclaration';
     body: StatementBlock;
     export: boolean;
-    name: string;
+    name: FeatureName;
     parameters: Array<ParameterDeclaration>;
     returnType?: TypeReference;
 }
@@ -431,7 +437,6 @@ export const LambdaType = {
     array: 'array',
     parameters: 'parameters',
     primitive: 'primitive',
-    reference: 'reference',
     returnType: 'returnType'
 } as const;
 
@@ -543,7 +548,7 @@ export interface ModelDeclaration extends TypeReference {
     readonly $container: ELangProgram | ForStatement | MatchOption | MatchStatement | ModelExpression | StatementBlock;
     readonly $type: 'ModelDeclaration';
     export: boolean;
-    name: string;
+    name: FeatureName;
     parameters: Array<ParameterDeclaration>;
     parentTypes: Array<langium.Reference<ModelDeclaration>>;
 }
@@ -555,8 +560,7 @@ export const ModelDeclaration = {
     name: 'name',
     parameters: 'parameters',
     parentTypes: 'parentTypes',
-    primitive: 'primitive',
-    reference: 'reference'
+    primitive: 'primitive'
 } as const;
 
 export function isModelDeclaration(item: unknown): item is ModelDeclaration {
@@ -581,7 +585,7 @@ export function isModelExpression(item: unknown): item is ModelExpression {
 export interface ModelMemberAssignment extends langium.AstNode {
     readonly $container: ELangProgram | ForStatement | MatchOption | MatchStatement | ModelExpression | StatementBlock;
     readonly $type: 'ModelMemberAssignment';
-    name: string;
+    name: FeatureName;
     value: Expression;
 }
 
@@ -595,12 +599,29 @@ export function isModelMemberAssignment(item: unknown): item is ModelMemberAssig
     return reflection.isInstance(item, ModelMemberAssignment.$type);
 }
 
+export interface ModelReference extends TypeReference {
+    readonly $type: 'ModelReference';
+    array: boolean;
+    reference: langium.Reference<NamedElement>;
+}
+
+export const ModelReference = {
+    $type: 'ModelReference',
+    array: 'array',
+    primitive: 'primitive',
+    reference: 'reference'
+} as const;
+
+export function isModelReference(item: unknown): item is ModelReference {
+    return reflection.isInstance(item, ModelReference.$type);
+}
+
 export interface MutableDeclaration extends langium.AstNode {
     readonly $container: ELangProgram | ForStatement | MatchOption | MatchStatement | ModelExpression | StatementBlock;
     readonly $type: 'MutableDeclaration';
     assignment: boolean;
     export: boolean;
-    name: string;
+    name: FeatureName;
     type?: TypeReference;
     value?: Expression;
 }
@@ -677,7 +698,7 @@ export interface ParameterDeclaration extends langium.AstNode {
     readonly $container: ELangProgram | ForStatement | FormulaDeclaration | LambdaExpression | MatchOption | MatchStatement | ModelDeclaration | ModelExpression | StatementBlock;
     readonly $type: 'ParameterDeclaration';
     isOptional: boolean;
-    name: string;
+    name: FeatureName;
     type: TypeReference;
 }
 
@@ -809,7 +830,6 @@ export const TypeIntersection = {
     left: 'left',
     operator: 'operator',
     primitive: 'primitive',
-    reference: 'reference',
     right: 'right'
 } as const;
 
@@ -818,17 +838,15 @@ export function isTypeIntersection(item: unknown): item is TypeIntersection {
 }
 
 export interface TypeReference extends langium.AstNode {
-    readonly $type: 'LambdaType' | 'ModelDeclaration' | 'TypeIntersection' | 'TypeReference' | 'TypeUnion';
+    readonly $type: 'LambdaType' | 'ModelDeclaration' | 'ModelReference' | 'TypeIntersection' | 'TypeReference' | 'TypeUnion';
     array: boolean;
     primitive?: 'boolean' | 'number' | 'text';
-    reference?: langium.Reference<NamedElement>;
 }
 
 export const TypeReference = {
     $type: 'TypeReference',
     array: 'array',
-    primitive: 'primitive',
-    reference: 'reference'
+    primitive: 'primitive'
 } as const;
 
 export function isTypeReference(item: unknown): item is TypeReference {
@@ -848,7 +866,6 @@ export const TypeUnion = {
     left: 'left',
     operator: 'operator',
     primitive: 'primitive',
-    reference: 'reference',
     right: 'right'
 } as const;
 
@@ -862,7 +879,7 @@ export interface UnitDeclaration extends langium.AstNode {
     dimension?: langium.Reference<DimensionDeclaration>;
     export: boolean;
     expression?: UnitExpression;
-    name: string;
+    name: FeatureName;
 }
 
 export const UnitDeclaration = {
@@ -969,6 +986,7 @@ export type ELangAstType = {
     ModelDeclaration: ModelDeclaration
     ModelExpression: ModelExpression
     ModelMemberAssignment: ModelMemberAssignment
+    ModelReference: ModelReference
     MutableDeclaration: MutableDeclaration
     NamedElement: NamedElement
     NegativeNumericExpression: NegativeNumericExpression
@@ -1278,10 +1296,6 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 primitive: {
                     name: LambdaType.primitive
                 },
-                reference: {
-                    name: LambdaType.reference,
-                    referenceType: NamedElement.$type
-                },
                 returnType: {
                     name: LambdaType.returnType
                 }
@@ -1386,10 +1400,6 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 },
                 primitive: {
                     name: ModelDeclaration.primitive
-                },
-                reference: {
-                    name: ModelDeclaration.reference,
-                    referenceType: NamedElement.$type
                 }
             },
             superTypes: [TypeReference.$type, ExportableElement.$type, NamedElement.$type]
@@ -1415,6 +1425,23 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 }
             },
             superTypes: [NamedElement.$type]
+        },
+        ModelReference: {
+            name: ModelReference.$type,
+            properties: {
+                array: {
+                    name: ModelReference.array,
+                    defaultValue: false
+                },
+                primitive: {
+                    name: ModelReference.primitive
+                },
+                reference: {
+                    name: ModelReference.reference,
+                    referenceType: NamedElement.$type
+                }
+            },
+            superTypes: [TypeReference.$type]
         },
         MutableDeclaration: {
             name: MutableDeclaration.$type,
@@ -1572,10 +1599,6 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 primitive: {
                     name: TypeIntersection.primitive
                 },
-                reference: {
-                    name: TypeIntersection.reference,
-                    referenceType: NamedElement.$type
-                },
                 right: {
                     name: TypeIntersection.right
                 }
@@ -1591,10 +1614,6 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 },
                 primitive: {
                     name: TypeReference.primitive
-                },
-                reference: {
-                    name: TypeReference.reference,
-                    referenceType: NamedElement.$type
                 }
             },
             superTypes: [ExportableElement.$type, Statement.$type]
@@ -1614,10 +1633,6 @@ export class ELangAstReflection extends langium.AbstractAstReflection {
                 },
                 primitive: {
                     name: TypeUnion.primitive
-                },
-                reference: {
-                    name: TypeUnion.reference,
-                    referenceType: NamedElement.$type
                 },
                 right: {
                     name: TypeUnion.right

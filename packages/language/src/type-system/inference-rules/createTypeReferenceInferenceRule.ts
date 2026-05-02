@@ -17,8 +17,8 @@ export function createTypeReferenceInferenceRules(typir: ELangTypirServices) {
                 case "text": inferredType = getOrCreateTypeText(typir); break;
                 case "boolean": inferredType = getOrCreateTypeBool(typir); break;
             }
-        } else if (node.reference?.ref) {
-            const type = typir.Inference.inferType(node.reference.ref);
+        } else if ((node as any).reference?.ref) {
+            const type = typir.Inference.inferType((node as any).reference.ref);
             if (isType(type)) {
                 inferredType = type;
             }

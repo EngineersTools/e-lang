@@ -36,12 +36,12 @@ ReturnStatement:
 ;
 
 VariableDeclaration returns NamedElement:
-    {infer ConstantDeclaration} (export?='export')? 'const' name=ID (':' type=TypeReference)? (assignment?='=' value=Expression)? |
-    {infer MutableDeclaration} (export?='export')? 'var' name=ID (':' type=TypeReference)? (assignment?='=' value=Expression)?
+    {infer ConstantDeclaration} (export?='export')? 'const' name=FeatureName (':' type=TypeReference)? (assignment?='=' value=Expression)? |
+    {infer MutableDeclaration} (export?='export')? 'var' name=FeatureName (':' type=TypeReference)? (assignment?='=' value=Expression)?
 ;
 
 ParameterDeclaration:
-    name=ID (isOptional?='?')? ':' type=TypeReference
+    name=FeatureName (isOptional?='?')? ':' type=TypeReference
 ;
 
 fragment ParameterBlock:
@@ -51,15 +51,15 @@ fragment ParameterBlock:
 ;
 
 ModelDeclaration infers TypeReference:
-    {infer ModelDeclaration} (export?='export')? 'model' name=ID ('extends' parentTypes+=[ModelDeclaration:ID] (',' parentTypes+=[ModelDeclaration:ID])*)? ParameterBlock
+    {infer ModelDeclaration} (export?='export')? 'model' name=FeatureName ('extends' parentTypes+=[ModelDeclaration:FeatureName] (',' parentTypes+=[ModelDeclaration:FeatureName])*)? ParameterBlock
 ;
 
 FormulaDeclaration:
-    (export?='export')? 'formula' name=ID '(' (parameters+=ParameterDeclaration (',' parameters+=ParameterDeclaration)*)? ')' (':' returnType=TypeReference)? body=StatementBlock
+    (export?='export')? 'formula' name=FeatureName '(' (parameters+=ParameterDeclaration (',' parameters+=ParameterDeclaration)*)? ')' (':' returnType=TypeReference)? body=StatementBlock
 ;
 
 DimensionDeclaration:
-    (export?='export')? 'dimension' name=ID ( '=' expression=DimensionExpression )?
+    (export?='export')? 'dimension' name=FeatureName ( '=' expression=DimensionExpression )?
 ;
 
 DimensionExpression:
@@ -67,14 +67,14 @@ DimensionExpression:
 ;
 
 DimensionTerm infers DimensionExpression:
-    {infer DimensionReference} ref=[DimensionDeclaration:ID] ('^' power=INT)? |
+    {infer DimensionReference} ref=[DimensionDeclaration:FeatureName] ('^' power=INT)? |
     '(' DimensionExpression ')' |
     {infer DimensionLiteral} (value=INT | value=DEC)
 ;
 
 UnitDeclaration:
-    (export?='export')? 'unit' name=ID 
-    ( ':' dimension=[DimensionDeclaration:ID] )?   // For Base units (unit meter : Length)
+    (export?='export')? 'unit' name=FeatureName 
+    ( ':' dimension=[DimensionDeclaration:FeatureName] )?   // For Base units (unit meter : Length)
     ( '=' expression=UnitExpression )?           // For Derived units (unit hertz = 1 / second)
 ;
 
@@ -83,7 +83,7 @@ UnitExpression:
 ;
 
 UnitTerm infers UnitExpression:
-    {infer UnitReference} ref=[UnitDeclaration:ID] ('^' power=INT)? |
+    {infer UnitReference} ref=[UnitDeclaration:FeatureName] ('^' power=INT)? |
     '(' UnitExpression ')' |
     {infer UnitLiteral} (value=INT | value=DEC)
 ;
@@ -175,7 +175,7 @@ PostUnaryExpression infers Expression:
 EvaluationExpression infers Expression:
     ImaginaryExpression
     ( // These can chain: obj.member[index](arg)
-        {infer MemberAccess.receiver=current} '.' member=[NamedElement:ID] |
+        {infer MemberAccess.receiver=current} '.' member=[NamedElement:FeatureName] |
         {infer IndexedAccess.receiver=current} '[' index=Expression ']' |
         {infer CallExpression.callee=current} '(' (arguments+=Expression (',' arguments+=Expression)*)? ')'
     )*
@@ -186,11 +186,12 @@ ImaginaryExpression infers Expression:
 ;
 
 NumericExpression infers Expression:
-    PrimitiveExpression ({infer Measurement.value=current} '~' unit=[UnitDeclaration:ID])?
+    PrimitiveExpression ({infer Measurement.value=current} '~' unit=[UnitDeclaration:FeatureName])?
 ;
 
 PrimitiveExpression infers Expression:
-    '(' Expression ')'
+    LambdaExpression
+    | '(' Expression ')'
     | LogicalNotExpression
     | NegativeNumericExpression
     | ReferenceExpression
@@ -200,7 +201,6 @@ PrimitiveExpression infers Expression:
     | NullLiteral
     | ModelExpression
     | ListExpression
-    | LambdaExpression
     | MatchStatement
 ;
 
@@ -213,7 +213,7 @@ NegativeNumericExpression:
 ;
 
 ReferenceExpression:
-    element=[NamedElement:ID]
+    element=[NamedElement:FeatureName]
 ;
 
 StringLiteral:
@@ -242,7 +242,7 @@ NullLiteral:
 ;
 
 ModelMemberAssignment returns NamedElement:
-    {infer ModelMemberAssignment} name=ID ':' value=Expression
+    {infer ModelMemberAssignment} name=FeatureName ':' value=Expression
 ;
 
 ModelExpression:
@@ -277,7 +277,7 @@ PrimaryTypeReference infers TypeReference:
     (
         '(' TypeReference ')'
         | primitive=('number' | 'text' | 'boolean')
-        | reference=[NamedElement:ID]
+        | {infer ModelReference} reference=[NamedElement:FeatureName]
         | LambdaType
     )
     (array?='list')?
@@ -304,6 +304,10 @@ type ExportableElement =
 
 hidden terminal WS: /\s+/;
 terminal ID: /[_a-zA-Z][\w_]*/;
+
+FeatureName returns string:
+    ID | 'number' | 'text' | 'boolean' | 'null' | 'true' | 'false';
+
 terminal STRING returns string: /"(\\.|[^"\\])*"|'(\\.|[^'\\])*'/;
 terminal DEC returns number: INT '.' INT;
 terminal INT returns number: /[0-9]+/;
