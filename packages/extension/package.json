@@ -1,6 +1,12 @@
 {
-    "name": "e-lang-extension",
-    "description": "The extension specific package",
+    "name": "e-lang",
+    "publisher": "EngineersTools",
+    "description": "The engineering programming language.",
+    "author": {
+        "name": "Carlos Gamez"
+    },
+    "license": "MIT",
+    "icon": "img/elang-social-card.png",
     "version": "0.1.0",
     "displayName": "e-lang",
     "type": "module",
@@ -25,6 +31,10 @@
                 "extensions": [
                     ".elng"
                 ],
+                "icon": {
+                    "dark": "./img/elang-file-icon-dark.png",
+                    "light": "./img/elang-file-icon-light.png"
+                },
                 "configuration": "./language-configuration.json"
             }
         ],
@@ -53,9 +63,9 @@
     ],
     "main": "./out/extension/main.cjs",
     "scripts": {
-        "clean": "shx rm -fr *.tsbuildinfo out syntaxes",
+        "clean": "shx rm -fr *.tsbuildinfo out syntaxes img",
         "vscode:prepublish": "npm run build && npm run --include-workspace-root --workspace=../..",
-        "build:prepare": "shx mkdir -p ./syntaxes/ && shx cp -f ../language/syntaxes/e-lang.tmLanguage.json ./syntaxes/e-lang.tmLanguage.json",
+        "build:prepare": "shx mkdir -p ./syntaxes/ ./img/ && shx cp -f ../language/syntaxes/e-lang.tmLanguage.json ./syntaxes/e-lang.tmLanguage.json && shx cp -rf ../../img/* ./img/",
         "build": "npm run build:prepare && tsc -b tsconfig.json && node esbuild.mjs",
         "build:clean": "npm run clean && npm run build",
         "watch": "npm run build:prepare && concurrently -n tsc,esbuild -c blue,yellow \"tsc -b tsconfig.json --watch\" \"node esbuild.mjs --watch\"",

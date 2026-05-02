@@ -1,5 +1,5 @@
 {
-    "name": "e-lang-cli",
+    "name": "@eng-tools/e-lang",
     "description": "The cli specific package",
     "version": "0.1.0",
     "type": "module",
