@@ -1,7 +1,7 @@
 {
     "name": "e-lang-interpreter",
     "description": "Interpreter for the e-lang programming language",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "type": "module",
     "engines": {
         "node": ">=20.10.0",
