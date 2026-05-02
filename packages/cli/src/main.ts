@@ -4,14 +4,7 @@ import { NodeFileSystem } from 'langium/node';
 import { Interpreter } from 'e-lang-interpreter';
 import { extractAstNode } from './util.js';
 import chalk from 'chalk';
-import * as url from 'node:url';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
 
-const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
-
-const packagePath = path.resolve(__dirname, '..', 'package.json');
-const packageContent = await fs.readFile(packagePath, 'utf-8');
 
 const runAction = async (fileName: string): Promise<void> => {
     const services = createELangServices(NodeFileSystem).ELang;
@@ -28,7 +21,7 @@ const runAction = async (fileName: string): Promise<void> => {
 export default function(): void {
     const program = new Command();
 
-    program.version(JSON.parse(packageContent).version);
+    program.version(process.env.PACKAGE_VERSION || 'unknown');
 
     // CLI Commands go here
     const fileExtensions = ELangLanguageMetaData.fileExtensions.join(', ');

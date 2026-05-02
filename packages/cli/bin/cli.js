@@ -1,4 +1,5 @@
 #!/usr/bin/env node
 
-import main from '../out/main.js';
+import mainModule from '../out/main.cjs';
+const main = mainModule.default || mainModule;
 main();

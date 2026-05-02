@@ -7,8 +7,12 @@ const ctx = await esbuild.context({
     outdir: 'out',
     bundle: true,
     platform: 'node',
-    format: 'esm',
-    target: 'es2022',
+    format: 'cjs',
+    outExtension: { '.js': '.cjs' },
+    target: 'node20',
+    define: {
+        'process.env.PACKAGE_VERSION': JSON.stringify(process.env.npm_package_version || '0.1.2')
+    },
     // We bundle the internal workspace packages but keep external NPM packages separate
     external: ['chalk', 'commander'],
     sourcemap: true,
