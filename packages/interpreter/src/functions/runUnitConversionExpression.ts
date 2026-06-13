@@ -7,6 +7,7 @@ import {
 import { AstNodeError } from "../classes_and_types/AstNodeError.js";
 import { RunnerContext } from "../classes_and_types/Context.js";
 import { runExpression } from "./runExpression.js";
+import { MeasurementNumber } from "../classes_and_types/MeasurementNumber.js";
 
 export async function runUnitConversionExpression(
   expr: BinaryExpression,
@@ -20,13 +21,16 @@ export async function runUnitConversionExpression(
   }
 
   const left = await runExpression(expr.left, context);
-  if (typeof left !== "number") {
-    throw new AstNodeError(expr, "Type Error: Unit conversion requires a number on the left hand side");
+
+  console.log(left);
+
+  if (!(left instanceof MeasurementNumber)) {
+    throw new AstNodeError(expr, "Type Error: Unit conversion requires a measurement on the left hand side");
   }
 
   const right = expr.right.element.ref;
   const calculator = new ConversionCalculator();
   const factor = calculator.compute(right);
 
-  return left / factor;
+  return left.value / factor;
 }

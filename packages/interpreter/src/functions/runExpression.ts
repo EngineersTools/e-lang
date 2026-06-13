@@ -56,11 +56,13 @@ export async function runExpression(
     const value = expression.value
       ? await runExpression(expression.value, context)
       : 1;
+
     if (typeof value !== "number")
       throw new AstNodeError(
         expression,
         "Type Error: Measurement value must be a number",
       );
+      
     return new MeasurementNumber(
       value,
       expression.unit.ref?.name ?? "unknown_unit",
