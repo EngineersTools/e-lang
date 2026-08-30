@@ -1,7 +1,0 @@
-[
-  {
-    "kind": 2,
-    "languageId": "e-lang",
-    "content": "// ============================================\n// Test 01: Basic Language Features\n// ============================================\n// Tests: domain declaration, const/var variables, \n// type annotations, print statements\n\ndomain engineering\n\n// Constant declarations\nconst PI = 3.14159\nconst MAX_VALUE: number = 100\nexport const VERSION = \"1.0\"\n\n// Mutable variable declarations\nvar counter: number = 0\nvar message: text = \"Hello, e-lang!\"\nvar isActive: boolean = true\n\n// Variables without initial assignment\nvar uninitialized: number\nconst typeAnnotatedConst: text\n\n// Print output to visualize execution\nprint PI\nprint MAX_VALUE\nprint message\nprint isActive\nprint counter\n\n// Modify mutable variable\ncounter = 42\nprint counter\n\n// Assignment expression test\nvar x = 10\nx = 20\nprint x\n\n// String literals - single and double quotes\nconst greeting = 'Welcome to e-lang'\nconst description = \"A language for engineers\"\nprint greeting\nprint description\n"
-  }
-]
