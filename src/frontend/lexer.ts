@@ -1,16 +1,20 @@
-export type TokenType = 
-    "IdentifierTk" |
-    "EqualTk" |
-    "ConstantKeywordTk" |
-    "VariableKeywordTk" |
-    "OpenParenTk" |
-    "CloseParenTk" |
-    "NumberTk" |
-    "TextTk" |
-    "BinaryOperatorTk" |
-    "DimensionKeywordTk" |
-    "UnitKeywordTk" |
-    "ModelKeywordTk"
+export type TokenType =
+    | "IdentifierTk"
+    | "EqualTk"
+    | "ConstantKeywordTk"
+    | "VariableKeywordTk"
+    | "OpenParenTk"
+    | "CloseParenTk"
+    | "TypeAssignmentTk"
+    | "NumberTk"
+    | "TextTk"
+    | "BooleanTk"
+    | "NullTk"
+    | "BinaryOperatorTk"
+    | "DimensionKeywordTk"
+    | "UnitKeywordTk"
+    | "ModelKeywordTk"
+    | "EOFTk";
 
 export const Keywords = {
     ["ConstantKeywordTk"]: 'const',
@@ -49,6 +53,13 @@ export function tokenise(input: string): Token[] {
         if (char === '\n') {
             currentLine++;
             currentColumn = 1;
+            currentIndex++;
+            continue;
+        }
+
+        if(char === ":") {
+            tokens.push(buildToken("TypeAssignmentTk", ':', currentLine, currentColumn));
+            currentColumn++;
             currentIndex++;
             continue;
         }
@@ -118,16 +129,20 @@ export function tokenise(input: string): Token[] {
                 currentIndex++;
                 currentColumn++;
             }
-            if (identifierValue === 'const') {
+            if (identifierValue === Keywords.ConstantKeywordTk) {
                 tokens.push(buildToken("ConstantKeywordTk", identifierValue, currentLine, currentColumn - identifierValue.length));
-            } else if (identifierValue === 'var') {
+            } else if (identifierValue === Keywords.VariableKeywordTk) {
                 tokens.push(buildToken("VariableKeywordTk", identifierValue, currentLine, currentColumn - identifierValue.length));
-            } else if (identifierValue === 'dimension') {
+            } else if (identifierValue === Keywords.DimensionKeywordTk) {
                 tokens.push(buildToken("DimensionKeywordTk", identifierValue, currentLine, currentColumn - identifierValue.length));
-            } else if (identifierValue === 'unit') {
+            } else if (identifierValue === Keywords.UnitKeywordTk) {
                 tokens.push(buildToken("UnitKeywordTk", identifierValue, currentLine, currentColumn - identifierValue.length));
-            } else if (identifierValue === 'model') {
+            } else if (identifierValue === Keywords.ModelKeywordTk) {
                 tokens.push(buildToken("ModelKeywordTk", identifierValue, currentLine, currentColumn - identifierValue.length));
+            } else if (identifierValue === "null") {
+                tokens.push(buildToken("NullTk", identifierValue, currentLine, currentColumn - identifierValue.length));
+            } else if (identifierValue === "true" || identifierValue === "false") {
+                tokens.push(buildToken("BooleanTk", identifierValue, currentLine, currentColumn - identifierValue.length));
             } else {
                 tokens.push(buildToken("IdentifierTk", identifierValue, currentLine, currentColumn - identifierValue.length));
             }
@@ -137,5 +152,6 @@ export function tokenise(input: string): Token[] {
         throw new Error(`Unexpected character '${char}' at line ${currentLine}, column ${currentColumn}`);
     }
 
+    tokens.push(buildToken("EOFTk", '<EndOfFile>', currentLine, currentColumn));
     return tokens;
 }

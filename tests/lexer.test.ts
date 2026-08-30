@@ -1,25 +1,27 @@
-import { describe, test, expect } from 'bun:test'
-import { tokenise } from '../src/frontend/lexer';
+import { describe, expect, test } from 'bun:test';
+import { buildToken, tokenise } from '../src/frontend/lexer';
+
+const eofToken = (line: number, col: number) => buildToken("EOFTk", '<EndOfFile>', line, col)
 
 describe('Lexer Tests', () => {
-
     test('Tokenize empty input', () => {
         const input = '';
         const tokens = tokenise(input);
-        expect(tokens).toEqual([]);
+        expect(tokens).toEqual([eofToken(1, 1)]);
     });
 
     test('Tokenize whitespace only', () => {
         const input = '   \n\t  ';
         const tokens = tokenise(input);
-        expect(tokens).toEqual([]);
+        expect(tokens).toEqual([eofToken(2, 4)]);
     });
 
     test('Tokenize single identifier', () => {
         const input = 'myVariable';
         const tokens = tokenise(input);
         expect(tokens).toEqual([
-            { type: "IdentifierTk", value: "myVariable", line: 1, column: 1 }
+            { type: "IdentifierTk", value: "myVariable", line: 1, column: 1 },
+            eofToken(1, 11)
         ]);
     });
 
@@ -27,7 +29,8 @@ describe('Lexer Tests', () => {
         const input = '12345';
         const tokens = tokenise(input);
         expect(tokens).toEqual([
-            { type: "NumberTk", value: "12345", line: 1, column: 1 }
+            { type: "NumberTk", value: "12345", line: 1, column: 1 },
+            eofToken(1, 6)
         ]);
     });
 
@@ -35,7 +38,8 @@ describe('Lexer Tests', () => {
         const input = '"Hello, World!"';
         const tokens = tokenise(input);
         expect(tokens).toEqual([
-            { type: "TextTk", value: "Hello, World!", line: 1, column: 2 }
+            { type: "TextTk", value: "Hello, World!", line: 1, column: 2 },
+            eofToken(1, 14)
         ]);
     });
 
@@ -43,7 +47,8 @@ describe('Lexer Tests', () => {
         const input = '+';
         const tokens = tokenise(input);
         expect(tokens).toEqual([
-            { type: "BinaryOperatorTk", value: "+", line: 1, column: 1 }
+            { type: "BinaryOperatorTk", value: "+", line: 1, column: 1 },
+            eofToken(1, 2)
         ]);
     });
 
@@ -51,7 +56,8 @@ describe('Lexer Tests', () => {
         const input = '(';
         const tokens = tokenise(input);
         expect(tokens).toEqual([
-            { type: "OpenParenTk", value: "(", line: 1, column: 1 }
+            { type: "OpenParenTk", value: "(", line: 1, column: 1 },
+            eofToken(1, 2)
         ]);
     });
 
@@ -59,7 +65,8 @@ describe('Lexer Tests', () => {
         const input = '=';
         const tokens = tokenise(input);
         expect(tokens).toEqual([
-            { type: "EqualTk", value: "=", line: 1, column: 1 }
+            { type: "EqualTk", value: "=", line: 1, column: 1 },
+            eofToken(1, 2)
         ]);
     });
 
@@ -72,7 +79,8 @@ describe('Lexer Tests', () => {
             { type: "EqualTk", value: "=", line: 1, column: 9 },
             { type: "NumberTk", value: "42", line: 1, column: 11 },
             { type: "BinaryOperatorTk", value: "+", line: 1, column: 14 },
-            { type: "NumberTk", value: "5", line: 1, column: 16 }
+            { type: "NumberTk", value: "5", line: 1, column: 16 },
+            eofToken(1, 17)
         ]);
     });
 
@@ -83,7 +91,8 @@ describe('Lexer Tests', () => {
             { type: "VariableKeywordTk", value: "var", line: 1, column: 1 },
             { type: "IdentifierTk", value: "message", line: 1, column: 5 },
             { type: "EqualTk", value: "=", line: 1, column: 13 },
-            { type: "TextTk", value: "Hello, World!", line: 1, column: 16 }
+            { type: "TextTk", value: "Hello, World!", line: 1, column: 16 },
+            eofToken(1, 31)
         ]);
     });
 
@@ -105,7 +114,8 @@ describe('Lexer Tests', () => {
             { type: "NumberTk", value: "20", line: 3, column: 21 },
             { type: "IdentifierTk", value: "a", line: 4, column: 13 },
             { type: "BinaryOperatorTk", value: "+", line: 4, column: 15 },
-            { type: "IdentifierTk", value: "b", line: 4, column: 17 }
+            { type: "IdentifierTk", value: "b", line: 4, column: 17 },
+            eofToken(5, 9)
         ]);
     });
 
@@ -127,7 +137,8 @@ describe('Lexer Tests', () => {
             { type: "DimensionKeywordTk", value: "dimension", line: 1, column: 1 },
             { type: "IdentifierTk", value: "length", line: 1, column: 11 },
             { type: "UnitKeywordTk", value: "unit", line: 2, column: 9 },
-            { type: "IdentifierTk", value: "meter", line: 2, column: 14 }
+            { type: "IdentifierTk", value: "meter", line: 2, column: 14 },
+            eofToken(2, 19)
         ]);
     });
 
@@ -144,7 +155,8 @@ describe('Lexer Tests', () => {
             { type: "IdentifierTk", value: "b", line: 1, column: 21 },
             { type: "CloseParenTk", value: ")", line: 1, column: 22 },
             { type: "BinaryOperatorTk", value: "*", line: 1, column: 24 },
-            { type: "IdentifierTk", value: "c", line: 1, column: 26 }
+            { type: "IdentifierTk", value: "c", line: 1, column: 26 },
+            eofToken(1, 27)
         ]);
     });
 
@@ -153,7 +165,8 @@ describe('Lexer Tests', () => {
         const tokens = tokenise(input);
         expect(tokens).toEqual([
             { type: "ModelKeywordTk", value: "model", line: 1, column: 1 },
-            { type: "IdentifierTk", value: "myModel", line: 1, column: 7 }
+            { type: "IdentifierTk", value: "myModel", line: 1, column: 7 },
+            eofToken(1, 15)
         ]);
     });
 })
