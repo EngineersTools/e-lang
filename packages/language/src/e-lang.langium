@@ -277,7 +277,7 @@ PrimaryTypeReference infers TypeReference:
     (
         '(' TypeReference ')'
         | primitive=('number' | 'text' | 'boolean' | 'null')
-        | {infer ModelReference} reference=[NamedElement:FeatureName]
+        | reference=[NamedElement:FeatureName]
         | LambdaType
     )
     (arrayDimensions+='list')*

@@ -5,7 +5,8 @@
             "id": "e-lang",
             "grammar": "src/e-lang.langium",
             "fileExtensions": [
-                "elng"
+                "elng",
+                "elnb"
             ],
             "textMate": {
                 "out": "syntaxes/e-lang.tmLanguage.json"

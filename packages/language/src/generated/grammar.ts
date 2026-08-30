@@ -3561,36 +3561,24 @@ export const ELangGrammar = (): Grammar => loadedELangGrammar ?? (loadedELangGra
                 }
               },
               {
-                "$type": "Group",
-                "elements": [
-                  {
-                    "$type": "Action",
-                    "inferredType": {
-                      "$type": "InferredType",
-                      "name": "ModelReference"
-                    }
+                "$type": "Assignment",
+                "feature": "reference",
+                "operator": "=",
+                "terminal": {
+                  "$type": "CrossReference",
+                  "type": {
+                    "$ref": "#/types@0"
                   },
-                  {
-                    "$type": "Assignment",
-                    "feature": "reference",
-                    "operator": "=",
-                    "terminal": {
-                      "$type": "CrossReference",
-                      "type": {
-                        "$ref": "#/types@0"
-                      },
-                      "terminal": {
-                        "$type": "RuleCall",
-                        "rule": {
-                          "$ref": "#/rules@59"
-                        },
-                        "arguments": []
-                      },
-                      "deprecatedSyntax": false,
-                      "isMulti": false
-                    }
-                  }
-                ]
+                  "terminal": {
+                    "$type": "RuleCall",
+                    "rule": {
+                      "$ref": "#/rules@59"
+                    },
+                    "arguments": []
+                  },
+                  "deprecatedSyntax": false,
+                  "isMulti": false
+                }
               },
               {
                 "$type": "RuleCall",

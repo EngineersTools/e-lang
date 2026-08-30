@@ -9,7 +9,7 @@ import { ELangGrammar } from './grammar.js';
 
 export const ELangLanguageMetaData = {
     languageId: 'e-lang',
-    fileExtensions: ['.elng'],
+    fileExtensions: ['.elng', '.elnb'],
     caseInsensitive: false,
     mode: 'development'
 } as const satisfies LanguageMetaData;
