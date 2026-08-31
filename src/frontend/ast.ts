@@ -1,17 +1,20 @@
 
 export type NodeType =
     | "Program"
+
     | "ConstantDeclaration"
     | "VariableDeclaration"
     | "DimensionDeclaration"
     | "UnitDeclaration"
+    
     | "Identifier"
-    | "Assignment"
+    | "AssignmentExpression"
     | "BinaryExpression"
     | "NumericLiteral"
     | "TextLiteral"
     | "BooleanLiteral"
     | "NullLiteral"
+    | "MeasurementLiteral";
 
 export interface Statement {
     kind: NodeType;
@@ -55,7 +58,7 @@ export interface Expression extends Statement { }
 // COMPOUND EXPRESSIONS
 
 export interface AssignmentExpression extends Expression {
-    kind: "Assignment";
+    kind: "AssignmentExpression";
     identifier: IdentifierExpression;
     value: Expression;
 }
@@ -92,4 +95,10 @@ export interface BooleanLiteral extends Expression {
 export interface NullLiteral extends Expression {
     kind: "NullLiteral";
     value: null;
+}
+
+export interface MeasurementLiteral extends Expression {
+    kind: "MeasurementLiteral";
+    value: number;
+    unit: string;
 }

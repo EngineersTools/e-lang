@@ -1,20 +1,21 @@
 export type TokenType =
-    | "IdentifierTk"
-    | "EqualTk"
-    | "ConstantKeywordTk"
-    | "VariableKeywordTk"
-    | "OpenParenTk"
-    | "CloseParenTk"
-    | "TypeAssignmentTk"
-    | "NumberTk"
-    | "TextTk"
-    | "BooleanTk"
-    | "NullTk"
     | "BinaryOperatorTk"
+    | "BooleanTk"
+    | "CloseParenTk"
+    | "ConstantKeywordTk"
     | "DimensionKeywordTk"
-    | "UnitKeywordTk"
+    | "EOFTk"
+    | "EqualTk"
+    | "IdentifierTk"
     | "ModelKeywordTk"
-    | "EOFTk";
+    | "NullTk"
+    | "NumberTk"
+    | "OpenParenTk"
+    | "TextTk"
+    | "TypeAssignmentTk"
+    | "UnitKeywordTk"
+    | "UnitAssignmentTk"
+    | "VariableKeywordTk";
 
 export const Keywords = {
     ["ConstantKeywordTk"]: 'const',
@@ -57,8 +58,15 @@ export function tokenise(input: string): Token[] {
             continue;
         }
 
-        if(char === ":") {
+        if (char === ":") {
             tokens.push(buildToken("TypeAssignmentTk", ':', currentLine, currentColumn));
+            currentColumn++;
+            currentIndex++;
+            continue;
+        }
+
+        if (char === "@") {
+            tokens.push(buildToken("UnitAssignmentTk", '@', currentLine, currentColumn));
             currentColumn++;
             currentIndex++;
             continue;
@@ -85,16 +93,16 @@ export function tokenise(input: string): Token[] {
             continue;
         }
 
-        if (char === '+' || char === '-' || char === '*' || char === '/') {
+        if (char === '+' || char === '-' || char === '*' || char === '/' || char === '^') {
             tokens.push(buildToken("BinaryOperatorTk", char, currentLine, currentColumn));
             currentColumn++;
             currentIndex++;
             continue;
         }
 
-        if (char >= '0' && char <= '9') {
+        if (char >= '0' && char <= '9' || (char === '.' && currentIndex + 1 < input.length && input[currentIndex + 1]! >= '0' && input[currentIndex + 1]! <= '9')) {
             let numberValue = '';
-            while (currentIndex < input.length && input[currentIndex]! >= '0' && input[currentIndex]! <= '9') {
+            while (currentIndex < input.length && ((input[currentIndex]! >= '0' && input[currentIndex]! <= '9') || input[currentIndex]! === '.')) {
                 numberValue += input[currentIndex];
                 currentIndex++;
                 currentColumn++;

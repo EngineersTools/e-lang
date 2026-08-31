@@ -1,5 +1,4 @@
-import type { NullLiteral } from "typescript/unstable/ast";
-import type { AssignmentExpression, BinaryExpression, BooleanLiteral, ConstantDeclaration, Expression, IdentifierExpression, NumericLiteral, Program, Statement, TextLiteral, VariableDeclaration } from "./ast";
+import type { AssignmentExpression, BinaryExpression, BooleanLiteral, ConstantDeclaration, Expression, IdentifierExpression, MeasurementLiteral, NullLiteral, NumericLiteral, Program, Statement, TextLiteral, VariableDeclaration } from "./ast";
 import { tokenise, type Token } from "./lexer";
 
 export default class Parser {
@@ -127,7 +126,7 @@ export default class Parser {
         this.expect("TypeAssignmentTk"); // expect ':'
         const dimensionToken = this.expect("IdentifierTk");
 
-        if(this.peek().type === "EqualTk") {
+        if (this.peek().type === "EqualTk") {
             this.consume(); // consume '=' token
             const conversionExpression = this.parseExpression();
 
@@ -164,7 +163,7 @@ export default class Parser {
             this.consume(); // consume the '=' token
             const valueExpression = this.parseSubtractionExpression();
             return {
-                kind: "Assignment",
+                kind: "AssignmentExpression",
                 identifier: {
                     kind: "Identifier",
                     symbol: (left as IdentifierExpression).symbol
@@ -228,9 +227,26 @@ export default class Parser {
     }
 
     private parseMultiplicationExpression(): Expression {
-        let left = this.parsePrimaryExpression();
+        let left = this.parseExponentiationExpression();
 
         while (this.at().type === "BinaryOperatorTk" && this.at().value === "*") {
+            const operatorToken = this.consume();
+            const right = this.parseExponentiationExpression();
+            left = {
+                kind: "BinaryExpression",
+                operator: operatorToken.value,
+                left: left,
+                right: right
+            } as BinaryExpression;
+        }
+
+        return left;
+    }
+
+    private parseExponentiationExpression(): Expression {
+        let left = this.parsePrimaryExpression();
+
+        while (this.at().type === "BinaryOperatorTk" && this.at().value === "^") {
             const operatorToken = this.consume();
             const right = this.parsePrimaryExpression();
             left = {
@@ -250,6 +266,23 @@ export default class Parser {
         switch (tk.type) {
             case "NumberTk":
                 this.consume();
+
+                if(this.peek().type === "UnitAssignmentTk") {
+                    this.consume(); // consume '@' token
+                    
+                    const unitToken = this.consume();
+
+                    if (!tk.value || !unitToken.value) {
+                        throw new Error(`Invalid measurement literal: ${tk.value}@${unitToken.value}`);
+                    }
+
+                    return {
+                        kind: "MeasurementLiteral",
+                        value: parseFloat(tk.value),
+                        unit: unitToken.value
+                    } as MeasurementLiteral;
+                }
+
                 return {
                     kind: "NumericLiteral",
                     value: parseFloat(tk.value)
@@ -266,6 +299,12 @@ export default class Parser {
                     kind: "BooleanLiteral",
                     value: tk.value === "true"
                 } as BooleanLiteral;
+            case "NullTk":
+                this.consume();
+                return {
+                    kind: "NullLiteral",
+                    value: null
+                } as NullLiteral;
             case "IdentifierTk":
                 this.consume();
                 return {

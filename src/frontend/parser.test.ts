@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import type { AssignmentExpression, BinaryExpression, BooleanLiteral, ConstantDeclaration, DimensionDeclaration, Expression, IdentifierExpression, NumericLiteral, Program, TextLiteral, UnitDeclaration, VariableDeclaration } from "../src/frontend/ast";
-import Parser from "../src/frontend/parser";
+import type { AssignmentExpression, BinaryExpression, BooleanLiteral, ConstantDeclaration, DimensionDeclaration, Expression, IdentifierExpression, MeasurementLiteral, NullLiteral, NumericLiteral, Program, TextLiteral, UnitDeclaration, VariableDeclaration } from "./ast";
+import Parser from "./parser";
 
 describe("Parser Tests", () => {
     it("should parse an empty program", () => {
@@ -14,7 +14,7 @@ describe("Parser Tests", () => {
         });
     });
 
-    it("should parse a simple numeric literal", () => {
+    it("should parse a simple numeric (integer) literal", () => {
         const sourceCode = '42';
         const parser = new Parser();
         const ast = parser.parseProgram(sourceCode);
@@ -25,6 +25,22 @@ describe("Parser Tests", () => {
                 {
                     kind: "NumericLiteral",
                     value: 42
+                } as NumericLiteral
+            ]
+        });
+    });
+
+    it("should parse a simple numeric (floating-point) literal", () => {
+        const sourceCode = '3.14';
+        const parser = new Parser();
+        const ast = parser.parseProgram(sourceCode);
+
+        expect(ast).toEqual({
+            kind: "Program",
+            body: [
+                {
+                    kind: "NumericLiteral",
+                    value: 3.14
                 } as NumericLiteral
             ]
         });
@@ -66,6 +82,39 @@ describe("Parser Tests", () => {
         });
     });
 
+    it("should parse a simple null literal", () => {
+        const sourceCode = 'null';
+        const parser = new Parser();
+        const ast = parser.parseProgram(sourceCode);
+
+        expect(ast).toEqual({
+            kind: "Program",
+            body: [
+                {
+                    kind: "NullLiteral",
+                    value: null
+                } as NullLiteral
+            ]
+        });
+    });
+
+    it("should parse a measurement literal", () => {
+        const sourceCode = '5.3 @meter';
+        const parser = new Parser();
+        const ast = parser.parseProgram(sourceCode);
+
+        expect(ast).toEqual({
+            kind: "Program",
+            body: [
+                {
+                    kind: "MeasurementLiteral",
+                    value: 5.3,
+                    unit: "meter"
+                } as MeasurementLiteral
+            ]
+        });
+    });
+
     it("should parse a simple identifier", () => {
         const sourceCode = 'myVariable';
         const parser = new Parser();
@@ -91,7 +140,7 @@ describe("Parser Tests", () => {
             kind: "Program",
             body: [
                 {
-                    kind: "Assignment",
+                    kind: "AssignmentExpression",
                     identifier: { kind: "Identifier", symbol: "x" },
                     value: { kind: "NumericLiteral", value: 42 }
                 } as AssignmentExpression
@@ -191,8 +240,26 @@ describe("Parser Tests", () => {
         });
     });
 
+    it("should parse a simple exponentiation expression", () => {
+        const sourceCode = '2 ^ 3';
+        const parser = new Parser();
+        const ast = parser.parseProgram(sourceCode);
+
+        expect(ast).toEqual({
+            kind: "Program",
+            body: [
+                {
+                    kind: "BinaryExpression",
+                    operator: "^",
+                    left: { kind: "NumericLiteral", value: 2 },
+                    right: { kind: "NumericLiteral", value: 3 }
+                } as BinaryExpression
+            ]
+        });
+    });
+
     it("should parse a complex expression with mixed operators", () => {
-        const sourceCode = '1 + 2 * 3 - 4 / 5';
+        const sourceCode = '1^3 + 2 * 3 - 4 / 5';
         const parser = new Parser();
         const ast = parser.parseProgram(sourceCode);
 
@@ -205,7 +272,12 @@ describe("Parser Tests", () => {
                     left: {
                         kind: "BinaryExpression",
                         operator: "+",
-                        left: { kind: "NumericLiteral", value: 1 },
+                        left: { 
+                            kind: "BinaryExpression",
+                            operator: "^",
+                            left: { kind: "NumericLiteral", value: 1 },
+                            right: { kind: "NumericLiteral", value: 3 }
+                        },
                         right: {
                             kind: "BinaryExpression",
                             operator: "*",
