@@ -29,7 +29,8 @@
           "e-lang"
         ],
         "extensions": [
-          ".elng"
+          ".elng",
+          ".elnb"
         ],
         "icon": {
           "dark": "./img/elang-file-icon-dark.png",
