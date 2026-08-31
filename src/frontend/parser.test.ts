@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import type { AssignmentExpression, BinaryExpression, BooleanLiteral, ConstantDeclaration, DimensionDeclaration, Expression, IdentifierExpression, MeasurementLiteral, NullLiteral, NumericLiteral, Program, TextLiteral, UnitDeclaration, VariableDeclaration } from "./ast";
+import type { AssignmentExpression, BinaryExpression, BooleanLiteral, ConstantDeclaration, DimensionDeclaration, Expression, IdentifierExpression, MeasurementLiteral, NullLiteral, NumericLiteral, Program, TextLiteral, TypeReference, UnitDeclaration, VariableDeclaration } from "./ast";
 import Parser from "./parser";
 
 describe("Parser Tests", () => {
@@ -272,7 +272,7 @@ describe("Parser Tests", () => {
                     left: {
                         kind: "BinaryExpression",
                         operator: "+",
-                        left: { 
+                        left: {
                             kind: "BinaryExpression",
                             operator: "^",
                             left: { kind: "NumericLiteral", value: 1 },
@@ -351,6 +351,36 @@ describe("Parser Tests", () => {
         } as Program);
     });
 
+    it("should parse a varilable and constant declarations with type annotations", () => {
+        const sourceCode = 'var x: number = 10 const y: number = 20';
+        const parser = new Parser();
+        const ast = parser.parseProgram(sourceCode);
+
+        expect(ast).toEqual({
+            kind: "Program",
+            body: [
+                {
+                    kind: "VariableDeclaration",
+                    identifier: "x",
+                    type: {
+                        kind: "TypeReference",
+                        name: "number"
+                    } as TypeReference,
+                    value: { kind: "NumericLiteral", value: 10 }
+                } as VariableDeclaration,
+                {
+                    kind: "ConstantDeclaration",
+                    identifier: "y",
+                    type: {
+                        kind: "TypeReference",
+                        name: "number"
+                    } as TypeReference,
+                    value: { kind: "NumericLiteral", value: 20 }
+                } as ConstantDeclaration
+            ]
+        } as Program);
+    });
+
     it("should parse variable declaration without assignment", () => {
         const sourceCode = 'var z';
         const parser = new Parser();
@@ -412,14 +442,14 @@ describe("Parser Tests", () => {
 
         expect(() => {
             parser.parseProgram(sourceCode);
-        }).toThrowError("Expected token of type TypeAssignmentTk, but got <EndOfFile> at line 1, column 11");
+        }).toThrowError("Expected ':' or '=' after unit identifier, but got EOFTk at line 1, column 11");
     });
 
     it("should parse a unit declaration with a conversion expression", () => {
         const sourceCode = `
         dimension Length
         unit meter: Length
-        unit kilometer: Length = 1000 * meter
+        unit kilometer = 1000 * meter
         `;
         const parser = new Parser();
         const ast = parser.parseProgram(sourceCode);
@@ -439,7 +469,6 @@ describe("Parser Tests", () => {
                 {
                     kind: "UnitDeclaration",
                     identifier: "kilometer",
-                    dimension: "Length",
                     conversion: {
                         kind: "BinaryExpression",
                         operator: "*",
@@ -447,6 +476,148 @@ describe("Parser Tests", () => {
                         right: { kind: "Identifier", symbol: "meter" }
                     } as Expression
                 } as UnitDeclaration
+            ]
+        } as Program);
+    });
+
+    it("should parse a dimension declaration with a dimension calculation expression", () => {
+        const sourceCode = `
+        dimension Length
+        dimension Area = Length ^ 2
+        `;
+        const parser = new Parser();
+        const ast = parser.parseProgram(sourceCode);
+
+        expect(ast).toEqual({
+            kind: "Program",
+            body: [
+                {
+                    kind: "DimensionDeclaration",
+                    identifier: "Length"
+                } as DimensionDeclaration,
+                {
+                    kind: "DimensionDeclaration",
+                    identifier: "Area",
+                    complexDimensionExpression: {
+                        kind: "BinaryExpression",
+                        operator: "^",
+                        left: { kind: "Identifier", symbol: "Length" },
+                        right: { kind: "NumericLiteral", value: 2 }
+                    } as Expression
+                } as DimensionDeclaration
+            ]
+        } as Program);
+    });
+
+    it("should parse a complex program with multiple statements", () => {
+        const sourceCode = `
+        var x: number = 10
+        const y = 20
+        var z
+        dimension Length
+        unit meter: Length
+        unit kilometer = 1000 * meter
+        z = x + y
+        const l: Length = 5 @meter
+        dimension Area = Length ^ 2
+        unit squareMeter: Area
+        const a: Area = 10 @squareMeter
+        `;
+        const parser = new Parser();
+        const ast = parser.parseProgram(sourceCode);
+
+        expect(ast).toEqual({
+            kind: "Program",
+            body: [
+                {
+                    kind: "VariableDeclaration",
+                    identifier: "x",
+                    type: {
+                        kind: "TypeReference",
+                        name: "number"
+                    } as TypeReference,
+                    value: { kind: "NumericLiteral", value: 10 }
+                } as VariableDeclaration,
+                {
+                    kind: "ConstantDeclaration",
+                    identifier: "y",
+                    value: { kind: "NumericLiteral", value: 20 }
+                } as ConstantDeclaration,
+                {
+                    kind: "VariableDeclaration",
+                    identifier: "z",
+                    value: { kind: "NullLiteral", value: null }
+                } as VariableDeclaration,
+                {
+                    kind: "DimensionDeclaration",
+                    identifier: "Length"
+                } as DimensionDeclaration,
+                {
+                    kind: "UnitDeclaration",
+                    identifier: "meter",
+                    dimension: "Length",
+                } as UnitDeclaration,
+                {
+                    kind: "UnitDeclaration",
+                    identifier: "kilometer",
+                    conversion: {
+                        kind: "BinaryExpression",
+                        operator: "*",
+                        left: { kind: "NumericLiteral", value: 1000 },
+                        right: { kind: "Identifier", symbol: "meter" }
+                    } as Expression
+                } as UnitDeclaration,
+                {
+                    kind: "AssignmentExpression",
+                    identifier: { kind: "Identifier", symbol: "z" },
+                    value: {
+                        kind: "BinaryExpression",
+                        operator: "+",
+                        left: { kind: "Identifier", symbol: "x" },
+                        right: { kind: "Identifier", symbol: "y" }
+                    } as Expression
+                } as AssignmentExpression,
+                {
+                    kind: "ConstantDeclaration",
+                    identifier: "l",
+                    type: {
+                        kind: "TypeReference",
+                        name: "Length"
+                    } as TypeReference,
+                    value: {
+                        kind: "MeasurementLiteral",
+                        value: 5,
+                        unit: "meter"
+                    } as Expression
+                } as ConstantDeclaration,
+                {
+                    kind: "DimensionDeclaration",
+                    identifier: "Area",
+                    complexDimensionExpression: {
+                        kind: "BinaryExpression",
+                        operator: "^",
+                        left: { kind: "Identifier", symbol: "Length" },
+                        right: { kind: "NumericLiteral", value: 2 }
+                    } as Expression
+                } as DimensionDeclaration,
+                {
+                    kind: "UnitDeclaration",
+                    identifier: "squareMeter",
+                    dimension: "Area"
+                } as UnitDeclaration,
+                {
+                    kind: "ConstantDeclaration",
+                    identifier: "a",
+                    type: {
+                        kind: "TypeReference",
+                        name: "Area"
+                    } as TypeReference,
+                    value: {
+                        kind: "MeasurementLiteral",
+                        value: 10,
+                        unit: "squareMeter"
+                    } as Expression
+                } as ConstantDeclaration
             ]
         } as Program);
     });

@@ -1,4 +1,4 @@
-import type { AssignmentExpression, BinaryExpression, BooleanLiteral, ConstantDeclaration, Expression, IdentifierExpression, MeasurementLiteral, NullLiteral, NumericLiteral, Program, Statement, TextLiteral, VariableDeclaration } from "./ast";
+import type { AssignmentExpression, BinaryExpression, BooleanLiteral, ConstantDeclaration, DimensionDeclaration, Expression, IdentifierExpression, MeasurementLiteral, NullLiteral, NumericLiteral, Program, Statement, TextLiteral, TypeReference, UnitDeclaration, VariableDeclaration } from "./ast";
 import { tokenise, type Token } from "./lexer";
 
 export default class Parser {
@@ -65,84 +65,223 @@ export default class Parser {
 
     private parseVariableDeclaration(): Statement {
         const keywordToken = this.consume();
-        const identifierToken = this.expect("IdentifierTk");
-        const isAssignment = this.peek().type === "EqualTk";
 
-        if (!isAssignment) {
-            if (keywordToken.type === "VariableKeywordTk") {
-                // In ELang, variable declarations without an initial value are allowed
-                // By convention an unassigned VariableDeclaration is assigned a
-                // `null` value by default.
-                const nullExpression = {
-                    kind: "NullLiteral",
-                    value: null
-                } as Expression;
-
-                return {
-                    kind: "VariableDeclaration",
-                    identifier: identifierToken.value,
-                    value: nullExpression
-                } as VariableDeclaration;
-            } else if (keywordToken.type === "ConstantKeywordTk") {
-                throw new Error(`Constant declaration must have an initial value at line ${identifierToken.line}, column ${identifierToken.column}`);
-            } else {
-                throw new Error(`Unexpected keyword token type: ${keywordToken.type}`);
-            }
+        if (keywordToken.type === "VariableKeywordTk") {
+            return this.parseMutableDeclaration();
+        } else if (keywordToken.type === "ConstantKeywordTk") {
+            return this.parseImmutableDeclaration();
         } else {
-            this.expect("EqualTk");
-            const valueExpression = this.parseExpression();
-
-            if (keywordToken.type === "VariableKeywordTk") {
-                return {
-                    kind: "VariableDeclaration",
-                    identifier: identifierToken.value,
-                    value: valueExpression
-                } as VariableDeclaration;
-            } else if (keywordToken.type === "ConstantKeywordTk") {
-                return {
-                    kind: "ConstantDeclaration",
-                    identifier: identifierToken.value,
-                    value: valueExpression
-                } as ConstantDeclaration;
-            } else {
-                throw new Error(`Unexpected keyword token type: ${keywordToken.type}`);
-            }
+            throw new Error(`Unexpected keyword token type: ${keywordToken.type} at line ${keywordToken.line}, column ${keywordToken.column}`);
         }
+
+        // const identifierToken = this.expect("IdentifierTk");
+        // const isTypeAssignment = this.peek().type === "TypeAssignmentTk";
+
+        // const isAssignment = this.peek().type === "EqualTk";
+
+        // if (!isAssignment) {
+        //     if (keywordToken.type === "VariableKeywordTk") {
+        //         // If there's no assignment, we can create a VariableDeclaration with a null value.
+        //         // This is valid in ELang, as variable declarations without an initial value are allowed.
+        //         // By convention, an unassigned VariableDeclaration is assigned a `null` value by default.
+        //         const nullExpression = {
+        //             kind: "NullLiteral",
+        //             value: null
+        //         } as Expression;
+
+        //         if (this.peek().type === "TypeAssignmentTk") {
+        //             this.consume(); // consume ':' token
+        //             const typeToken = this.expect("IdentifierTk");
+        //             return {
+        //                 kind: "VariableDeclaration",
+        //                 identifier: identifierToken.value,
+        //                 value: {
+        //                     kind: "TypeReference",
+        //                     name: typeToken.value
+        //                 } as Expression
+        //             } as VariableDeclaration;
+        //         } else {
+        //             return {
+        //                 kind: "VariableDeclaration",
+        //                 identifier: identifierToken.value,
+        //                 value: nullExpression
+        //             } as VariableDeclaration;
+        //         }
+        //     } else if (keywordToken.type === "ConstantKeywordTk") {
+        //         throw new Error(`Constant declaration must have an initial value at line ${identifierToken.line}, column ${identifierToken.column}`);
+        //     } else {
+        //         throw new Error(`Unexpected keyword token type: ${keywordToken.type} at line ${keywordToken.line}, column ${keywordToken.column}`);
+        //     }
+        // } else {
+        //     if (this.peek().type === "TypeAssignmentTk") {
+        //         this.consume(); // consume ':' token
+        //         const typeToken = this.expect("IdentifierTk");
+
+        //         this.expect("EqualTk");
+
+        //         const valueExpression = this.parseExpression();
+
+        //         if (keywordToken.type === "VariableKeywordTk") {
+        //             return {
+        //                 kind: "VariableDeclaration",
+        //                 identifier: identifierToken.value,
+        //                 type: {
+        //                     kind: "TypeReference",
+        //                     name: typeToken.value
+        //                 } as TypeReference,
+        //                 value: valueExpression
+        //             } as VariableDeclaration;
+        //         } else if (keywordToken.type === "ConstantKeywordTk") {
+        //             return {
+        //                 kind: "ConstantDeclaration",
+        //                 identifier: identifierToken.value,
+        //                 type: {
+        //                     kind: "TypeReference",
+        //                     name: typeToken.value
+        //                 } as TypeReference,
+        //                 value: valueExpression
+        //             } as ConstantDeclaration;
+        //         } else {
+        //             throw new Error(`Unexpected keyword token type: ${keywordToken.type} at line ${keywordToken.line}, column ${keywordToken.column}`);
+        //         }
+        //     } else {
+        //         this.expect("EqualTk");
+        //         const valueExpression = this.parseExpression();
+
+        //         if (keywordToken.type === "VariableKeywordTk") {
+        //             return {
+        //                 kind: "VariableDeclaration",
+        //                 identifier: identifierToken.value,
+        //                 value: valueExpression
+        //             } as VariableDeclaration;
+        //         } else if (keywordToken.type === "ConstantKeywordTk") {
+        //             return {
+        //                 kind: "ConstantDeclaration",
+        //                 identifier: identifierToken.value,
+        //                 value: valueExpression
+        //             } as ConstantDeclaration;
+        //         } else {
+        //             throw new Error(`Unexpected keyword token type: ${keywordToken.type} at line ${keywordToken.line}, column ${keywordToken.column}`);
+        //         }
+        //     }
+        // }
     }
 
-    private parseDimensionDeclaration(): Statement {
+    private parseMutableDeclaration(): VariableDeclaration {
+        const identifierToken = this.expect("IdentifierTk");
+
+        const nullExpression = {
+            kind: "NullLiteral",
+            value: null
+        } as NullLiteral;
+
+        let typeToken: Token | null = null;
+
+        if (this.peek().type === "TypeAssignmentTk") {
+            this.consume(); // consume ':' token
+            typeToken = this.expect("IdentifierTk");
+        }
+
+        if (this.peek().type === "EqualTk") {
+            this.consume(); // consume '=' token
+            const valueExpression = this.parseExpression();
+
+            return {
+                kind: "VariableDeclaration",
+                identifier: identifierToken.value,
+                type: typeToken ? {
+                    kind: "TypeReference",
+                    name: typeToken.value
+                } as TypeReference : undefined,
+                value: valueExpression
+            } as VariableDeclaration;
+        }
+
+        return {
+            kind: "VariableDeclaration",
+            identifier: identifierToken.value,
+            type: typeToken ? {
+                kind: "TypeReference",
+                name: typeToken.value
+            } as TypeReference : undefined,
+            value: nullExpression,
+        } as VariableDeclaration;
+    }
+
+    private parseImmutableDeclaration(): ConstantDeclaration {
+        const identifierToken = this.expect("IdentifierTk");
+        let typeToken: Token | null = null;
+
+        if (this.peek().type === "TypeAssignmentTk") {
+            this.consume(); // consume ':' token
+            typeToken = this.expect("IdentifierTk");
+
+        }
+
+        if (this.peek().type === "EqualTk") {
+            this.consume(); // consume '=' token
+            const valueExpression = this.parseExpression();
+
+            return {
+                kind: "ConstantDeclaration",
+                identifier: identifierToken.value,
+                type: typeToken ? {
+                    kind: "TypeReference",
+                    name: typeToken.value
+                } as TypeReference : undefined,
+                value: valueExpression
+            } as ConstantDeclaration;
+        }
+
+        throw new Error(`Constant declaration must have an initial value at line ${identifierToken.line}, column ${identifierToken.column}`);
+
+    }
+
+    private parseDimensionDeclaration(): DimensionDeclaration {
         this.consume(); // consume 'dimension' keyword
         const identifierToken = this.expect("IdentifierTk");
+
+        if (this.peek().type === "EqualTk") {
+            this.consume(); // consume '=' token
+            const complexDimensionExpression = this.parseExpression();
+
+            return {
+                kind: "DimensionDeclaration",
+                identifier: identifierToken.value,
+                complexDimensionExpression: complexDimensionExpression
+            };
+        }
 
         return {
             kind: "DimensionDeclaration",
             identifier: identifierToken.value
-        } as Statement;
+        };
     }
 
     private parseUnitDeclaration(): Statement {
         this.consume(); // consume 'unit' keyword
         const identifierToken = this.expect("IdentifierTk");
-        this.expect("TypeAssignmentTk"); // expect ':'
-        const dimensionToken = this.expect("IdentifierTk");
 
-        if (this.peek().type === "EqualTk") {
+        if (this.peek().type === "TypeAssignmentTk") {
+            this.consume(); // consume ':' token
+            const dimensionToken = this.expect("IdentifierTk");
+            return {
+                kind: "UnitDeclaration",
+                identifier: identifierToken.value,
+                dimension: dimensionToken.value
+            } as UnitDeclaration;
+        } else if (this.peek().type === "EqualTk") {
             this.consume(); // consume '=' token
             const conversionExpression = this.parseExpression();
 
             return {
                 kind: "UnitDeclaration",
                 identifier: identifierToken.value,
-                dimension: dimensionToken.value,
                 conversion: conversionExpression
-            } as Statement;
+            } as UnitDeclaration;
+        } else {
+            throw new Error(`Expected ':' or '=' after unit identifier, but got ${this.peek().type} at line ${this.peek().line}, column ${this.peek().column}`);
         }
-
-        return {
-            kind: "UnitDeclaration",
-            identifier: identifierToken.value,
-            dimension: dimensionToken.value
-        } as Statement;
     }
 
     // EXPRESSIONS
@@ -267,9 +406,9 @@ export default class Parser {
             case "NumberTk":
                 this.consume();
 
-                if(this.peek().type === "UnitAssignmentTk") {
+                if (this.peek().type === "UnitAssignmentTk") {
                     this.consume(); // consume '@' token
-                    
+
                     const unitToken = this.consume();
 
                     if (!tk.value || !unitToken.value) {
@@ -317,7 +456,7 @@ export default class Parser {
                 this.expect("CloseParenTk"); // expect ')'
                 return expr;
             default:
-                throw new Error(`Unexpected token type: ${tk.type}`);
+                throw new Error(`Unexpected token type: ${tk.type} at line ${tk.line}, column ${tk.column}`);
         }
     }
 }

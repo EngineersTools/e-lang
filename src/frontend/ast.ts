@@ -7,6 +7,8 @@ export type NodeType =
     | "DimensionDeclaration"
     | "UnitDeclaration"
     
+    | "TypeReference"
+
     | "Identifier"
     | "AssignmentExpression"
     | "BinaryExpression"
@@ -30,25 +32,44 @@ export interface Program extends Statement {
 export interface VariableDeclaration extends Statement {
     kind: "VariableDeclaration";
     identifier: string;
+    type?: TypeReference;
     value?: Expression;
 }
 
 export interface ConstantDeclaration extends Statement {
     kind: "ConstantDeclaration";
     identifier: string;
+    type?: TypeReference;
     value: Expression;
 }
 
 export interface DimensionDeclaration extends Statement {
     kind: "DimensionDeclaration";
     identifier: string;
+    complexDimensionExpression?: Expression;
 }
 
-export interface UnitDeclaration extends Statement {
+interface UnitDeclarationWithDimension extends Statement {
     kind: "UnitDeclaration";
     identifier: string;
     dimension: string;
-    conversion?: Expression;
+    conversion?: never;
+}
+
+interface UnitDeclarationWithConversion extends Statement {
+    kind: "UnitDeclaration";
+    identifier: string;
+    dimension?: never;
+    conversion: Expression;
+}
+
+export type UnitDeclaration = UnitDeclarationWithDimension | UnitDeclarationWithConversion;
+
+// TYPES
+
+export interface TypeReference extends Statement {
+    kind: "TypeReference";
+    name: string;
 }
 
 // EXPRESSIONS
